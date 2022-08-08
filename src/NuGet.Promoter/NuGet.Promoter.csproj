@@ -3,7 +3,7 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <PackAsTool>true</PackAsTool>
-        <ToolCommandName>dotnet-nuget-promote</ToolCommandName>
+        <ToolCommandName>nuget-promote</ToolCommandName>
     </PropertyGroup>
 
     <ItemGroup>

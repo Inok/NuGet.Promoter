@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\NuGet.Promoter\NuGet.Promoter.csproj" />
+      <ProjectReference Include="..\..\src\NuGet.Promoter\NuGet.Promoter.csproj" />
     </ItemGroup>
 
 </Project>
