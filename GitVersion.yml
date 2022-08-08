@@ -1,0 +1,10 @@
+tag-prefix: '[vV]'
+assembly-versioning-scheme: Major
+mode: ContinuousDeployment
+
+branches:
+  main:
+    regex: ^main$
+    tag: main
+    increment: Patch
+    prevent-increment-of-merged-branch-version: true
