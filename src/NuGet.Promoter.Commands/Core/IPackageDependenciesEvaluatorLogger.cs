@@ -1,6 +1,6 @@
 ﻿using NuGet.Packaging.Core;
 
-namespace NuGet.Promoter.Commands.Promote;
+namespace NuGet.Promoter.Commands.Core;
 
 public interface IPackageDependenciesEvaluatorLogger
 {

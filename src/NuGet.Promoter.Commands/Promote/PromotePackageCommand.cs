@@ -20,7 +20,7 @@ public class PromotePackageCommand
                                  IPromotePackageLogger promotePackageLogger)
     {
         _promotePackageLogger = promotePackageLogger ?? throw new ArgumentNullException(nameof(promotePackageLogger));
-        _dependenciesEvaluator = new PackageDependenciesEvaluator(sourceRepository, cacheContext, nugetLogger, new PackageDependenciesEvaluatorLogger(promotePackageLogger));
+        _dependenciesEvaluator = new PackageDependenciesEvaluator(sourceRepository, cacheContext, nugetLogger, new PromotePackageToPackageDependenciesEvaluatorLoggerAdapter(promotePackageLogger));
         _packageVersionFinder = new PackageVersionFinder(sourceRepository, cacheContext, nugetLogger);
         _singlePackagePromoter = new SinglePackagePromoter(sourceRepository, destinationRepository, cacheContext, nugetLogger);
     }
