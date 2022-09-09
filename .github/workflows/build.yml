@@ -45,6 +45,7 @@ jobs:
 
   publish-to-nuget-org:
     name: Publish to NuGet.org
+    needs: [build]
     environment: NuGet.org
     runs-on: ubuntu-latest
 
