@@ -18,7 +18,7 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Build project
-      run: .\build.ps1 -Target Al
+      run: .\build.ps1 -Target All
     - name: Upload test results
       uses: actions/upload-artifact@v1
       with:
