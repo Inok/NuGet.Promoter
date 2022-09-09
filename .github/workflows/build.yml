@@ -1,4 +1,4 @@
-name: Build & test
+name: Build & test & publish
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-
+    name: Build & test
     runs-on: ubuntu-latest
 
     steps:
@@ -41,3 +41,25 @@ jobs:
         path: artifacts/*.nupkg
         if-no-files-found: error
         retention-days: 7
+
+
+  publish-to-nuget-org:
+    name: Publish to NuGet.org
+    environment: NuGet.org
+    runs-on: ubuntu-latest
+
+    steps:
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+        
+    - name: Download packages
+      uses: actions/download-artifact@v3.0.0
+      with:
+        name: packages
+        path: packages/
+        
+    - name: Publish packages
+      run: dotnet nuget push --api-key ${{ secrets.NUGET_API_KEY }} packages/*.nupkg
