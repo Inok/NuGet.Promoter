@@ -1,4 +1,4 @@
-name: .NET
+name: Build & test
 
 on:
   push:
@@ -34,10 +34,10 @@ jobs:
         if-no-files-found: error
         retention-days: 7
 
-    - name: Upload artifacts
+    - name: Upload packages
       uses: actions/upload-artifact@v3.1.0
       with:
-        name: artifacts
+        name: packages
         path: artifacts/*.nupkg
         if-no-files-found: error
         retention-days: 7
