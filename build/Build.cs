@@ -21,7 +21,7 @@ partial class Build : NukeBuild
 
     AbsolutePath TestsDirectory => RootDirectory / "tests";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
-    AbsolutePath TestResultsDirectory => RootDirectory / "test_results";
+    AbsolutePath TestResultsDirectory => RootDirectory / "test-results";
 
     public static int Main() => Execute<Build>(x => x.Compile);
 
