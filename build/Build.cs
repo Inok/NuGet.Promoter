@@ -17,7 +17,7 @@ partial class Build : NukeBuild
     [Solution] readonly Solution Solution;
 
     AbsolutePath SourceDirectory => RootDirectory / "src";
-    AbsolutePath NuGetPromoterToolProject => SourceDirectory / "NuGet.Promoter";
+    AbsolutePath PromoteNuGetToolProject => SourceDirectory / "Promote.NuGet";
 
     AbsolutePath TestsDirectory => RootDirectory / "tests";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
@@ -139,7 +139,7 @@ partial class Build : NukeBuild
                                                                    .EnableNoRestore()
                                                                    .EnableNoBuild()
                                                                    .SetVersion(GitVersion.FullSemVer)
-                                                                   .SetProject(NuGetPromoterToolProject)
+                                                                   .SetProject(PromoteNuGetToolProject)
                                                                    .SetOutputDirectory(ArtifactsDirectory)
                                                    );
                                                });
