@@ -9,6 +9,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Promoter.Commands.Tests", "tests\NuGet.Promoter.Commands.Tests\NuGet.Promoter.Commands.Tests.csproj", "{02D6F016-D34B-4444-84A7-0EECBCD4CC88}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{296EEB57-A442-40A6-A74E-F02A86A87748}"
+	ProjectSection(SolutionItems) = preProject
+		tests\Directory.Build.props = tests\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A76449E3-3BF9-4565-8BAE-150902FC55DE}"
 EndProject

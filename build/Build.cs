@@ -113,9 +113,9 @@ partial class Build : NukeBuild
                                                           .CombineWith(projects,
                                                                        (cs, v) =>
                                                                        {
-                                                                           var logFilePath = $"test-result-{v.NameWithoutExtension}-{Guid.NewGuid():N}.xml";
+                                                                           var logFilePath = $"test-result-{v.NameWithoutExtension}-{Guid.NewGuid():N}.html";
                                                                            return cs.SetProjectFile(v)
-                                                                                    .SetLoggers($"trx;logfilename={logFilePath}");
+                                                                                    .SetLoggers($"html;logfilename={logFilePath}");
                                                                        }),
                                                      degreeOfParallelism: Environment.ProcessorCount,
                                                      completeOnFailure: true
