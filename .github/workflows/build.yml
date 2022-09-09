@@ -3,6 +3,7 @@ name: Build & test & publish
 on:
   push:
     branches: [ "main" ]
+    tags: [ "v*" ]
   pull_request:
     branches: [ "main" ]
 
@@ -12,55 +13,55 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-        
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: 6.0.x
-        
-    - name: Build project
-      run: ./build.sh -Target All
-      
-    - name: Upload test results
-      uses: actions/upload-artifact@v3.1.0
-      if: ${{ always() }}
-      with:
-        name: test-results
-        path: test-results
-        if-no-files-found: error
-        retention-days: 7
 
-    - name: Upload packages
-      uses: actions/upload-artifact@v3.1.0
-      with:
-        name: packages
-        path: artifacts/*.nupkg
-        if-no-files-found: error
-        retention-days: 7
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Build project
+        run: ./build.sh -Target All
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3.1.0
+        if: ${{ always() }}
+        with:
+          name: test-results
+          path: test-results
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: packages
+          path: artifacts/*.nupkg
+          if-no-files-found: error
+          retention-days: 7
 
 
   publish-to-nuget-org:
     name: Publish to NuGet.org
-    needs: [build]
+    needs: [ build ]
     environment: NuGet.org
     runs-on: ubuntu-latest
 
     steps:
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: 6.0.x
-        
-    - name: Download packages
-      uses: actions/download-artifact@v3.0.0
-      with:
-        name: packages
-        path: packages/
-        
-    - name: Publish packages
-      run: dotnet nuget push --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} packages/*.nupkg
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Download packages
+        uses: actions/download-artifact@v3.0.0
+        with:
+          name: packages
+          path: packages/
+
+      - name: Publish packages
+        run: dotnet nuget push --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} packages/*.nupkg
