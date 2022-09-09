@@ -98,29 +98,6 @@ partial class Build : NukeBuild
     Target ReadyForTesting => _ => _.DependsOn(Compile)
                                     .Unlisted();
 
-    void RunCoreTest(AbsolutePath root, string[] patterns, bool executeInParallel)
-    {
-        var projects = root.GlobFiles(patterns);
-        Assert.NotEmpty(projects);
-
-        DotNetTest(s => s
-                        .SetConfiguration(Configuration)
-                        .EnableNoBuild()
-                        .EnableNoRestore()
-                        .SetTestAdapterPath(".")
-                        .SetResultsDirectory(TestResultsDirectory)
-                        .CombineWith(
-                            projects, (cs, v) =>
-                                      {
-                                          var logFilePath = TestResultsDirectory / "test-result-{assembly}-{framework}.xml";
-                                          return cs.SetProjectFile(v)
-                                                   .SetLoggers($"nunit;LogFilePath={logFilePath}");
-                                      }),
-                   degreeOfParallelism: executeInParallel ? Environment.ProcessorCount : 1,
-                   completeOnFailure: true
-        );
-    }
-
     Target RunTests => _ => _
                             .DependsOn(ReadyForTesting)
                             .Executes(() =>
@@ -132,9 +109,14 @@ partial class Build : NukeBuild
                                                           .SetConfiguration(Configuration)
                                                           .EnableNoBuild()
                                                           .EnableNoRestore()
-                                                          .SetTestAdapterPath(".")
                                                           .SetResultsDirectory(TestResultsDirectory)
-                                                          .CombineWith(projects, (cs, v) => cs.SetProjectFile(v)),
+                                                          .CombineWith(projects,
+                                                                       (cs, v) =>
+                                                                       {
+                                                                           var logFilePath = $"test-result-{v.NameWithoutExtension}-{Guid.NewGuid():N}.xml";
+                                                                           return cs.SetProjectFile(v)
+                                                                                    .SetLoggers($"trx;logfilename={logFilePath}");
+                                                                       }),
                                                      degreeOfParallelism: Environment.ProcessorCount,
                                                      completeOnFailure: true
                                           );
