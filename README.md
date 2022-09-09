@@ -1,4 +1,4 @@
-# NuGet.Promoter
+# Promote.NuGet
 A tool to promote NuGet packages and their dependencies from one feed to another.
 
 # Usage
@@ -12,10 +12,10 @@ The `promote` command allows to promote a set of packages from one feed to anoth
 The `promote package` command promotes the specified package from one feed to another. If `--version` specified, it promotes the specified version; otherwise, the latest version will be promoted.
 
 ```
-> NuGet.Promoter.exe promote package --help
+> promote-nuget promote package --help
 
 USAGE:
-    NuGet.Promoter.exe promote package <id> [OPTIONS]
+    Promote.NuGet.exe promote package <id> [OPTIONS]
 
 ARGUMENTS:
     <id>    Id of the package to promote
@@ -37,10 +37,10 @@ OPTIONS:
 Example:
 ```pwsh
 # Promotes the latest version of a package to the specified feed.
-NuGet.Promoter.exe promote package Newtonsoft.Json --destination '<TARGET-NUGET-FEED-URL>' --destination-api-key '<API-KEY>'
+promote-nuget promote package Newtonsoft.Json --destination '<TARGET-NUGET-FEED-URL>' --destination-api-key '<API-KEY>'
 
 # Promotes the specified version of a package to the specified feed.
-NuGet.Promoter.exe promote package Newtonsoft.Json --version 13.0.1 --destination '<TARGET-NUGET-FEED-URL>' --destination-api-key '<API-KEY>'
+promote-nuget promote package Newtonsoft.Json --version 13.0.1 --destination '<TARGET-NUGET-FEED-URL>' --destination-api-key '<API-KEY>'
 ```
 
 ### Promote packages listed in a file
@@ -49,10 +49,10 @@ The `promote from-file` command promotes packages listed in a file from one feed
 In a file, you can specify either the exact version to promote (e.g. `13.0.1`), or a version range (e.g. `[12.0.0,)`).
 
 ```
-> NuGet.Promoter.exe promote from-file --help
+> promote-nuget promote from-file --help
 
 USAGE:
-    NuGet.Promoter.exe promote from-file <file> [OPTIONS]
+    Promote.NuGet.exe promote from-file <file> [OPTIONS]
 
 ARGUMENTS:
     <file>    Path of a file with a list of packages. Each line contains package id and its version or version range. Allowed formats:
@@ -80,7 +80,7 @@ Example:
 # Install-Package System.Text.Json -Version [5.0.0,6)
 
 # Determines a set of packages to promote according to the list of versions and version ranges, ant promotes them.
-NuGet.Promoter.exe promote from-file packages.txt --destination '<TARGET-NUGET-FEED-URL>' --destination-api-key '<API-KEY>'
+promote-nuget promote from-file packages.txt --destination '<TARGET-NUGET-FEED-URL>' --destination-api-key '<API-KEY>'
 
 # Resolving matching packages for:
 # ├── System.IO (= 4.3.0)
@@ -124,10 +124,10 @@ NuGet.Promoter.exe promote from-file packages.txt --destination '<TARGET-NUGET-F
 You can use `--help` argument to find all available commands and options. Example:
 
 ```
-> NuGet.Promoter.exe promote --help
+> promote-nuget promote --help
 
 USAGE:
-    NuGet.Promoter.exe promote [OPTIONS] <COMMAND>
+    Promote.NuGet.exe promote [OPTIONS] <COMMAND>
 
 OPTIONS:
     -h, --help    Prints help information
