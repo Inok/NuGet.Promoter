@@ -29,7 +29,15 @@ public static class Program
 
                           configurator.SetExceptionHandler(ex =>
                                                            {
-                                                               AnsiConsole.WriteException(ex);
+                                                               if (ex is OperationCanceledException or TaskCanceledException)
+                                                               {
+                                                                   AnsiConsole.MarkupLineInterpolated($"[yellow]The operation was canceled[/]");
+                                                               }
+                                                               else
+                                                               {
+                                                                   AnsiConsole.WriteException(ex);
+                                                               }
+
                                                                return -1;
                                                            });
                       });

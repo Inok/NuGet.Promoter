@@ -15,9 +15,9 @@ using Spectre.Console.Cli;
 namespace Promote.NuGet.Promote.SinglePackage;
 
 [PublicAPI]
-internal sealed class PromoteSinglePackage : ICommand<PromoteSinglePackageSettings>
+internal sealed class PromoteSinglePackage : CancellableAsyncCommand<PromoteSinglePackageSettings>
 {
-    public async Task<int> Execute(CommandContext context, PromoteSinglePackageSettings promoteSettings)
+    public override async Task<int> ExecuteAsync(CommandContext context, PromoteSinglePackageSettings promoteSettings, CancellationToken cancellationToken)
     {
         using var cacheContext = new SourceCacheContext
                                  {
@@ -32,7 +32,7 @@ internal sealed class PromoteSinglePackage : ICommand<PromoteSinglePackageSettin
         var sourceRepository = new NuGetRepository(sourceDescriptor, cacheContext, nuGetLogger);
         var destinationRepository = new NuGetRepository(destinationDescriptor, cacheContext, nuGetLogger);
 
-        var identityResult = await CreatePackageIdentity(sourceRepository, promoteSettings);
+        var identityResult = await CreatePackageIdentity(sourceRepository, promoteSettings, cancellationToken);
         if (identityResult.IsFailure)
         {
             AnsiConsole.WriteLine(identityResult.Error);
@@ -41,7 +41,7 @@ internal sealed class PromoteSinglePackage : ICommand<PromoteSinglePackageSettin
 
         var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, new PromotePackageLogger());
 
-        var promotionResult = await promoter.Promote(identityResult.Value, promoteSettings.DryRun);
+        var promotionResult = await promoter.Promote(identityResult.Value, promoteSettings.DryRun, cancellationToken);
         if (promotionResult.IsFailure)
         {
             AnsiConsole.WriteLine(promotionResult.Error);
@@ -51,7 +51,9 @@ internal sealed class PromoteSinglePackage : ICommand<PromoteSinglePackageSettin
         return 0;
     }
 
-    private async Task<Result<PackageIdentity, string>> CreatePackageIdentity(INuGetRepository repository, PromoteSinglePackageSettings promoteSettings)
+    private async Task<Result<PackageIdentity, string>> CreatePackageIdentity(INuGetRepository repository,
+                                                                              PromoteSinglePackageSettings promoteSettings,
+                                                                              CancellationToken cancellationToken)
     {
         if (!promoteSettings.IsLatestVersion)
         {
@@ -59,16 +61,6 @@ internal sealed class PromoteSinglePackage : ICommand<PromoteSinglePackageSettin
         }
 
         var packageVersionFinder = new PackageVersionFinder(repository);
-        return await packageVersionFinder.FindLatestVersion(promoteSettings.Id!);
-    }
-
-    public ValidationResult Validate(CommandContext context, CommandSettings settings)
-    {
-        return ValidationResult.Success();
-    }
-
-    public Task<int> Execute(CommandContext context, CommandSettings settings)
-    {
-        return Execute(context, (PromoteSinglePackageSettings)settings);
+        return await packageVersionFinder.FindLatestVersion(promoteSettings.Id!, cancellationToken);
     }
 }

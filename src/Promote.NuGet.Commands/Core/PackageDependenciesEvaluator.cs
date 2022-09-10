@@ -31,6 +31,8 @@ public class PackageDependenciesEvaluator
 
         while (packagesToResolve.Count > 0)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var packageToResolve = packagesToResolve.First();
             packagesToResolve.Remove(packageToResolve);
             resolvedPackages.Add(packageToResolve);
@@ -49,6 +51,8 @@ public class PackageDependenciesEvaluator
 
             foreach (var depAndRanges in depsById)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 var dependencyIdentity = new PackageIdentity(depAndRanges.Key, null);
                 var dependencyRanges = depAndRanges.ToHashSet();
 

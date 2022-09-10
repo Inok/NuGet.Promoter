@@ -92,6 +92,8 @@ public class PromotePackageCommand
 
         foreach (var package in packages)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             current++;
             _promotePackageLogger.LogPromotePackage(package, current, total);
 

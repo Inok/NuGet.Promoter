@@ -14,9 +14,9 @@ using Spectre.Console.Cli;
 namespace Promote.NuGet.Promote.FromFile;
 
 [PublicAPI]
-internal sealed class PromotePackagesFromFile : ICommand<PromotePackagesFromFileSettings>
+internal sealed class PromotePackagesFromFile : CancellableAsyncCommand<PromotePackagesFromFileSettings>
 {
-    public async Task<int> Execute(CommandContext context, PromotePackagesFromFileSettings promoteSettings)
+    public override async Task<int> ExecuteAsync(CommandContext context, PromotePackagesFromFileSettings promoteSettings, CancellationToken cancellationToken)
     {
         using var cacheContext = new SourceCacheContext
                                  {
@@ -31,7 +31,7 @@ internal sealed class PromotePackagesFromFile : ICommand<PromotePackagesFromFile
         var sourceRepository = new NuGetRepository(sourceDescriptor, cacheContext, nuGetLogger);
         var destinationRepository = new NuGetRepository(destinationDescriptor, cacheContext, nuGetLogger);
 
-        var identitiesResult = await ParsePackages(promoteSettings.File!);
+        var identitiesResult = await ParsePackages(promoteSettings.File!, cancellationToken);
         if (identitiesResult.IsFailure)
         {
             AnsiConsole.WriteLine(identitiesResult.Error);
@@ -40,7 +40,7 @@ internal sealed class PromotePackagesFromFile : ICommand<PromotePackagesFromFile
 
         var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, new PromotePackageLogger());
 
-        var promotionResult = await promoter.Promote(identitiesResult.Value, promoteSettings.DryRun);
+        var promotionResult = await promoter.Promote(identitiesResult.Value, promoteSettings.DryRun, cancellationToken);
         if (promotionResult.IsFailure)
         {
             AnsiConsole.WriteLine(promotionResult.Error);
@@ -50,11 +50,11 @@ internal sealed class PromotePackagesFromFile : ICommand<PromotePackagesFromFile
         return 0;
     }
 
-    private async Task<Result<IReadOnlySet<PackageDependency>, string>> ParsePackages(string file)
+    private async Task<Result<IReadOnlySet<PackageDependency>, string>> ParsePackages(string file, CancellationToken cancellationToken)
     {
         var packages = new HashSet<PackageDependency>();
 
-        var lines = await File.ReadAllLinesAsync(file);
+        var lines = await File.ReadAllLinesAsync(file, cancellationToken);
 
         foreach (var line in lines)
         {
@@ -70,15 +70,5 @@ internal sealed class PromotePackagesFromFile : ICommand<PromotePackagesFromFile
         }
 
         return packages;
-    }
-
-    public ValidationResult Validate(CommandContext context, CommandSettings settings)
-    {
-        return ValidationResult.Success();
-    }
-
-    public Task<int> Execute(CommandContext context, CommandSettings settings)
-    {
-        return Execute(context, (PromotePackagesFromFileSettings)settings);
     }
 }
