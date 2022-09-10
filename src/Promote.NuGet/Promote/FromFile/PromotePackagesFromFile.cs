@@ -4,10 +4,9 @@ using CSharpFunctionalExtensions;
 using JetBrains.Annotations;
 using NuGet.Common;
 using NuGet.Packaging.Core;
-using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
-using Promote.NuGet.Commands;
 using Promote.NuGet.Commands.Promote;
+using Promote.NuGet.Feeds;
 using Promote.NuGet.Infrastructure;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -26,8 +25,11 @@ internal sealed class PromotePackagesFromFile : ICommand<PromotePackagesFromFile
 
         var nuGetLogger = new NuGetLogger(promoteSettings.Verbose ? LogLevel.Information : LogLevel.Minimal);
 
-        var sourceRepository = CreateRepository(promoteSettings.Source!, promoteSettings.SourceApiKey);
-        var destinationRepository = CreateRepository(promoteSettings.Destination!, promoteSettings.DestinationApiKey);
+        var sourceDescriptor = new NuGetRepositoryDescriptor(promoteSettings.Source!, promoteSettings.SourceApiKey);
+        var destinationDescriptor = new NuGetRepositoryDescriptor(promoteSettings.Destination!, promoteSettings.DestinationApiKey);
+
+        var sourceRepository = new NuGetRepository(sourceDescriptor, cacheContext, nuGetLogger);
+        var destinationRepository = new NuGetRepository(destinationDescriptor, cacheContext, nuGetLogger);
 
         var identitiesResult = await ParsePackages(promoteSettings.File!);
         if (identitiesResult.IsFailure)
@@ -36,7 +38,7 @@ internal sealed class PromotePackagesFromFile : ICommand<PromotePackagesFromFile
             return -1;
         }
 
-        var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, cacheContext, nuGetLogger, new PromotePackageLogger());
+        var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, new PromotePackageLogger());
 
         var promotionResult = await promoter.Promote(identitiesResult.Value, promoteSettings.DryRun);
         if (promotionResult.IsFailure)
@@ -68,12 +70,6 @@ internal sealed class PromotePackagesFromFile : ICommand<PromotePackagesFromFile
         }
 
         return packages;
-    }
-
-    private static NuGetRepository CreateRepository(string source, string? apiKey)
-    {
-        var sourceRepository = Repository.Factory.GetCoreV3(source);
-        return new NuGetRepository(sourceRepository, apiKey);
     }
 
     public ValidationResult Validate(CommandContext context, CommandSettings settings)

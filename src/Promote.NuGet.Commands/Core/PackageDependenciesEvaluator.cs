@@ -1,23 +1,18 @@
 ﻿using CSharpFunctionalExtensions;
-using NuGet.Common;
 using NuGet.Packaging.Core;
-using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using Promote.NuGet.Feeds;
 
 namespace Promote.NuGet.Commands.Core;
 
 public class PackageDependenciesEvaluator
 {
-    private readonly NuGetRepository _repository;
-    private readonly SourceCacheContext _cacheContext;
-    private readonly ILogger _nugetLogger;
+    private readonly INuGetRepository _repository;
     private readonly IPackageDependenciesEvaluatorLogger _logger;
 
-    public PackageDependenciesEvaluator(NuGetRepository repository, SourceCacheContext cacheContext, ILogger nugetLogger, IPackageDependenciesEvaluatorLogger logger)
+    public PackageDependenciesEvaluator(INuGetRepository repository, IPackageDependenciesEvaluatorLogger logger)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-        _cacheContext = cacheContext ?? throw new ArgumentNullException(nameof(cacheContext));
-        _nugetLogger = nugetLogger ?? throw new ArgumentNullException(nameof(nugetLogger));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -26,9 +21,6 @@ public class PackageDependenciesEvaluator
     {
         if (identities == null) throw new ArgumentNullException(nameof(identities));
         if (identities.Any(i => !i.HasVersion)) throw new ArgumentException("Version of a package must be specified.", nameof(identities));
-
-        var findResource = await _repository.Repository.GetResourceAsync<FindPackageByIdResource>(cancellationToken);
-        var packageMetadataResource = await _repository.Repository.GetResourceAsync<PackageMetadataResource>(cancellationToken);
 
         var resolvedPackages = new HashSet<PackageIdentity>();
 
@@ -45,13 +37,15 @@ public class PackageDependenciesEvaluator
 
             _logger.LogProcessingDependenciesOfPackage(packageToResolve);
 
-            var meta = await packageMetadataResource.GetMetadataAsync(packageToResolve, _cacheContext, _nugetLogger, cancellationToken);
-            if (meta == null)
+            var metadataResult = await _repository.Packages.GetPackageMetadata(packageToResolve, cancellationToken);
+            if (metadataResult.IsFailure)
             {
-                return $"Package {packageToResolve} not found.";
+                return metadataResult.Error;
             }
 
-            var depsById = meta.DependencySets.SelectMany(x => x.Packages).GroupBy(x => x.Id, x => x.VersionRange);
+            var metadata = metadataResult.Value;
+
+            var depsById = metadata.DependencySets.SelectMany(x => x.Packages).GroupBy(x => x.Id, x => x.VersionRange);
 
             foreach (var depAndRanges in depsById)
             {
@@ -74,7 +68,13 @@ public class PackageDependenciesEvaluator
 
                 if (!packageVersionsCache.TryGetValue(dependencyIdentity, out var allVersionsOfDep))
                 {
-                    allVersionsOfDep = (await findResource.GetAllVersionsAsync(dependencyIdentity.Id, _cacheContext, _nugetLogger, cancellationToken)).ToList();
+                    var allVersionsResult = await _repository.Packages.GetAllVersions(dependencyIdentity.Id, cancellationToken);
+                    if (allVersionsResult.IsFailure)
+                    {
+                        return allVersionsResult.Error;
+                    }
+
+                    allVersionsOfDep = allVersionsResult.Value;
                     packageVersionsCache.Add(dependencyIdentity, allVersionsOfDep);
                 }
 

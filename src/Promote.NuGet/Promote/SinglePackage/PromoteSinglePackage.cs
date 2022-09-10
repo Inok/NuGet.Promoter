@@ -3,12 +3,11 @@ using CSharpFunctionalExtensions;
 using JetBrains.Annotations;
 using NuGet.Common;
 using NuGet.Packaging.Core;
-using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using Promote.NuGet.Commands;
 using Promote.NuGet.Commands.Core;
 using Promote.NuGet.Commands.Promote;
+using Promote.NuGet.Feeds;
 using Promote.NuGet.Infrastructure;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -27,17 +26,20 @@ internal sealed class PromoteSinglePackage : ICommand<PromoteSinglePackageSettin
 
         var nuGetLogger = new NuGetLogger(promoteSettings.Verbose ? LogLevel.Information : LogLevel.Minimal);
 
-        var sourceRepository = CreateRepository(promoteSettings.Source!, promoteSettings.SourceApiKey);
-        var destinationRepository = CreateRepository(promoteSettings.Destination!, promoteSettings.DestinationApiKey);
+        var sourceDescriptor = new NuGetRepositoryDescriptor(promoteSettings.Source!, promoteSettings.SourceApiKey);
+        var destinationDescriptor = new NuGetRepositoryDescriptor(promoteSettings.Destination!, promoteSettings.DestinationApiKey);
 
-        var identityResult = await CreatePackageIdentity(sourceRepository, promoteSettings, cacheContext, nuGetLogger);
+        var sourceRepository = new NuGetRepository(sourceDescriptor, cacheContext, nuGetLogger);
+        var destinationRepository = new NuGetRepository(destinationDescriptor, cacheContext, nuGetLogger);
+
+        var identityResult = await CreatePackageIdentity(sourceRepository, promoteSettings);
         if (identityResult.IsFailure)
         {
             AnsiConsole.WriteLine(identityResult.Error);
             return -1;
         }
 
-        var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, cacheContext, nuGetLogger, new PromotePackageLogger());
+        var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, new PromotePackageLogger());
 
         var promotionResult = await promoter.Promote(identityResult.Value, promoteSettings.DryRun);
         if (promotionResult.IsFailure)
@@ -49,23 +51,14 @@ internal sealed class PromoteSinglePackage : ICommand<PromoteSinglePackageSettin
         return 0;
     }
 
-    private static NuGetRepository CreateRepository(string source, string? apiKey)
-    {
-        var sourceRepository = Repository.Factory.GetCoreV3(source);
-        return new NuGetRepository(sourceRepository, apiKey);
-    }
-
-    private async Task<Result<PackageIdentity, string>> CreatePackageIdentity(NuGetRepository repository,
-                                                                              PromoteSinglePackageSettings promoteSettings,
-                                                                              SourceCacheContext cacheContext,
-                                                                              NuGetLogger nuGetLogger)
+    private async Task<Result<PackageIdentity, string>> CreatePackageIdentity(INuGetRepository repository, PromoteSinglePackageSettings promoteSettings)
     {
         if (!promoteSettings.IsLatestVersion)
         {
             return new PackageIdentity(promoteSettings.Id, NuGetVersion.Parse(promoteSettings.Version));
         }
 
-        var packageVersionFinder = new PackageVersionFinder(repository, cacheContext, nuGetLogger);
+        var packageVersionFinder = new PackageVersionFinder(repository);
         return await packageVersionFinder.FindLatestVersion(promoteSettings.Id!);
     }
 

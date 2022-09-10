@@ -1,29 +1,30 @@
 ﻿using CSharpFunctionalExtensions;
-using NuGet.Common;
 using NuGet.Packaging.Core;
-using NuGet.Protocol.Core.Types;
 using Promote.NuGet.Commands.Core;
+using Promote.NuGet.Feeds;
 
 namespace Promote.NuGet.Commands.Promote;
 
 public class PromotePackageCommand
 {
-    private readonly PackageDependenciesEvaluator _dependenciesEvaluator;
     private readonly PackageVersionFinder _packageVersionFinder;
+    private readonly PackageDependenciesEvaluator _dependenciesEvaluator;
     private readonly SinglePackagePromoter _singlePackagePromoter;
     private readonly IPromotePackageLogger _promotePackageLogger;
     private readonly PromotePackageToFindMatchingPackagesLoggerAdapter _promotePackageToFindMatchingPackagesLoggerAdapter;
 
-    public PromotePackageCommand(NuGetRepository sourceRepository,
-                                 NuGetRepository destinationRepository,
-                                 SourceCacheContext cacheContext,
-                                 ILogger nugetLogger,
+    public PromotePackageCommand(INuGetRepository sourceRepository,
+                                 INuGetRepository destinationRepository,
                                  IPromotePackageLogger promotePackageLogger)
     {
         _promotePackageLogger = promotePackageLogger ?? throw new ArgumentNullException(nameof(promotePackageLogger));
-        _dependenciesEvaluator = new PackageDependenciesEvaluator(sourceRepository, cacheContext, nugetLogger, new PromotePackageToPackageDependenciesEvaluatorLoggerAdapter(promotePackageLogger));
-        _packageVersionFinder = new PackageVersionFinder(sourceRepository, cacheContext, nugetLogger);
-        _singlePackagePromoter = new SinglePackagePromoter(sourceRepository, destinationRepository, cacheContext, nugetLogger);
+        _packageVersionFinder = new PackageVersionFinder(sourceRepository);
+
+        var packageDependenciesEvaluatorLoggerAdapter = new PromotePackageToPackageDependenciesEvaluatorLoggerAdapter(promotePackageLogger);
+        _dependenciesEvaluator = new PackageDependenciesEvaluator(sourceRepository, packageDependenciesEvaluatorLoggerAdapter);
+
+        _singlePackagePromoter = new SinglePackagePromoter(sourceRepository, destinationRepository);
+
         _promotePackageToFindMatchingPackagesLoggerAdapter = new PromotePackageToFindMatchingPackagesLoggerAdapter(promotePackageLogger);
     }
 
@@ -31,7 +32,8 @@ public class PromotePackageCommand
     {
         _promotePackageLogger.LogResolvingMatchingPackages(dependencies);
 
-        var resolvedPackagesResult = await _packageVersionFinder.FindMatchingPackages(dependencies, _promotePackageToFindMatchingPackagesLoggerAdapter, cancellationToken);
+        var resolvedPackagesResult =
+            await _packageVersionFinder.FindMatchingPackages(dependencies, _promotePackageToFindMatchingPackagesLoggerAdapter, cancellationToken);
         if (resolvedPackagesResult.IsFailure)
         {
             return resolvedPackagesResult.Error;

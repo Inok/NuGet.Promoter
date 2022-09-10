@@ -1,38 +1,29 @@
 using CSharpFunctionalExtensions;
-using NuGet.Common;
 using NuGet.Packaging.Core;
-using NuGet.Protocol.Core.Types;
+using Promote.NuGet.Feeds;
 
 namespace Promote.NuGet.Commands.Core;
 
 public sealed class PackageVersionFinder
 {
-    private readonly NuGetRepository _repository;
-    private readonly SourceCacheContext _cacheContext;
-    private readonly ILogger _logger;
+    private readonly INuGetRepository _repository;
 
-    public PackageVersionFinder(NuGetRepository repository, SourceCacheContext cacheContext, ILogger logger)
+    public PackageVersionFinder(INuGetRepository repository)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-        _cacheContext = cacheContext ?? throw new ArgumentNullException(nameof(cacheContext));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<Result<PackageIdentity, string>> FindLatestVersion(string id, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentException("Value cannot be null or empty.", nameof(id));
 
-        var findResource = await _repository.Repository.GetResourceAsync<FindPackageByIdResource>(cancellationToken);
-
-        var allVersions = await findResource.GetAllVersionsAsync(id, _cacheContext, _logger, cancellationToken);
-        var allVersionsCollection = allVersions?.ToList();
-
-        if (allVersionsCollection == null || !allVersionsCollection.Any())
+        var allVersions = await _repository.Packages.GetAllVersions(id, cancellationToken);
+        if (allVersions.IsFailure)
         {
-            return $"Package {id} not found";
+            return allVersions.Error;
         }
 
-        var maxVersion = allVersionsCollection.Where(v => !v.IsPrerelease).Max();
+        var maxVersion = allVersions.Value.Where(v => !v.IsPrerelease).Max();
 
         return new PackageIdentity(id, maxVersion);
     }
@@ -46,8 +37,6 @@ public sealed class PackageVersionFinder
         if (dependencies == null) throw new ArgumentNullException(nameof(dependencies));
         if (logger == null) throw new ArgumentNullException(nameof(logger));
 
-        var findResource = await _repository.Repository.GetResourceAsync<FindPackageByIdResource>(cancellationToken);
-
         var identities = new HashSet<PackageIdentity>();
         var matchingPackages = new HashSet<PackageIdentity>();
 
@@ -56,13 +45,13 @@ public sealed class PackageVersionFinder
             var packageId = packageRanges.Key;
             var versionRanges = packageRanges.Select(x => x.VersionRange).ToList();
 
-            var allVersions = await findResource.GetAllVersionsAsync(packageId, _cacheContext, _logger, cancellationToken);
-            if (allVersions == null)
+            var allVersionsResult = await _repository.Packages.GetAllVersions(packageId, cancellationToken);
+            if (allVersionsResult.IsFailure)
             {
-                return $"Package {packageId} not found.";
+                return allVersionsResult.Error;
             }
 
-            foreach (var version in allVersions)
+            foreach (var version in allVersionsResult.Value)
             {
                 if (version.IsPrerelease)
                 {

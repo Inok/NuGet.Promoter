@@ -1,24 +1,19 @@
 ﻿using System.IO;
 using CSharpFunctionalExtensions;
-using NuGet.Common;
 using NuGet.Packaging.Core;
-using NuGet.Protocol.Core.Types;
+using Promote.NuGet.Feeds;
 
 namespace Promote.NuGet.Commands.Promote;
 
 public class SinglePackagePromoter
 {
-    private readonly NuGetRepository _sourceRepository;
-    private readonly NuGetRepository _destinationRepository;
-    private readonly SourceCacheContext _cacheContext;
-    private readonly ILogger _logger;
+    private readonly INuGetRepository _sourceRepository;
+    private readonly INuGetRepository _destinationRepository;
 
-    public SinglePackagePromoter(NuGetRepository sourceRepository, NuGetRepository destinationRepository, SourceCacheContext cacheContext, ILogger logger)
+    public SinglePackagePromoter(INuGetRepository sourceRepository, INuGetRepository destinationRepository)
     {
         _sourceRepository = sourceRepository ?? throw new ArgumentNullException(nameof(sourceRepository));
         _destinationRepository = destinationRepository ?? throw new ArgumentNullException(nameof(destinationRepository));
-        _cacheContext = cacheContext ?? throw new ArgumentNullException(nameof(cacheContext));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<UnitResult<string>> Promote(PackageIdentity identity, bool skipDuplicate, CancellationToken cancellationToken)
@@ -36,7 +31,11 @@ public class SinglePackagePromoter
                 return downloadResult;
             }
 
-            await PushPackage(tempFilePath, skipDuplicate, cancellationToken);
+            var pushResult = await PushPackage(tempFilePath, skipDuplicate, cancellationToken);
+            if (pushResult.IsFailure)
+            {
+                return pushResult;
+            }
         }
         finally
         {
@@ -48,35 +47,15 @@ public class SinglePackagePromoter
 
     private async Task<UnitResult<string>> DownloadPackage(PackageIdentity identity, string filePath, CancellationToken cancellationToken)
     {
-        var sourceFindResource = await _sourceRepository.Repository.GetResourceAsync<FindPackageByIdResource>(cancellationToken);
-
         await using var packageStream = new FileStream(filePath, FileMode.Truncate, FileAccess.Write);
 
-        var result = await sourceFindResource.CopyNupkgToStreamAsync(identity.Id, identity.Version, packageStream, _cacheContext, _logger, cancellationToken);
-        if (!result)
-        {
-            return UnitResult.Failure<string>($"Failed to download package {identity}");
-        }
+        var copyNupkgToStreamResult = await _sourceRepository.Packages.CopyNupkgToStream(identity, packageStream, cancellationToken);
 
-        return UnitResult.Success<string>();
+        return copyNupkgToStreamResult;
     }
 
-    private async Task PushPackage(string filePath, bool skipDuplicate, CancellationToken cancellationToken)
+    private async Task<UnitResult<string>> PushPackage(string filePath, bool skipDuplicate, CancellationToken cancellationToken)
     {
-        var destUpdateResource = await _destinationRepository.Repository.GetResourceAsync<PackageUpdateResource>(cancellationToken);
-        var apiKey = _destinationRepository.ApiKey;
-
-        await destUpdateResource.Push(
-            new[] { filePath },
-            symbolSource: null,
-            timeoutInSecond: 60,
-            disableBuffering: false,
-            getApiKey: _ => apiKey,
-            getSymbolApiKey: packageSource => null,
-            noServiceEndpoint: false,
-            skipDuplicate: skipDuplicate,
-            symbolPackageUpdateResource: null,
-            _logger
-        );
+        return await _destinationRepository.Packages.PushPackage(filePath, skipDuplicate, cancellationToken);
     }
 }
