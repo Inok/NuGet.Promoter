@@ -24,6 +24,10 @@ public sealed class PackageVersionFinder
         }
 
         var maxVersion = allVersions.Value.Where(v => !v.IsPrerelease).Max();
+        if (maxVersion == null)
+        {
+            return $"Package {id} has no released versions";
+        }
 
         return new PackageIdentity(id, maxVersion);
     }
