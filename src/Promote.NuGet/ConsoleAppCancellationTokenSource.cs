@@ -38,6 +38,8 @@ internal sealed class ConsoleAppCancellationTokenSource : IDisposable
 
     public void Dispose()
     {
+        AppDomain.CurrentDomain.ProcessExit -= OnProcessExit;
+        Console.CancelKeyPress -= OnCancelKeyPress;
         _cts.Dispose();
     }
 }

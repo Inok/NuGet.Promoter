@@ -94,4 +94,12 @@ public sealed class PackageVersionFinder
 
         return matchingPackages;
     }
+
+    public async Task<Result<bool, string>> DoesPackageExist(PackageIdentity identity, CancellationToken cancellationToken = default)
+    {
+        if (identity == null) throw new ArgumentNullException(nameof(identity));
+        if (!identity.HasVersion) throw new ArgumentException("Identity must have version.", nameof(identity));
+
+        return await _repository.Packages.DoesPackageExist(identity, cancellationToken);
+    }
 }

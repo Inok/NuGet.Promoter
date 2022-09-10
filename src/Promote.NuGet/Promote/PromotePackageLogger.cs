@@ -27,6 +27,21 @@ public class PromotePackageLogger : IPromotePackageLogger
         AnsiConsole.MarkupLineInterpolated($"[gray]Matching packages for {packageId} {rangesString}: {versionsString}[/]");
     }
 
+    public void LogFilteringPresentPackages(IReadOnlySet<PackageIdentity> identities)
+    {
+        AnsiConsole.MarkupLineInterpolated($"[bold green]Filtering packages that are already present in the destination repository...[/]");
+    }
+
+    public void LogPackagePresentInDestination(PackageIdentity identity)
+    {
+        AnsiConsole.MarkupLineInterpolated($"[gray]Package {identity.Id} {identity.Version} is already present in the destination repository.[/]");
+    }
+
+    public void LogNoPackagesToPromote()
+    {
+        AnsiConsole.MarkupLineInterpolated($"[bold green]There are no packages to promote.[/]");
+    }
+
     public void LogResolvingDependencies(IReadOnlyCollection<PackageIdentity> identities)
     {
         var tree = new Tree("[bold green]Resolving dependencies for:[/]");

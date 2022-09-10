@@ -36,6 +36,10 @@ internal class PromoteSettings : CommandSettings
     [CommandOption("--verbose")]
     public bool Verbose { get; init; }
 
+    [Description("Do not check that promoted package already exists in destination repository. Instead, try to promote all packages and their dependencies.")]
+    [CommandOption("--force")]
+    public bool Force { get; init; }
+
     public override ValidationResult Validate()
     {
         if (string.IsNullOrEmpty(Source))

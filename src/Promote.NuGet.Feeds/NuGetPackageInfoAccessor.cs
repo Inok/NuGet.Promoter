@@ -93,4 +93,14 @@ internal class NuGetPackageInfoAccessor : INuGetPackageInfoAccessor
 
         return Result.Success();
     }
+
+    public async Task<Result<bool, string>> DoesPackageExist(PackageIdentity identity, CancellationToken cancellationToken = default)
+    {
+        if (identity == null) throw new ArgumentNullException(nameof(identity));
+        if (!identity.HasVersion) throw new ArgumentException("Identity must have version.", nameof(identity));
+
+        var findResource = await _sourceRepository.GetResourceAsync<FindPackageByIdResource>(cancellationToken);
+
+        return await findResource.DoesPackageExistAsync(identity.Id, identity.Version, _cacheContext, _logger, cancellationToken);
+    }
 }

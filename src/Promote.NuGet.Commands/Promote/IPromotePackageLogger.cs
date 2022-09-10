@@ -9,6 +9,12 @@ public interface IPromotePackageLogger
 
     void LogMatchingPackagesResolved(string packageId, IReadOnlyCollection<VersionRange> versionRanges, IReadOnlyCollection<PackageIdentity> matchingPackages);
 
+    void LogFilteringPresentPackages(IReadOnlySet<PackageIdentity> identities);
+
+    void LogPackagePresentInDestination(PackageIdentity identity);
+
+    void LogNoPackagesToPromote();
+
     void LogResolvingDependencies(IReadOnlyCollection<PackageIdentity> identities);
 
     void LogProcessingDependenciesOfPackage(PackageIdentity identity);

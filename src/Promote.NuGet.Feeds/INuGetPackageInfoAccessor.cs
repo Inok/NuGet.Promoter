@@ -15,4 +15,6 @@ public interface INuGetPackageInfoAccessor
     Task<UnitResult<string>> CopyNupkgToStream(PackageIdentity identity, Stream stream, CancellationToken cancellationToken = default);
 
     Task<UnitResult<string>> PushPackage(string filePath, bool skipDuplicate, CancellationToken cancellationToken = default);
+
+    Task<Result<bool, string>> DoesPackageExist(PackageIdentity identity, CancellationToken cancellationToken = default);
 }

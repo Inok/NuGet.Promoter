@@ -7,18 +7,20 @@ namespace Promote.NuGet.Commands.Promote;
 
 public class PromotePackageCommand
 {
-    private readonly PackageVersionFinder _packageVersionFinder;
+    private readonly PackageVersionFinder _sourcePackageVersionFinder;
     private readonly PackageDependenciesEvaluator _dependenciesEvaluator;
     private readonly SinglePackagePromoter _singlePackagePromoter;
     private readonly IPromotePackageLogger _promotePackageLogger;
     private readonly PromotePackageToFindMatchingPackagesLoggerAdapter _promotePackageToFindMatchingPackagesLoggerAdapter;
+    private readonly PackageVersionFinder _destinationPackageVersionFinder;
 
     public PromotePackageCommand(INuGetRepository sourceRepository,
                                  INuGetRepository destinationRepository,
                                  IPromotePackageLogger promotePackageLogger)
     {
         _promotePackageLogger = promotePackageLogger ?? throw new ArgumentNullException(nameof(promotePackageLogger));
-        _packageVersionFinder = new PackageVersionFinder(sourceRepository);
+        _sourcePackageVersionFinder = new PackageVersionFinder(sourceRepository);
+        _destinationPackageVersionFinder = new PackageVersionFinder(destinationRepository);
 
         var packageDependenciesEvaluatorLoggerAdapter = new PromotePackageToPackageDependenciesEvaluatorLoggerAdapter(promotePackageLogger);
         _dependenciesEvaluator = new PackageDependenciesEvaluator(sourceRepository, packageDependenciesEvaluatorLoggerAdapter);
@@ -28,31 +30,57 @@ public class PromotePackageCommand
         _promotePackageToFindMatchingPackagesLoggerAdapter = new PromotePackageToFindMatchingPackagesLoggerAdapter(promotePackageLogger);
     }
 
-    public async Task<UnitResult<string>> Promote(IReadOnlySet<PackageDependency> dependencies, bool dryRun, CancellationToken cancellationToken = default)
+    public async Task<UnitResult<string>> Promote(IReadOnlySet<PackageDependency> dependencies,
+                                                  bool dryRun,
+                                                  bool force,
+                                                  CancellationToken cancellationToken = default)
     {
         _promotePackageLogger.LogResolvingMatchingPackages(dependencies);
 
-        var resolvedPackagesResult =
-            await _packageVersionFinder.FindMatchingPackages(dependencies, _promotePackageToFindMatchingPackagesLoggerAdapter, cancellationToken);
-        if (resolvedPackagesResult.IsFailure)
+        var packages = await _sourcePackageVersionFinder.FindMatchingPackages(dependencies, _promotePackageToFindMatchingPackagesLoggerAdapter,
+                                                                              cancellationToken);
+        if (packages.IsFailure)
         {
-            return resolvedPackagesResult.Error;
+            return packages.Error;
         }
 
-        return await Promote(resolvedPackagesResult.Value, dryRun, cancellationToken);
+        return await Promote(packages.Value, dryRun, force, cancellationToken);
     }
 
-    public async Task<UnitResult<string>> Promote(PackageIdentity identity, bool dryRun, CancellationToken cancellationToken = default)
+    public async Task<UnitResult<string>> Promote(PackageIdentity identity,
+                                                  bool dryRun,
+                                                  bool force,
+                                                  CancellationToken cancellationToken = default)
     {
         if (identity == null) throw new ArgumentNullException(nameof(identity));
 
         var identities = new HashSet<PackageIdentity> { identity };
-        return await Promote(identities, dryRun, cancellationToken);
+        return await Promote(identities, dryRun, force, cancellationToken);
     }
 
-    public async Task<UnitResult<string>> Promote(IReadOnlySet<PackageIdentity> identities, bool dryRun, CancellationToken cancellationToken = default)
+    public async Task<UnitResult<string>> Promote(IReadOnlySet<PackageIdentity> identities,
+                                                  bool dryRun,
+                                                  bool force,
+                                                  CancellationToken cancellationToken = default)
     {
         if (identities == null) throw new ArgumentNullException(nameof(identities));
+
+        if (!force)
+        {
+            var filteredPackages = await FilterAlreadyPresentPackages(identities, cancellationToken);
+            if (filteredPackages.IsFailure)
+            {
+                return filteredPackages.Error;
+            }
+
+            identities = filteredPackages.Value;
+        }
+
+        if (identities.Count == 0)
+        {
+            _promotePackageLogger.LogNoPackagesToPromote();
+            return UnitResult.Success<string>();
+        }
 
         var resolvedPackagesResult = await ResolvePackagesToPromote(identities, cancellationToken);
         if (resolvedPackagesResult.IsFailure)
@@ -66,6 +94,33 @@ public class PromotePackageCommand
         }
 
         return await PromotePackages(resolvedPackagesResult.Value, cancellationToken);
+    }
+
+    private async Task<Result<IReadOnlySet<PackageIdentity>, string>> FilterAlreadyPresentPackages(IReadOnlySet<PackageIdentity> identities,
+                                                                                                   CancellationToken cancellationToken)
+    {
+        _promotePackageLogger.LogFilteringPresentPackages(identities);
+
+        var result = new HashSet<PackageIdentity>();
+        foreach (var identity in identities)
+        {
+            var packageExistResult = await _destinationPackageVersionFinder.DoesPackageExist(identity, cancellationToken);
+            if (packageExistResult.IsFailure)
+            {
+                return packageExistResult.Error;
+            }
+
+            var packageExists = packageExistResult.Value;
+            if (packageExists)
+            {
+                _promotePackageLogger.LogPackagePresentInDestination(identity);
+                continue;
+            }
+
+            result.Add(identity);
+        }
+
+        return result;
     }
 
     private async Task<Result<IReadOnlyCollection<PackageIdentity>, string>> ResolvePackagesToPromote(IReadOnlyCollection<PackageIdentity> identities,
