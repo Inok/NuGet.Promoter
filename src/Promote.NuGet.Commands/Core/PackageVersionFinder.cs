@@ -1,5 +1,6 @@
 using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
+using NuGet.Versioning;
 using Promote.NuGet.Feeds;
 
 namespace Promote.NuGet.Commands.Core;
@@ -42,40 +43,55 @@ public sealed class PackageVersionFinder
         if (logger == null) throw new ArgumentNullException(nameof(logger));
 
         var identities = new HashSet<PackageIdentity>();
-        var matchingPackages = new HashSet<PackageIdentity>();
 
         foreach (var packageRanges in dependencies.GroupBy(d => d.Id, StringComparer.OrdinalIgnoreCase))
         {
             var packageId = packageRanges.Key;
             var versionRanges = packageRanges.Select(x => x.VersionRange).ToList();
 
-            var allVersionsResult = await _repository.Packages.GetAllVersions(packageId, cancellationToken);
-            if (allVersionsResult.IsFailure)
+            var matchingPackagesResult = await FindMatchingVersions(packageId, versionRanges, cancellationToken);
+            if (matchingPackagesResult.IsFailure)
             {
-                return allVersionsResult.Error;
+                return matchingPackagesResult.Error;
             }
 
-            foreach (var version in allVersionsResult.Value)
-            {
-                if (version.IsPrerelease)
-                {
-                    continue;
-                }
-
-                if (!versionRanges.Any(range => range.Satisfies(version)))
-                {
-                    continue;
-                }
-
-                matchingPackages.Add(new PackageIdentity(packageId, version));
-            }
-
+            var matchingPackages = matchingPackagesResult.Value;
             logger.LogMatchingPackagesResolved(packageId, versionRanges, matchingPackages);
 
             identities.UnionWith(matchingPackages);
-            matchingPackages.Clear();
         }
 
         return identities;
+    }
+
+    private async Task<Result<IReadOnlySet<PackageIdentity>, string>> FindMatchingVersions(
+        string packageId,
+        IReadOnlyCollection<VersionRange> versionRanges,
+        CancellationToken cancellationToken)
+    {
+        var allVersionsResult = await _repository.Packages.GetAllVersions(packageId, cancellationToken);
+        if (allVersionsResult.IsFailure)
+        {
+            return allVersionsResult.Error;
+        }
+
+        var matchingPackages = new HashSet<PackageIdentity>();
+
+        foreach (var version in allVersionsResult.Value)
+        {
+            if (version.IsPrerelease)
+            {
+                continue;
+            }
+
+            if (!versionRanges.Any(range => range.Satisfies(version)))
+            {
+                continue;
+            }
+
+            matchingPackages.Add(new PackageIdentity(packageId, version));
+        }
+
+        return matchingPackages;
     }
 }
