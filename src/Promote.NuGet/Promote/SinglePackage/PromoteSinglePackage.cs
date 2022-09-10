@@ -60,7 +60,7 @@ internal sealed class PromoteSinglePackage : ICommand<PromoteSinglePackageSettin
                                                                               SourceCacheContext cacheContext,
                                                                               NuGetLogger nuGetLogger)
     {
-        if (!string.IsNullOrEmpty(promoteSettings.Version))
+        if (!promoteSettings.IsLatestVersion)
         {
             return new PackageIdentity(promoteSettings.Id, NuGetVersion.Parse(promoteSettings.Version));
         }
