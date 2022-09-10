@@ -37,23 +37,29 @@ public sealed class PackageVersionFinder
         return new PackageIdentity(id, maxVersion);
     }
 
-    public async Task<Result<IReadOnlySet<PackageIdentity>, string>> ResolvePackageAndDependencies(
+    public async Task<Result<IReadOnlySet<PackageIdentity>, string>> FindMatchingPackages(
         IReadOnlyCollection<PackageDependency> dependencies,
+        IFindMatchingPackagesLogger logger,
         CancellationToken cancellationToken = default
     )
     {
         if (dependencies == null) throw new ArgumentNullException(nameof(dependencies));
+        if (logger == null) throw new ArgumentNullException(nameof(logger));
 
         var findResource = await _repository.Repository.GetResourceAsync<FindPackageByIdResource>(cancellationToken);
 
         var identities = new HashSet<PackageIdentity>();
+        var matchingPackages = new HashSet<PackageIdentity>();
 
         foreach (var packageRanges in dependencies.GroupBy(d => d.Id, StringComparer.OrdinalIgnoreCase))
         {
-            var allVersions = await findResource.GetAllVersionsAsync(packageRanges.Key, _cacheContext, _logger, cancellationToken);
+            var packageId = packageRanges.Key;
+            var versionRanges = packageRanges.Select(x => x.VersionRange).ToList();
+
+            var allVersions = await findResource.GetAllVersionsAsync(packageId, _cacheContext, _logger, cancellationToken);
             if (allVersions == null)
             {
-                return $"Package {packageRanges.Key} not found.";
+                return $"Package {packageId} not found.";
             }
 
             foreach (var version in allVersions)
@@ -63,13 +69,18 @@ public sealed class PackageVersionFinder
                     continue;
                 }
 
-                if (!packageRanges.Any(dep => dep.VersionRange.Satisfies(version)))
+                if (!versionRanges.Any(range => range.Satisfies(version)))
                 {
                     continue;
                 }
 
-                identities.Add(new PackageIdentity(packageRanges.Key, version));
+                matchingPackages.Add(new PackageIdentity(packageId, version));
             }
+
+            logger.LogMatchingPackagesResolved(packageId, versionRanges, matchingPackages);
+
+            identities.UnionWith(matchingPackages);
+            matchingPackages.Clear();
         }
 
         return identities;

@@ -12,6 +12,7 @@ public class PromotePackageCommand
     private readonly PackageVersionFinder _packageVersionFinder;
     private readonly SinglePackagePromoter _singlePackagePromoter;
     private readonly IPromotePackageLogger _promotePackageLogger;
+    private readonly PromotePackageToFindMatchingPackagesLoggerAdapter _promotePackageToFindMatchingPackagesLoggerAdapter;
 
     public PromotePackageCommand(NuGetRepository sourceRepository,
                                  NuGetRepository destinationRepository,
@@ -23,13 +24,14 @@ public class PromotePackageCommand
         _dependenciesEvaluator = new PackageDependenciesEvaluator(sourceRepository, cacheContext, nugetLogger, new PromotePackageToPackageDependenciesEvaluatorLoggerAdapter(promotePackageLogger));
         _packageVersionFinder = new PackageVersionFinder(sourceRepository, cacheContext, nugetLogger);
         _singlePackagePromoter = new SinglePackagePromoter(sourceRepository, destinationRepository, cacheContext, nugetLogger);
+        _promotePackageToFindMatchingPackagesLoggerAdapter = new PromotePackageToFindMatchingPackagesLoggerAdapter(promotePackageLogger);
     }
 
     public async Task<UnitResult<string>> Promote(IReadOnlySet<PackageDependency> dependencies, bool dryRun, CancellationToken cancellationToken = default)
     {
         _promotePackageLogger.LogResolvingMatchingPackages(dependencies);
 
-        var resolvedPackagesResult = await _packageVersionFinder.ResolvePackageAndDependencies(dependencies, cancellationToken);
+        var resolvedPackagesResult = await _packageVersionFinder.FindMatchingPackages(dependencies, _promotePackageToFindMatchingPackagesLoggerAdapter, cancellationToken);
         if (resolvedPackagesResult.IsFailure)
         {
             return resolvedPackagesResult.Error;

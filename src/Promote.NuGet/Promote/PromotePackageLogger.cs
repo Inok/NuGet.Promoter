@@ -1,4 +1,5 @@
 using NuGet.Packaging.Core;
+using NuGet.Versioning;
 using Promote.NuGet.Commands.Promote;
 using Spectre.Console;
 
@@ -9,12 +10,21 @@ public class PromotePackageLogger : IPromotePackageLogger
     public void LogResolvingMatchingPackages(IReadOnlyCollection<PackageDependency> dependencies)
     {
         var tree = new Tree("[bold green]Resolving matching packages for:[/]");
-        foreach (var dep in dependencies)
+        foreach (var dep in dependencies.OrderBy(x => x.Id))
         {
             tree.AddNode(Markup.FromInterpolated($"{dep.Id} {dep.VersionRange.PrettyPrint()}"));
         }
 
         AnsiConsole.Write(tree);
+    }
+
+    public void LogMatchingPackagesResolved(string packageId,
+                                            IReadOnlyCollection<VersionRange> versionRanges,
+                                            IReadOnlyCollection<PackageIdentity> matchingPackages)
+    {
+        var rangesString = string.Join(", ", versionRanges.Select(r => r.PrettyPrint()));
+        var versionsString = string.Join(", ", matchingPackages.Select(r => r.Version));
+        AnsiConsole.MarkupLineInterpolated($"[gray]Matching packages for {packageId} {rangesString}: {versionsString}[/]");
     }
 
     public void LogResolvingDependencies(IReadOnlyCollection<PackageIdentity> identities)
