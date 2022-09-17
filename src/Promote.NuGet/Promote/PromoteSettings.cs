@@ -36,9 +36,15 @@ internal class PromoteSettings : CommandSettings
     [CommandOption("--verbose")]
     public bool Verbose { get; init; }
 
-    [Description("Do not check that promoted package already exists in destination repository. Instead, try to promote all packages and their dependencies.")]
-    [CommandOption("--force")]
-    public bool Force { get; init; }
+    [Description("Always resolve dependencies of a package, even if the package itself exists in the destination repository. "
+               + "This option allows to restore the integrity of the destination repository by promoting missing dependencies.")]
+    [CommandOption("--always-resolve-deps")]
+    public bool AlwaysResolveDeps { get; init; }
+
+    [Description("Push packages and their dependencies even if they already exist in the destination repository. "
+               + "Use that option to restore the integrity of the destination repository (i.e. when some packages in the feed are broken).")]
+    [CommandOption("--force-push")]
+    public bool ForcePush { get; init; }
 
     public override ValidationResult Validate()
     {

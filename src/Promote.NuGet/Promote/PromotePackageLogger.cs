@@ -27,11 +27,6 @@ public class PromotePackageLogger : IPromotePackageLogger
         AnsiConsole.MarkupLineInterpolated($"[gray]Matching packages for {packageId} {rangesString}: {versionsString}[/]");
     }
 
-    public void LogFilteringPresentPackages(IReadOnlySet<PackageIdentity> identities)
-    {
-        AnsiConsole.MarkupLineInterpolated($"[bold green]Filtering packages that are already present in the destination repository...[/]");
-    }
-
     public void LogPackagePresentInDestination(PackageIdentity identity)
     {
         AnsiConsole.MarkupLineInterpolated($"[gray]Package {identity.Id} {identity.Version} is already present in the destination repository.[/]");
@@ -42,9 +37,9 @@ public class PromotePackageLogger : IPromotePackageLogger
         AnsiConsole.MarkupLineInterpolated($"[bold green]There are no packages to promote.[/]");
     }
 
-    public void LogResolvingDependencies(IReadOnlyCollection<PackageIdentity> identities)
+    public void LogResolvingPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities)
     {
-        var tree = new Tree("[bold green]Resolving dependencies for:[/]");
+        var tree = new Tree("[bold green]Resolving packages to promote:[/]");
         foreach (var identity in identities)
         {
             tree.AddNode(Markup.FromInterpolated($"{identity.Id} {identity.Version}"));
@@ -53,9 +48,19 @@ public class PromotePackageLogger : IPromotePackageLogger
         AnsiConsole.Write(tree);
     }
 
-    public void LogProcessingDependenciesOfPackage(PackageIdentity identity)
+    public void LogProcessingPackage(PackageIdentity identity)
     {
-        AnsiConsole.MarkupLine($"[gray]Processing deps: {identity.Id} {identity.Version}[/]");
+        AnsiConsole.MarkupLine($"[gray]Processing package {identity.Id} {identity.Version}[/]");
+    }
+
+    public void LogProcessingDependency(string packageId, VersionRange versionRange)
+    {
+        AnsiConsole.MarkupLine($"[gray]Processing dependency {packageId} {versionRange.PrettyPrint()}[/]");
+    }
+
+    public void LogNewDependencyToProcess(string packageId, VersionRange versionRange)
+    {
+        AnsiConsole.MarkupLine($"[gray]New dependency to process: {packageId} {versionRange.PrettyPrint()}[/]");
     }
 
     public void LogNewDependencyFound(PackageIdentity identity)
