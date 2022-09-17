@@ -2,6 +2,7 @@
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using Promote.NuGet.Commands.Core;
 using Promote.NuGet.Feeds;
 
 namespace Promote.NuGet.Commands.Promote;
@@ -29,16 +30,16 @@ public class PackagesToPromoteEvaluator
         if (identities.Any(i => !i.HasVersion)) throw new ArgumentException("Version of a package must be specified.", nameof(identities));
         if (options == null) throw new ArgumentNullException(nameof(options));
 
-        var packageQueue = new PackageResolutionQueue(identities);
-        var dependencyQueue = new DependencyResolutionQueue();
+        var packageQueue = new DistinctQueue<PackageIdentity>(identities);
+        var dependencyQueue = new DistinctQueue<Dependency>();
         var versionFinder = new CachedPackageVersionFinder(_sourceRepository);
 
         var packagesToPromote = new HashSet<PackageIdentity>();
 
-        while (packageQueue.HasPackagesToProcess || dependencyQueue.HasDependenciesToProcess)
+        while (packageQueue.HasItems || dependencyQueue.HasItems)
         {
             // Resolve all packages known at this point
-            while (packageQueue.TryDequeueAsResolved(out var packageIdentity))
+            while (packageQueue.TryDequeue(out var packageIdentity))
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -50,11 +51,13 @@ public class PackagesToPromoteEvaluator
             }
 
             // Resolve dependencies known at this point
-            while (dependencyQueue.TryDequeueAsResolved(out var dependencyIdentity, out var dependencyVersionRange))
+            while (dependencyQueue.TryDequeue(out var dependency))
             {
+                var (dependencyIdentity, dependencyVersionRange) = dependency;
+
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var processingResult = await ProcessDependency(dependencyIdentity, dependencyVersionRange, packageQueue, versionFinder, cancellationToken);
+                var processingResult = await ProcessDependency(dependencyIdentity.Id, dependencyVersionRange, packageQueue, versionFinder, cancellationToken);
                 if (processingResult.IsFailure)
                 {
                     return processingResult.Error;
@@ -68,7 +71,7 @@ public class PackagesToPromoteEvaluator
     private async Task<UnitResult<string>> ProcessPackage(PackageIdentity packageIdentity,
                                                           PromotePackageCommandOptions options,
                                                           ISet<PackageIdentity> packagesToPromote,
-                                                          DependencyResolutionQueue dependencyResolutionQueue,
+                                                          DistinctQueue<Dependency> dependencyResolutionQueue,
                                                           CancellationToken cancellationToken)
     {
         _logger.LogProcessingPackage(packageIdentity);
@@ -114,7 +117,7 @@ public class PackagesToPromoteEvaluator
         return Result.Success();
     }
 
-    private void ProcessPackageDependencies(IPackageSearchMetadata metadata, DependencyResolutionQueue dependencyResolutionQueue)
+    private void ProcessPackageDependencies(IPackageSearchMetadata metadata, DistinctQueue<Dependency> dependencyResolutionQueue)
     {
         var depsById = metadata.DependencySets
                                .SelectMany(x => x.Packages)
@@ -122,13 +125,13 @@ public class PackagesToPromoteEvaluator
 
         foreach (var depAndRanges in depsById)
         {
-            var dependencyId = depAndRanges.Key;
+            var dependencyIdentity = new PackageIdentity(depAndRanges.Key, null);
 
             foreach (var dependencyRange in depAndRanges)
             {
-                if (dependencyResolutionQueue.EnqueueIfNotResolvedAlready(dependencyId, dependencyRange))
+                if (dependencyResolutionQueue.Enqueue(new Dependency(dependencyIdentity, dependencyRange)))
                 {
-                    _logger.LogNewDependencyToProcess(dependencyId, dependencyRange);
+                    _logger.LogNewDependencyToProcess(dependencyIdentity.Id, dependencyRange);
                 }
             }
         }
@@ -136,7 +139,7 @@ public class PackagesToPromoteEvaluator
 
     private async Task<UnitResult<string>> ProcessDependency(string packageId,
                                                              VersionRange versionRange,
-                                                             PackageResolutionQueue packageResolutionQueue,
+                                                             DistinctQueue<PackageIdentity> packageResolutionQueue,
                                                              CachedPackageVersionFinder versionFinder,
                                                              CancellationToken cancellationToken)
     {
@@ -151,11 +154,13 @@ public class PackagesToPromoteEvaluator
         var bestMatchVersion = versionRange.FindBestMatch(allVersionsOfDepResult.Value);
         var bestMatchIdentity = new PackageIdentity(packageId, bestMatchVersion);
 
-        if (packageResolutionQueue.EnqueueIfNotResolvedAlready(bestMatchIdentity))
+        if (packageResolutionQueue.Enqueue(bestMatchIdentity))
         {
             _logger.LogNewDependencyFound(bestMatchIdentity);
         }
 
         return Result.Success();
     }
+
+    private sealed record Dependency(PackageIdentity Identity, VersionRange VersionRange);
 }
