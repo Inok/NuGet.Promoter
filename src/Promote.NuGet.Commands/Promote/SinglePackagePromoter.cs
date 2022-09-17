@@ -16,7 +16,7 @@ public class SinglePackagePromoter
         _destinationRepository = destinationRepository ?? throw new ArgumentNullException(nameof(destinationRepository));
     }
 
-    public async Task<UnitResult<string>> Promote(PackageIdentity identity, bool skipDuplicate, CancellationToken cancellationToken)
+    public async Task<Result> Promote(PackageIdentity identity, bool skipDuplicate, CancellationToken cancellationToken)
     {
         if (identity == null) throw new ArgumentNullException(nameof(identity));
         if (!identity.HasVersion) throw new ArgumentException("Identity must have version.", nameof(identity));
@@ -42,10 +42,10 @@ public class SinglePackagePromoter
             File.Delete(tempFilePath);
         }
 
-        return UnitResult.Success<string>();
+        return Result.Success();
     }
 
-    private async Task<UnitResult<string>> DownloadPackage(PackageIdentity identity, string filePath, CancellationToken cancellationToken)
+    private async Task<Result> DownloadPackage(PackageIdentity identity, string filePath, CancellationToken cancellationToken)
     {
         await using var packageStream = new FileStream(filePath, FileMode.Truncate, FileAccess.Write);
 
@@ -54,7 +54,7 @@ public class SinglePackagePromoter
         return copyNupkgToStreamResult;
     }
 
-    private async Task<UnitResult<string>> PushPackage(string filePath, bool skipDuplicate, CancellationToken cancellationToken)
+    private async Task<Result> PushPackage(string filePath, bool skipDuplicate, CancellationToken cancellationToken)
     {
         return await _destinationRepository.Packages.PushPackage(filePath, skipDuplicate, cancellationToken);
     }

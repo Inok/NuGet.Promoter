@@ -53,7 +53,7 @@ internal sealed class PromoteSinglePackage : CancellableAsyncCommand<PromoteSing
         return 0;
     }
 
-    private async Task<Result<PackageIdentity, string>> CreatePackageIdentity(INuGetRepository repository,
+    private async Task<Result<PackageIdentity>> CreatePackageIdentity(INuGetRepository repository,
                                                                               PromoteSinglePackageSettings promoteSettings,
                                                                               CancellationToken cancellationToken)
     {

@@ -16,7 +16,7 @@ internal class CachedPackageVersionFinder
         _packageVersionsCache = new Dictionary<PackageIdentity, IReadOnlyCollection<NuGetVersion>>();
     }
 
-    public async Task<Result<IReadOnlyCollection<NuGetVersion>, string>> GetAllVersions(string packageId, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<NuGetVersion>>> GetAllVersions(string packageId, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(packageId)) throw new ArgumentException("Value cannot be null or empty.", nameof(packageId));
 
@@ -24,18 +24,18 @@ internal class CachedPackageVersionFinder
 
         if (_packageVersionsCache.TryGetValue(identity, out var allVersionsOfDep))
         {
-            return Result.Success<IReadOnlyCollection<NuGetVersion>, string>(allVersionsOfDep);
+            return Result.Success(allVersionsOfDep);
         }
 
         var allVersionsResult = await _repository.Packages.GetAllVersions(identity.Id, cancellationToken);
         if (allVersionsResult.IsFailure)
         {
-            return allVersionsResult.Error;
+            return Result.Failure<IReadOnlyCollection<NuGetVersion>>(allVersionsResult.Error);
         }
 
         allVersionsOfDep = allVersionsResult.Value;
         _packageVersionsCache.Add(identity, allVersionsOfDep);
 
-        return Result.Success<IReadOnlyCollection<NuGetVersion>, string>(allVersionsOfDep);
+        return Result.Success(allVersionsOfDep);
     }
 }

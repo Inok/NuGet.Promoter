@@ -12,9 +12,9 @@ public interface INuGetPackageInfoAccessor
 
     Task<Result<IPackageSearchMetadata>> GetPackageMetadata(PackageIdentity identity, CancellationToken cancellationToken = default);
 
-    Task<UnitResult<string>> CopyNupkgToStream(PackageIdentity identity, Stream stream, CancellationToken cancellationToken = default);
+    Task<Result> CopyNupkgToStream(PackageIdentity identity, Stream stream, CancellationToken cancellationToken = default);
 
-    Task<UnitResult<string>> PushPackage(string filePath, bool skipDuplicate, CancellationToken cancellationToken = default);
+    Task<Result> PushPackage(string filePath, bool skipDuplicate, CancellationToken cancellationToken = default);
 
     Task<Result<bool>> DoesPackageExist(PackageIdentity identity, CancellationToken cancellationToken = default);
 }

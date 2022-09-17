@@ -14,26 +14,26 @@ public sealed class PackageVersionFinder
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
     }
 
-    public async Task<Result<PackageIdentity, string>> FindLatestVersion(string id, CancellationToken cancellationToken = default)
+    public async Task<Result<PackageIdentity>> FindLatestVersion(string id, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentException("Value cannot be null or empty.", nameof(id));
 
         var allVersions = await _repository.Packages.GetAllVersions(id, cancellationToken);
         if (allVersions.IsFailure)
         {
-            return allVersions.Error;
+            return Result.Failure<PackageIdentity>(allVersions.Error);
         }
 
         var maxVersion = allVersions.Value.Where(v => !v.IsPrerelease).Max();
         if (maxVersion == null)
         {
-            return $"Package {id} has no released versions";
+            return Result.Failure<PackageIdentity>($"Package {id} has no released versions");
         }
 
         return new PackageIdentity(id, maxVersion);
     }
 
-    public async Task<Result<IReadOnlySet<PackageIdentity>, string>> FindMatchingPackages(
+    public async Task<Result<IReadOnlySet<PackageIdentity>>> FindMatchingPackages(
         IReadOnlyCollection<PackageDependency> dependencies,
         IFindMatchingPackagesLogger logger,
         CancellationToken cancellationToken = default
@@ -52,7 +52,7 @@ public sealed class PackageVersionFinder
             var matchingPackagesResult = await FindMatchingVersions(packageId, versionRanges, cancellationToken);
             if (matchingPackagesResult.IsFailure)
             {
-                return matchingPackagesResult.Error;
+                return Result.Failure<IReadOnlySet<PackageIdentity>>(matchingPackagesResult.Error);
             }
 
             var matchingPackages = matchingPackagesResult.Value;
@@ -64,7 +64,7 @@ public sealed class PackageVersionFinder
         return identities;
     }
 
-    private async Task<Result<IReadOnlySet<PackageIdentity>, string>> FindMatchingVersions(
+    private async Task<Result<IReadOnlySet<PackageIdentity>>> FindMatchingVersions(
         string packageId,
         IReadOnlyCollection<VersionRange> versionRanges,
         CancellationToken cancellationToken)
@@ -72,7 +72,7 @@ public sealed class PackageVersionFinder
         var allVersionsResult = await _repository.Packages.GetAllVersions(packageId, cancellationToken);
         if (allVersionsResult.IsFailure)
         {
-            return allVersionsResult.Error;
+            return Result.Failure<IReadOnlySet<PackageIdentity>>(allVersionsResult.Error);
         }
 
         var matchingPackages = new HashSet<PackageIdentity>();

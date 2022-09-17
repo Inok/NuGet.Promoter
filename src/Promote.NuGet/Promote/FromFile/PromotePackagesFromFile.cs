@@ -52,7 +52,7 @@ internal sealed class PromotePackagesFromFile : CancellableAsyncCommand<PromoteP
         return 0;
     }
 
-    private async Task<Result<IReadOnlySet<PackageDependency>, string>> ParsePackages(string file, CancellationToken cancellationToken)
+    private async Task<Result<IReadOnlySet<PackageDependency>>> ParsePackages(string file, CancellationToken cancellationToken)
     {
         var packages = new HashSet<PackageDependency>();
 
@@ -65,7 +65,7 @@ internal sealed class PromotePackagesFromFile : CancellableAsyncCommand<PromoteP
             var parseIdentityResult = PackageDescriptorParser.ParseLine(line);
             if (parseIdentityResult.IsFailure)
             {
-                return parseIdentityResult.Error;
+                return Result.Failure<IReadOnlySet<PackageDependency>>(parseIdentityResult.Error);
             }
 
             packages.Add(parseIdentityResult.Value);

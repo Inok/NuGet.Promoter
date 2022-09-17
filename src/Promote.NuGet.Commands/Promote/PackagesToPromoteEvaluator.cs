@@ -22,9 +22,9 @@ public class PackagesToPromoteEvaluator
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<IReadOnlySet<PackageIdentity>, string>> ListPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities,
-                                                                                           PromotePackageCommandOptions options,
-                                                                                           CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlySet<PackageIdentity>>> ListPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities,
+                                                                                   PromotePackageCommandOptions options,
+                                                                                   CancellationToken cancellationToken)
     {
         if (identities == null) throw new ArgumentNullException(nameof(identities));
         if (identities.Any(i => !i.HasVersion)) throw new ArgumentException("Version of a package must be specified.", nameof(identities));
@@ -46,21 +46,21 @@ public class PackagesToPromoteEvaluator
                 var processingResult = await ProcessPackage(packageIdentity, options, packagesToPromote, dependencyQueue, cancellationToken);
                 if (processingResult.IsFailure)
                 {
-                    return processingResult.Error;
+                    return Result.Failure<IReadOnlySet<PackageIdentity>>(processingResult.Error);
                 }
             }
 
             // Resolve dependencies known at this point
             while (dependencyQueue.TryDequeue(out var dependency))
             {
-                var (dependencyIdentity, dependencyVersionRange) = dependency;
-
                 cancellationToken.ThrowIfCancellationRequested();
+
+                var (dependencyIdentity, dependencyVersionRange) = dependency;
 
                 var processingResult = await ProcessDependency(dependencyIdentity.Id, dependencyVersionRange, packageQueue, versionFinder, cancellationToken);
                 if (processingResult.IsFailure)
                 {
-                    return processingResult.Error;
+                    return Result.Failure<IReadOnlySet<PackageIdentity>>(processingResult.Error);
                 }
             }
         }
@@ -68,18 +68,18 @@ public class PackagesToPromoteEvaluator
         return packagesToPromote;
     }
 
-    private async Task<UnitResult<string>> ProcessPackage(PackageIdentity packageIdentity,
-                                                          PromotePackageCommandOptions options,
-                                                          ISet<PackageIdentity> packagesToPromote,
-                                                          DistinctQueue<Dependency> dependencyResolutionQueue,
-                                                          CancellationToken cancellationToken)
+    private async Task<Result> ProcessPackage(PackageIdentity packageIdentity,
+                                              PromotePackageCommandOptions options,
+                                              ISet<PackageIdentity> packagesToPromote,
+                                              DistinctQueue<Dependency> dependencyResolutionQueue,
+                                              CancellationToken cancellationToken)
     {
         _logger.LogProcessingPackage(packageIdentity);
 
         var metadataResult = await _sourceRepository.Packages.GetPackageMetadata(packageIdentity, cancellationToken);
         if (metadataResult.IsFailure)
         {
-            return metadataResult.Error;
+            return Result.Failure(metadataResult.Error);
         }
 
         var metadata = metadataResult.Value;
@@ -95,7 +95,7 @@ public class PackagesToPromoteEvaluator
         var packageExistInDestinationResult = await _destinationRepository.Packages.DoesPackageExist(packageIdentity, cancellationToken);
         if (packageExistInDestinationResult.IsFailure)
         {
-            return packageExistInDestinationResult.Error;
+            return Result.Failure(packageExistInDestinationResult.Error);
         }
 
         var packageExistInDestination = packageExistInDestinationResult.Value;
@@ -137,18 +137,18 @@ public class PackagesToPromoteEvaluator
         }
     }
 
-    private async Task<UnitResult<string>> ProcessDependency(string packageId,
-                                                             VersionRange versionRange,
-                                                             DistinctQueue<PackageIdentity> packageResolutionQueue,
-                                                             CachedPackageVersionFinder versionFinder,
-                                                             CancellationToken cancellationToken)
+    private async Task<Result> ProcessDependency(string packageId,
+                                                 VersionRange versionRange,
+                                                 DistinctQueue<PackageIdentity> packageResolutionQueue,
+                                                 CachedPackageVersionFinder versionFinder,
+                                                 CancellationToken cancellationToken)
     {
         _logger.LogProcessingDependency(packageId, versionRange);
 
         var allVersionsOfDepResult = await versionFinder.GetAllVersions(packageId, cancellationToken);
         if (allVersionsOfDepResult.IsFailure)
         {
-            return allVersionsOfDepResult.Error;
+            return Result.Failure(allVersionsOfDepResult.Error);
         }
 
         var bestMatchVersion = versionRange.FindBestMatch(allVersionsOfDepResult.Value);

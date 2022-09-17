@@ -57,7 +57,7 @@ internal class NuGetPackageInfoAccessor : INuGetPackageInfoAccessor
         return Result.Success(meta);
     }
 
-    public async Task<UnitResult<string>> CopyNupkgToStream(PackageIdentity identity, Stream stream, CancellationToken cancellationToken = default)
+    public async Task<Result> CopyNupkgToStream(PackageIdentity identity, Stream stream, CancellationToken cancellationToken = default)
     {
         if (identity == null) throw new ArgumentNullException(nameof(identity));
         if (stream == null) throw new ArgumentNullException(nameof(stream));
@@ -67,13 +67,13 @@ internal class NuGetPackageInfoAccessor : INuGetPackageInfoAccessor
         var result = await findResource.CopyNupkgToStreamAsync(identity.Id, identity.Version, stream, _cacheContext, _logger, cancellationToken);
         if (!result)
         {
-            return UnitResult.Failure<string>($"Failed to download package {identity}");
+            return Result.Failure($"Failed to download package {identity}");
         }
 
-        return UnitResult.Success<string>();
+        return Result.Success();
     }
 
-    public async Task<UnitResult<string>> PushPackage(string filePath, bool skipDuplicate, CancellationToken cancellationToken = default)
+    public async Task<Result> PushPackage(string filePath, bool skipDuplicate, CancellationToken cancellationToken = default)
     {
         var destUpdateResource = await _sourceRepository.GetResourceAsync<PackageUpdateResource>(cancellationToken);
         var apiKey = _repositoryDescriptor.ApiKey;

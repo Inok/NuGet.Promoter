@@ -28,9 +28,9 @@ public class PromotePackageCommand
         _promotePackageToFindMatchingPackagesLoggerAdapter = new PromotePackageToFindMatchingPackagesLoggerAdapter(promotePackageLogger);
     }
 
-    public async Task<UnitResult<string>> Promote(IReadOnlySet<PackageDependency> dependencies,
-                                                  PromotePackageCommandOptions options,
-                                                  CancellationToken cancellationToken = default)
+    public async Task<Result> Promote(IReadOnlySet<PackageDependency> dependencies,
+                                      PromotePackageCommandOptions options,
+                                      CancellationToken cancellationToken = default)
     {
         if (dependencies == null) throw new ArgumentNullException(nameof(dependencies));
         if (options == null) throw new ArgumentNullException(nameof(options));
@@ -42,15 +42,15 @@ public class PromotePackageCommand
                                                                               cancellationToken);
         if (packages.IsFailure)
         {
-            return packages.Error;
+            return Result.Failure(packages.Error);
         }
 
         return await Promote(packages.Value, options, cancellationToken);
     }
 
-    public async Task<UnitResult<string>> Promote(PackageIdentity identity,
-                                                  PromotePackageCommandOptions options,
-                                                  CancellationToken cancellationToken = default)
+    public async Task<Result> Promote(PackageIdentity identity,
+                                      PromotePackageCommandOptions options,
+                                      CancellationToken cancellationToken = default)
     {
         if (identity == null) throw new ArgumentNullException(nameof(identity));
         if (options == null) throw new ArgumentNullException(nameof(options));
@@ -59,7 +59,7 @@ public class PromotePackageCommand
         return await Promote(identities, options, cancellationToken);
     }
 
-    public async Task<UnitResult<string>> Promote(IReadOnlySet<PackageIdentity> identities,
+    public async Task<Result> Promote(IReadOnlySet<PackageIdentity> identities,
                                                   PromotePackageCommandOptions options,
                                                   CancellationToken cancellationToken = default)
     {
@@ -69,24 +69,24 @@ public class PromotePackageCommand
         if (identities.Count == 0)
         {
             _promotePackageLogger.LogNoPackagesToPromote();
-            return UnitResult.Success<string>();
+            return Result.Success();
         }
 
         var resolvedPackagesResult = await ResolvePackagesToPromote(identities, options, cancellationToken);
         if (resolvedPackagesResult.IsFailure)
         {
-            return resolvedPackagesResult.Error;
+            return Result.Failure(resolvedPackagesResult.Error);
         }
 
         if (options.DryRun)
         {
-            return UnitResult.Success<string>();
+            return Result.Success();
         }
 
         return await PromotePackages(resolvedPackagesResult.Value, cancellationToken);
     }
 
-    private async Task<Result<IReadOnlyCollection<PackageIdentity>, string>> ResolvePackagesToPromote(IReadOnlyCollection<PackageIdentity> identities,
+    private async Task<Result<IReadOnlyCollection<PackageIdentity>>> ResolvePackagesToPromote(IReadOnlyCollection<PackageIdentity> identities,
                                                                                                       PromotePackageCommandOptions options,
                                                                                                       CancellationToken cancellationToken)
     {
@@ -95,21 +95,28 @@ public class PromotePackageCommand
         var packagesToPromote = await _packagesToPromoteEvaluator.ListPackagesToPromote(identities, options, cancellationToken);
         if (packagesToPromote.IsFailure)
         {
-            return packagesToPromote.Error;
+            return Result.Failure<IReadOnlyCollection<PackageIdentity>>(packagesToPromote.Error);
         }
 
         var resolvedPackages = packagesToPromote.Value.OrderBy(x => x).ToList();
-        _promotePackageLogger.LogPackagesToPromote(resolvedPackages);
+
+        if (resolvedPackages.Count > 0)
+        {
+            _promotePackageLogger.LogPackagesToPromote(resolvedPackages);
+        }
+        else
+        {
+            _promotePackageLogger.LogNoPackagesToPromote();
+        }
 
         return resolvedPackages;
     }
 
-    private async Task<UnitResult<string>> PromotePackages(IReadOnlyCollection<PackageIdentity> packages, CancellationToken cancellationToken)
+    private async Task<Result> PromotePackages(IReadOnlyCollection<PackageIdentity> packages, CancellationToken cancellationToken)
     {
         if (packages.Count == 0)
         {
-            _promotePackageLogger.LogNoPackagesToPromote();
-            return UnitResult.Success<string>();
+            return Result.Success();
         }
 
         var current = 0;
@@ -131,6 +138,6 @@ public class PromotePackageCommand
 
         _promotePackageLogger.LogPromotedPackagesCount(total);
 
-        return UnitResult.Success<string>();
+        return Result.Success();
     }
 }
