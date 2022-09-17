@@ -8,13 +8,13 @@ namespace Promote.NuGet.Feeds;
 
 public interface INuGetPackageInfoAccessor
 {
-    Task<Result<IReadOnlyCollection<NuGetVersion>, string>> GetAllVersions(string packageId, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyCollection<NuGetVersion>>> GetAllVersions(string packageId, CancellationToken cancellationToken = default);
 
-    Task<Result<IPackageSearchMetadata, string>> GetPackageMetadata(PackageIdentity identity, CancellationToken cancellationToken = default);
+    Task<Result<IPackageSearchMetadata>> GetPackageMetadata(PackageIdentity identity, CancellationToken cancellationToken = default);
 
     Task<UnitResult<string>> CopyNupkgToStream(PackageIdentity identity, Stream stream, CancellationToken cancellationToken = default);
 
     Task<UnitResult<string>> PushPackage(string filePath, bool skipDuplicate, CancellationToken cancellationToken = default);
 
-    Task<Result<bool, string>> DoesPackageExist(PackageIdentity identity, CancellationToken cancellationToken = default);
+    Task<Result<bool>> DoesPackageExist(PackageIdentity identity, CancellationToken cancellationToken = default);
 }

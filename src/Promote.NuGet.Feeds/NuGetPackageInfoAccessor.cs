@@ -25,7 +25,7 @@ internal class NuGetPackageInfoAccessor : INuGetPackageInfoAccessor
         _logger = logger;
     }
 
-    public async Task<Result<IReadOnlyCollection<NuGetVersion>, string>> GetAllVersions(string packageId, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<NuGetVersion>>> GetAllVersions(string packageId, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(packageId)) throw new ArgumentException("Value cannot be null or empty.", nameof(packageId));
 
@@ -36,13 +36,13 @@ internal class NuGetPackageInfoAccessor : INuGetPackageInfoAccessor
 
         if (allVersionsCollection == null || !allVersionsCollection.Any())
         {
-            return $"Package {packageId} not found";
+            return Result.Failure<IReadOnlyCollection<NuGetVersion>>($"Package {packageId} not found");
         }
 
         return allVersionsCollection;
     }
 
-    public async Task<Result<IPackageSearchMetadata, string>> GetPackageMetadata(PackageIdentity identity, CancellationToken cancellationToken)
+    public async Task<Result<IPackageSearchMetadata>> GetPackageMetadata(PackageIdentity identity, CancellationToken cancellationToken)
     {
         if (identity == null) throw new ArgumentNullException(nameof(identity));
 
@@ -51,10 +51,10 @@ internal class NuGetPackageInfoAccessor : INuGetPackageInfoAccessor
         var meta = await packageMetadataResource.GetMetadataAsync(identity, _cacheContext, _logger, cancellationToken);
         if (meta == null)
         {
-            return $"Package {identity} not found";
+            return Result.Failure<IPackageSearchMetadata>($"Package {identity} not found");
         }
 
-        return Result.Success<IPackageSearchMetadata, string>(meta);
+        return Result.Success(meta);
     }
 
     public async Task<UnitResult<string>> CopyNupkgToStream(PackageIdentity identity, Stream stream, CancellationToken cancellationToken = default)
@@ -94,7 +94,7 @@ internal class NuGetPackageInfoAccessor : INuGetPackageInfoAccessor
         return Result.Success();
     }
 
-    public async Task<Result<bool, string>> DoesPackageExist(PackageIdentity identity, CancellationToken cancellationToken = default)
+    public async Task<Result<bool>> DoesPackageExist(PackageIdentity identity, CancellationToken cancellationToken = default)
     {
         if (identity == null) throw new ArgumentNullException(nameof(identity));
         if (!identity.HasVersion) throw new ArgumentException("Identity must have version.", nameof(identity));

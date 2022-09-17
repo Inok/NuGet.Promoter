@@ -16,7 +16,7 @@ public class PackageVersionFinderTests
     public async Task FindLatestVersion_finds_greatest_released_package_version()
     {
         var packageId = "package-id";
-        var versions = Result.Success<IReadOnlyCollection<NuGetVersion>, string>(
+        var versions = Result.Success<IReadOnlyCollection<NuGetVersion>>(
             new NuGetVersion[]
             {
                 new(0, 1, 1),
@@ -39,7 +39,7 @@ public class PackageVersionFinderTests
     public async Task FindLatestVersion_returns_error_when_there_are_no_released_packages()
     {
         var packageId = "package-id";
-        var versions = Result.Success<IReadOnlyCollection<NuGetVersion>, string>(
+        var versions = Result.Success<IReadOnlyCollection<NuGetVersion>>(
             new NuGetVersion[]
             {
                 new(0, 1, 0, "alpha.1"),
@@ -61,7 +61,7 @@ public class PackageVersionFinderTests
     public async Task FindLatestVersion_returns_error_when_package_not_found()
     {
         var packageId = "package-id";
-        var versions = Result.Failure<IReadOnlyCollection<NuGetVersion>, string>("error-text");
+        var versions = Result.Failure<IReadOnlyCollection<NuGetVersion>>("error-text");
 
         var nugetRepository = SetupRepository(packageId, versions);
 
@@ -73,7 +73,7 @@ public class PackageVersionFinderTests
         latestVersion.Error.Should().Be("error-text");
     }
 
-    private static INuGetRepository SetupRepository(string packageId, Result<IReadOnlyCollection<NuGetVersion>, string> versions)
+    private static INuGetRepository SetupRepository(string packageId, Result<IReadOnlyCollection<NuGetVersion>> versions)
     {
         var packageInfoAccessor = new Mock<INuGetPackageInfoAccessor>();
         packageInfoAccessor.Setup(x => x.GetAllVersions(packageId, It.IsAny<CancellationToken>()))
