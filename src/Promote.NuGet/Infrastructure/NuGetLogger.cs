@@ -37,7 +37,7 @@ public class NuGetLogger : LoggerBase
                 AnsiConsole.MarkupLineInterpolated($"[red]Error: {FormatMessage(message)}[/]");
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(null, message.Level, null);
         }
     }
 
