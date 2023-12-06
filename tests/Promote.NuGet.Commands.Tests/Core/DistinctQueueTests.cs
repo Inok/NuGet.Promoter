@@ -95,4 +95,37 @@ public class DistinctQueueTests
         queue.TryDequeue(out result).Should().BeFalse();
         result.Should().BeNull();
     }
+
+    [Test]
+    public void Ctor_keeps_only_unique_initial_items()
+    {
+        var queue = new DistinctQueue<string>(new[] { "str_1", "str_2", "str_1" });
+
+        queue.TryDequeue(out var result).Should().BeTrue();
+        result.Should().Be("str_1");
+
+        queue.TryDequeue(out result).Should().BeTrue();
+        result.Should().Be("str_2");
+
+        queue.TryDequeue(out result).Should().BeFalse();
+        result.Should().BeNull();
+    }
+
+    [Test]
+    public void Cannot_enqueue_items_added_by_ctor()
+    {
+        var queue = new DistinctQueue<string>(new[] { "str_1", "str_2" });
+
+        queue.TryDequeue(out var result).Should().BeTrue();
+        result.Should().Be("str_1");
+
+        queue.Enqueue("str_1").Should().BeFalse();
+        queue.Enqueue("str_2").Should().BeFalse();
+
+        queue.TryDequeue(out result).Should().BeTrue();
+        result.Should().Be("str_2");
+
+        queue.TryDequeue(out result).Should().BeFalse();
+        result.Should().BeNull();
+    }
 }

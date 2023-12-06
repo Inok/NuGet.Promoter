@@ -15,12 +15,14 @@ internal class DistinctQueue<T>
         _enqueuedItems = new HashSet<T>();
     }
 
-    public DistinctQueue(IEnumerable<T> items)
+    public DistinctQueue(IEnumerable<T> items) : this()
     {
         if (items == null) throw new ArgumentNullException(nameof(items));
 
-        _queue = new Queue<T>(items);
-        _enqueuedItems = new HashSet<T>();
+        foreach (var item in items)
+        {
+            Enqueue(item);
+        }
     }
 
     public bool Enqueue(T item)
