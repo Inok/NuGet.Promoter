@@ -1,8 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
-using FluentAssertions;
-using NSubstitute;
 using NuGet.Versioning;
-using NUnit.Framework;
 using Promote.NuGet.Commands.Promote;
 using Promote.NuGet.Feeds;
 

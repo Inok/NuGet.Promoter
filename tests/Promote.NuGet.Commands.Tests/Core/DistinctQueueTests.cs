@@ -1,6 +1,4 @@
-﻿using FluentAssertions;
-using NUnit.Framework;
-using Promote.NuGet.Commands.Core;
+﻿using Promote.NuGet.Commands.Core;
 
 namespace Promote.NuGet.Commands.Tests.Core;
 

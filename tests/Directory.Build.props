@@ -15,4 +15,10 @@
         <PackageReference Include="NUnit" />
         <PackageReference Include="NUnit3TestAdapter" />
     </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="NUnit.Framework"/>
+        <Using Include="NSubstitute"/>
+        <Using Include="FluentAssertions"/>
+    </ItemGroup>
 </Project>
