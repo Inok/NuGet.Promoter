@@ -1,7 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <ItemGroup>
         <ProjectReference Include="..\..\src\Promote.NuGet\Promote.NuGet.csproj" />
     </ItemGroup>
-
 </Project>

@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Promote.NuGet.Commands\Promote.NuGet.Commands.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Promote.NuGet.Commands\Promote.NuGet.Commands.csproj" />
+    </ItemGroup>
 </Project>
