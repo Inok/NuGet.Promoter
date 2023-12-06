@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using FluentAssertions;
-using Moq;
+using NSubstitute;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 using NUnit.Framework;
@@ -75,11 +75,11 @@ public class PackageVersionFinderTests
 
     private static INuGetRepository SetupRepository(string packageId, Result<IReadOnlyCollection<NuGetVersion>> versions)
     {
-        var packageInfoAccessor = new Mock<INuGetPackageInfoAccessor>();
-        packageInfoAccessor.Setup(x => x.GetAllVersions(packageId, It.IsAny<CancellationToken>()))
-                           .ReturnsAsync(versions);
+        var packageInfoAccessor = Substitute.For<INuGetPackageInfoAccessor>();
+        packageInfoAccessor.GetAllVersions(packageId, Arg.Any<CancellationToken>()).Returns(versions);
 
-        var nugetRepository = Mock.Of<INuGetRepository>(x => x.Packages == packageInfoAccessor.Object);
+        var nugetRepository = Substitute.For<INuGetRepository>();
+        nugetRepository.Packages.Returns(packageInfoAccessor);
         return nugetRepository;
     }
 }

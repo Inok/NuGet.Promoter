@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using FluentAssertions;
-using Moq;
+using NSubstitute;
 using NuGet.Versioning;
 using NUnit.Framework;
 using Promote.NuGet.Commands.Promote;
@@ -17,7 +17,8 @@ public class CachedPackageVersionFinderTests
         var packageId = "package.1";
         var expectedVersions = new[] { new NuGetVersion(1, 0, 0), new NuGetVersion(1, 1, 0) };
         var packageInfoAccessor = CreateRepository(packageId, expectedVersions);
-        var repository = Mock.Of<INuGetRepository>(r => r.Packages == packageInfoAccessor.Object);
+        var repository = Substitute.For<INuGetRepository>();
+        repository.Packages.Returns(packageInfoAccessor);
 
         var sut = new CachedPackageVersionFinder(repository);
 
@@ -26,7 +27,7 @@ public class CachedPackageVersionFinderTests
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeSameAs(expectedVersions);
 
-        packageInfoAccessor.Verify(x => x.GetAllVersions("package.1", default), Times.Once);
+        _ = packageInfoAccessor.Received(1).GetAllVersions("package.1", default);
     }
 
     [Test]
@@ -35,7 +36,8 @@ public class CachedPackageVersionFinderTests
         var packageId = "package.1";
         var expectedVersions = new[] { new NuGetVersion(1, 0, 0), new NuGetVersion(1, 1, 0) };
         var packageInfoAccessor = CreateRepository(packageId, expectedVersions);
-        var repository = Mock.Of<INuGetRepository>(r => r.Packages == packageInfoAccessor.Object);
+        var repository = Substitute.For<INuGetRepository>();
+        repository.Packages.Returns(packageInfoAccessor);
 
         var sut = new CachedPackageVersionFinder(repository);
 
@@ -45,7 +47,7 @@ public class CachedPackageVersionFinderTests
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().BeSameAs(expectedVersions);
 
-            packageInfoAccessor.Verify(x => x.GetAllVersions("package.1", default), Times.Once);
+            _ = packageInfoAccessor.Received(1).GetAllVersions("package.1", default);
         }
     }
 
@@ -65,7 +67,8 @@ public class CachedPackageVersionFinderTests
                        };
 
         var packageInfoAccessor = CreateRepository(versions);
-        var repository = Mock.Of<INuGetRepository>(r => r.Packages == packageInfoAccessor.Object);
+        var repository = Substitute.For<INuGetRepository>();
+        repository.Packages.Returns(packageInfoAccessor);
 
         var sut = new CachedPackageVersionFinder(repository);
 
@@ -75,13 +78,13 @@ public class CachedPackageVersionFinderTests
         result1.IsSuccess.Should().BeTrue();
         result1.Value.Should().BeSameAs(package1Versions);
 
-        packageInfoAccessor.Verify(x => x.GetAllVersions("package.1", default), Times.Once);
+        _ = packageInfoAccessor.Received(1).GetAllVersions("package.1", default);
 
         var result2 = await sut.GetAllVersions("package.2", CancellationToken.None);
         result2.IsSuccess.Should().BeTrue();
         result2.Value.Should().BeSameAs(package2Versions);
 
-        packageInfoAccessor.Verify(x => x.GetAllVersions("package.2", default), Times.Once);
+        _ = packageInfoAccessor.Received(1).GetAllVersions("package.2", default);
 
         // Now get them from cache
 
@@ -89,13 +92,13 @@ public class CachedPackageVersionFinderTests
         result1.IsSuccess.Should().BeTrue();
         result1.Value.Should().BeSameAs(package1Versions);
 
-        packageInfoAccessor.Verify(x => x.GetAllVersions("package.1", default), Times.Once);
+        _ = packageInfoAccessor.Received(1).GetAllVersions("package.1", default);
 
         result2 = await sut.GetAllVersions("package.2", CancellationToken.None);
         result2.IsSuccess.Should().BeTrue();
         result2.Value.Should().BeSameAs(package2Versions);
 
-        packageInfoAccessor.Verify(x => x.GetAllVersions("package.2", default), Times.Once);
+        _ = packageInfoAccessor.Received(1).GetAllVersions("package.2", default);
     }
 
     [Test]
@@ -104,7 +107,8 @@ public class CachedPackageVersionFinderTests
         var packageId = "package.1";
         var packageVersions = new[] { new NuGetVersion(1, 0, 0), new NuGetVersion(1, 1, 0) };
         var packageInfoAccessor = CreateRepository(packageId, packageVersions);
-        var repository = Mock.Of<INuGetRepository>(r => r.Packages == packageInfoAccessor.Object);
+        var repository = Substitute.For<INuGetRepository>();
+        repository.Packages.Returns(packageInfoAccessor);
 
         var sut = new CachedPackageVersionFinder(repository);
 
@@ -120,8 +124,8 @@ public class CachedPackageVersionFinderTests
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeSameAs(packageVersions);
 
-        packageInfoAccessor.Verify(x => x.GetAllVersions("package.1", default), Times.Once);
-        packageInfoAccessor.VerifyNoOtherCalls();
+        _ = packageInfoAccessor.Received(1).GetAllVersions("package.1", default);
+        _ = packageInfoAccessor.ReceivedWithAnyArgs(1).GetAllVersions(default!, default);
     }
 
     [Test]
@@ -130,7 +134,8 @@ public class CachedPackageVersionFinderTests
         var packageId = "package.1";
         var failure = Result.Failure<IReadOnlyCollection<NuGetVersion>>("Ooops");
         var packageInfoAccessor = CreateRepository(packageId, failure);
-        var repository = Mock.Of<INuGetRepository>(r => r.Packages == packageInfoAccessor.Object);
+        var repository = Substitute.For<INuGetRepository>();
+        repository.Packages.Returns(packageInfoAccessor);
 
         var sut = new CachedPackageVersionFinder(repository);
 
@@ -139,7 +144,7 @@ public class CachedPackageVersionFinderTests
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be("Ooops");
 
-        packageInfoAccessor.Verify(x => x.GetAllVersions("package.1", default), Times.Once);
+        _ = packageInfoAccessor.Received(1).GetAllVersions("package.1", default);
     }
 
     [Test]
@@ -148,24 +153,25 @@ public class CachedPackageVersionFinderTests
         var packageId = "package.1";
         var failure = Result.Failure<IReadOnlyCollection<NuGetVersion>>("Ooops");
         var packageInfoAccessor = CreateRepository(packageId, failure);
-        var repository = Mock.Of<INuGetRepository>(r => r.Packages == packageInfoAccessor.Object);
+        var repository = Substitute.For<INuGetRepository>();
+        repository.Packages.Returns(packageInfoAccessor);
 
         var sut = new CachedPackageVersionFinder(repository);
 
         var firstResult = await sut.GetAllVersions("package.1", CancellationToken.None);
         firstResult.IsFailure.Should().BeTrue();
         firstResult.Error.Should().Be("Ooops");
-        packageInfoAccessor.Verify(x => x.GetAllVersions("package.1", default), Times.Exactly(1));
+        _ = packageInfoAccessor.Received(1).GetAllVersions("package.1", default);
 
         var secondResult = await sut.GetAllVersions("package.1", CancellationToken.None);
         secondResult.IsFailure.Should().BeTrue();
         secondResult.Error.Should().Be("Ooops");
-        packageInfoAccessor.Verify(x => x.GetAllVersions("package.1", default), Times.Exactly(2));
+        _ = packageInfoAccessor.Received(2).GetAllVersions("package.1", default);
 
         firstResult.Should().NotBeSameAs(secondResult);
     }
 
-    private static Mock<INuGetPackageInfoAccessor> CreateRepository(string packageId, Result<IReadOnlyCollection<NuGetVersion>> result)
+    private static INuGetPackageInfoAccessor CreateRepository(string packageId, Result<IReadOnlyCollection<NuGetVersion>> result)
     {
         var packages = new Dictionary<string, Result<IReadOnlyCollection<NuGetVersion>>>
                        {
@@ -174,14 +180,13 @@ public class CachedPackageVersionFinderTests
         return CreateRepository(packages);
     }
 
-    private static Mock<INuGetPackageInfoAccessor> CreateRepository(IReadOnlyDictionary<string, Result<IReadOnlyCollection<NuGetVersion>>> versions)
+    private static INuGetPackageInfoAccessor CreateRepository(IReadOnlyDictionary<string, Result<IReadOnlyCollection<NuGetVersion>>> versions)
     {
-        var packageInfoAccessor = new Mock<INuGetPackageInfoAccessor>(MockBehavior.Strict);
+        var packageInfoAccessor = Substitute.For<INuGetPackageInfoAccessor>();
 
         foreach (var pair in versions)
         {
-            packageInfoAccessor.Setup(x => x.GetAllVersions(pair.Key, It.IsAny<CancellationToken>()))
-                               .ReturnsAsync(pair.Value);
+            packageInfoAccessor.GetAllVersions(pair.Key, Arg.Any<CancellationToken>()).Returns(pair.Value);
         }
 
         return packageInfoAccessor;
