@@ -2,7 +2,7 @@
     <ItemGroup>
         <PackageReference Include="CSharpFunctionalExtensions" Version="2.34.0" />
         <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
-        <PackageReference Include="NuGet.Protocol" Version="6.3.0" />
+        <PackageReference Include="NuGet.Protocol" Version="6.8.0" />
     </ItemGroup>
 
 </Project>

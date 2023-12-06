@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using NuGet.Versioning;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -17,6 +18,7 @@ internal sealed class PromoteSinglePackageSettings : PromoteSettings
     [CommandOption("-v|--version")]
     public string? Version { get; init; }
 
+    [MemberNotNullWhen(false, nameof(Version))]
     public bool IsLatestVersion => string.IsNullOrEmpty(Version) || string.Equals(Version, EXPLICIT_LATEST_VERSION_STRING, StringComparison.OrdinalIgnoreCase);
 
     public override ValidationResult Validate()

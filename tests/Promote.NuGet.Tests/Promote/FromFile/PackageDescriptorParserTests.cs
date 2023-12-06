@@ -10,7 +10,7 @@ namespace Promote.NuGet.Tests.Promote.FromFile;
 public class PackageDescriptorParserTests
 {
     [TestCase("PackageName 1.2.3", "PackageName", "[1.2.3]")]
-    public void Parse_space_separated_package_descriptor(string input, string id, string? versionRange)
+    public void Parse_space_separated_package_descriptor(string input, string id, string versionRange)
     {
         var expected = new PackageDependency(id, VersionRange.Parse(versionRange));
 
