@@ -1,11 +1,14 @@
 # Promote.NuGet
+
+[![Nuget](https://img.shields.io/nuget/v/Promote.NuGet)](https://www.nuget.org/packages/Promote.NuGet)
+
 A tool to promote NuGet packages and their dependencies from one feed to another.
 
 # Usage
 
 ## Promote
 
-The `promote` command allows to promote a set of packages from one feed to another.
+The `promote` command promotes a set of packages from one feed to another.
 
 ### Promote single package
 
