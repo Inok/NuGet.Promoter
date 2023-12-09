@@ -342,3 +342,6 @@ healthchecksdb
 
 # Test results files
 test-results/
+
+# Custom
+.env
