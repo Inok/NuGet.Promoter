@@ -45,7 +45,7 @@ promote-nuget promote package Newtonsoft.Json --version 13.0.1 --destination '<T
 
 ### Promote packages listed in a file
 
-The `promote from-file` command promotes packages listed in a file from one feed to another. 
+The `promote from-file` command promotes packages listed in a file from one feed to another.
 In a file, you can specify either the exact version to promote (e.g. `13.0.1`), or a version range (e.g. `[12.0.0,)`).
 
 ```
@@ -137,3 +137,8 @@ COMMANDS:
     from-file <file>    Promotes packages listed in the specified file
 
 ```
+
+# Third-party components
+
+- This application uses [NuGet.Client](https://github.com/NuGet/NuGet.Client) libraries.
+  These libraries are available under the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0).
