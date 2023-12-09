@@ -2,7 +2,7 @@
 
 namespace Promote.NuGet.Feeds.Tests;
 
-public class TestConsoleLogger : LoggerBase
+public sealed class TestConsoleLogger : LoggerBase
 {
     public static TestConsoleLogger Instance { get; } = new();
 
