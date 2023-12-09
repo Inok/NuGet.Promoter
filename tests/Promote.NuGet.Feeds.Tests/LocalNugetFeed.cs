@@ -6,6 +6,8 @@ namespace Promote.NuGet.Feeds.Tests;
 
 public sealed class LocalNugetFeed : IAsyncDisposable
 {
+    private static readonly SemaphoreSlim _semaphore = new(1, 1);
+
     private readonly IContainer _container;
 
     public string FeedUrl { get; }
@@ -36,7 +38,15 @@ public sealed class LocalNugetFeed : IAsyncDisposable
                                                   r => r.ForPort(bagetterPort).ForPath("/").ForStatusCode(HttpStatusCode.OK)))
                         .Build();
 
-        await container.StartAsync();
+        await _semaphore.WaitAsync();
+        try
+        {
+            await container.StartAsync();
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
 
         var feedUrl = new UriBuilder("http", container.Hostname, container.GetMappedPublicPort(bagetterPort), "/v3/index.json").Uri.ToString();
 

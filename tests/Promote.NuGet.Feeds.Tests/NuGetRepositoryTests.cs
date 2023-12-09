@@ -7,7 +7,7 @@ using NuGet.Versioning;
 
 namespace Promote.NuGet.Feeds.Tests;
 
-[TestFixture]
+[TestFixture, Parallelizable(ParallelScope.All)]
 public class NuGetRepositoryTests
 {
     private static readonly NuGetRepositoryDescriptor _nugetOrgRepositoryDescriptor = new("https://api.nuget.org/v3/index.json", apiKey: null);
@@ -17,7 +17,7 @@ public class NuGetRepositoryTests
     {
         await using var feed = await LocalNugetFeed.Create();
 
-        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, new NullSourceCacheContext(), TestConsoleLogger.Instance);
+        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestConsoleLogger.Instance);
 
         var packageIdentity = new PackageIdentity("Newtonsoft.Json", new NuGetVersion(13, 0, 3));
 
@@ -69,7 +69,7 @@ public class NuGetRepositoryTests
     {
         await using var feed = await LocalNugetFeed.Create();
 
-        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, new NullSourceCacheContext(), TestConsoleLogger.Instance);
+        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestConsoleLogger.Instance);
 
         var packageIdentity = new PackageIdentity("System.Not.Existing.Package.Name", new NuGetVersion(1, 2, 3));
 
@@ -86,7 +86,7 @@ public class NuGetRepositoryTests
     {
         await using var feed = await LocalNugetFeed.Create();
 
-        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, new NullSourceCacheContext(), TestConsoleLogger.Instance);
+        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestConsoleLogger.Instance);
 
         var packageIdentity = new PackageIdentity(packageId, NuGetVersion.Parse(packageVersion));
 
@@ -103,8 +103,8 @@ public class NuGetRepositoryTests
 
         var destinationFeedDescriptor = new NuGetRepositoryDescriptor(feed.FeedUrl, feed.ApiKey);
 
-        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, new NullSourceCacheContext(), TestConsoleLogger.Instance);
-        var destinationRepo = new NuGetRepository(destinationFeedDescriptor, new NullSourceCacheContext(), TestConsoleLogger.Instance);
+        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestConsoleLogger.Instance);
+        var destinationRepo = new NuGetRepository(destinationFeedDescriptor, NullSourceCacheContext.Instance, TestConsoleLogger.Instance);
 
         var packageIdentity = new PackageIdentity("System.Text.Json", new NuGetVersion(8, 0, 0));
 
