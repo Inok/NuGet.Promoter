@@ -12,7 +12,7 @@ public sealed class TestConsoleLogger : LoggerBase
 
     public override void Log(ILogMessage message)
     {
-        Console.WriteLine($"{message.Level:G}: {message.FormatWithCode()}");
+        TestContext.WriteLine($"{message.Level:G}: {message.FormatWithCode()}");
     }
 
     public override Task LogAsync(ILogMessage message)
