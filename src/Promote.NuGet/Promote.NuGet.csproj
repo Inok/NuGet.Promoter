@@ -6,6 +6,16 @@
         <ToolCommandName>promote-nuget</ToolCommandName>
     </PropertyGroup>
 
+    <!-- Package Metadata -->
+    <PropertyGroup>
+        <Description>A tool to promote NuGet packages and their dependencies from one feed to another.</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/Inok/NuGet.Promoter</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Inok/NuGet.Promoter</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <Authors>Pavel Borisov</Authors>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="Humanizer.Core"/>
         <PackageReference Include="JetBrains.Annotations"/>
