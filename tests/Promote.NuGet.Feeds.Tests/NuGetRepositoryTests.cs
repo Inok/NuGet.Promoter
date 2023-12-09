@@ -4,7 +4,6 @@ using DotNet.Testcontainers.Builders;
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using Promote.NuGet.Infrastructure;
 
 namespace Promote.NuGet.Feeds.Tests;
 
@@ -26,13 +25,13 @@ public class NuGetRepositoryTests
 
         await container.StartAsync();
 
-        var nugetOrgDescriptor = new NuGetRepositoryDescriptor(NuGetFeedRegistry.NUGET_ORG_V3_URL, apiKey: null);
+        var nugetOrgDescriptor = new NuGetRepositoryDescriptor("https://api.nuget.org/v3/index.json", apiKey: null);
 
         var destinationUri = new UriBuilder("http", container.Hostname, container.GetMappedPublicPort(8080), "/v3/index.json").Uri.ToString();
         var destinationFeedDescriptor = new NuGetRepositoryDescriptor(destinationUri, apiKey);
 
-        var sourceRepo = new NuGetRepository(nugetOrgDescriptor, new NullSourceCacheContext(), new NuGetLogger());
-        var destinationRepo = new NuGetRepository(destinationFeedDescriptor, new NullSourceCacheContext(), new NuGetLogger());
+        var sourceRepo = new NuGetRepository(nugetOrgDescriptor, new NullSourceCacheContext(), TestConsoleLogger.Instance);
+        var destinationRepo = new NuGetRepository(destinationFeedDescriptor, new NullSourceCacheContext(), TestConsoleLogger.Instance);
 
         var packageIdentity = new PackageIdentity("System.Text.Json", new NuGetVersion(8, 0, 0));
 
