@@ -51,8 +51,8 @@ partial class Build : NukeBuild
                                           .Before(Restore)
                                           .Executes(() =>
                                                     {
-                                                        EnsureCleanDirectory(ArtifactsDirectory);
-                                                        EnsureCleanDirectory(TestResultsDirectory);
+                                                        ArtifactsDirectory.CreateOrCleanDirectory();
+                                                        TestResultsDirectory.CreateOrCleanDirectory();
                                                     });
 
     Target CleanSolution => _ => _
