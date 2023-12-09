@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Promote.NuGet.Feeds\Promote.NuGet.Feeds.csproj" />
+        <ProjectReference Include="..\..\src\Promote.NuGet\Promote.NuGet.csproj" />
+    </ItemGroup>
+</Project>
