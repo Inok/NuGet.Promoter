@@ -4,6 +4,7 @@ using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using Promote.NuGet.TestInfrastructure;
 
 namespace Promote.NuGet.Feeds.Tests;
 
@@ -17,7 +18,7 @@ public class NuGetRepositoryTests
     {
         await using var feed = await LocalNugetFeed.Create();
 
-        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestConsoleLogger.Instance);
+        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestNuGetLogger.Instance);
 
         var packageMetadataResult = await sourceRepo.Packages.GetAllVersions("System.Text.Json");
 
@@ -49,7 +50,7 @@ public class NuGetRepositoryTests
     {
         await using var feed = await LocalNugetFeed.Create();
 
-        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestConsoleLogger.Instance);
+        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestNuGetLogger.Instance);
 
         var packageIdentity = new PackageIdentity("Newtonsoft.Json", new NuGetVersion(13, 0, 3));
 
@@ -97,11 +98,29 @@ public class NuGetRepositoryTests
     }
 
     [Test]
+    public async Task GetPackageMetadata_returns_package_metadata_with_proper_IsListed_value_for_unlisted_packages()
+    {
+        await using var feed = await LocalNugetFeed.Create();
+
+        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestNuGetLogger.Instance);
+
+        var packageIdentity = new PackageIdentity("System.Text.Json", new NuGetVersion(1, 0, 0));
+
+        var packageMetadataResult = await sourceRepo.Packages.GetPackageMetadata(packageIdentity);
+
+        packageMetadataResult.IsSuccess.Should().BeTrue();
+
+        var metadata = packageMetadataResult.Value;
+        metadata.Identity.Should().Be(packageIdentity);
+        metadata.IsListed.Should().BeFalse();
+    }
+
+    [Test]
     public async Task GetPackageMetadata_returns_failure_if_package_does_not_exist()
     {
         await using var feed = await LocalNugetFeed.Create();
 
-        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestConsoleLogger.Instance);
+        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestNuGetLogger.Instance);
 
         var packageIdentity = new PackageIdentity("System.Not.Existing.Package.Name", new NuGetVersion(1, 2, 3));
 
@@ -118,7 +137,7 @@ public class NuGetRepositoryTests
     {
         await using var feed = await LocalNugetFeed.Create();
 
-        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestConsoleLogger.Instance);
+        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestNuGetLogger.Instance);
 
         var packageIdentity = new PackageIdentity(packageId, NuGetVersion.Parse(packageVersion));
 
@@ -135,8 +154,8 @@ public class NuGetRepositoryTests
 
         var destinationFeedDescriptor = new NuGetRepositoryDescriptor(feed.FeedUrl, feed.ApiKey);
 
-        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestConsoleLogger.Instance);
-        var destinationRepo = new NuGetRepository(destinationFeedDescriptor, NullSourceCacheContext.Instance, TestConsoleLogger.Instance);
+        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestNuGetLogger.Instance);
+        var destinationRepo = new NuGetRepository(destinationFeedDescriptor, NullSourceCacheContext.Instance, TestNuGetLogger.Instance);
 
         var packageIdentity = new PackageIdentity("System.Text.Json", new NuGetVersion(8, 0, 0));
 
