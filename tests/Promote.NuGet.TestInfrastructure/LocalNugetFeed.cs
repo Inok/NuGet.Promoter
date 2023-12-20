@@ -2,7 +2,7 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 
-namespace Promote.NuGet.Feeds.Tests;
+namespace Promote.NuGet.TestInfrastructure;
 
 public sealed class LocalNugetFeed : IAsyncDisposable
 {

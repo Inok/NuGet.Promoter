@@ -110,6 +110,7 @@ partial class Build : NukeBuild
                                                           .EnableNoBuild()
                                                           .EnableNoRestore()
                                                           .SetResultsDirectory(TestResultsDirectory)
+                                                          .SetDataCollector("XPlat Code Coverage")
                                                           .CombineWith(projects,
                                                                        (cs, v) =>
                                                                        {
