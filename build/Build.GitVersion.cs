@@ -14,8 +14,7 @@ public partial class Build
                                  .SetProcessWorkingDirectory(RootDirectory)
                                  .SetFramework("net6.0")
                                  .EnableNoFetch()
-                                 .EnableNoCache()
-                                 .SetProcessArgumentConfigurator(a => a.Add("/nonormalize"));
+                                 .EnableNoCache();
 
         GitVersion = GitVersionTasks.GitVersion(gitVersionSettings).Result;
     }
