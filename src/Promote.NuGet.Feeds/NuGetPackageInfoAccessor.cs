@@ -75,6 +75,8 @@ internal class NuGetPackageInfoAccessor : INuGetPackageInfoAccessor
 
     public async Task<Result> PushPackage(string filePath, bool skipDuplicate, CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrEmpty(filePath)) throw new ArgumentException("Value cannot be null or empty.", nameof(filePath));
+
         var destUpdateResource = await _sourceRepository.GetResourceAsync<PackageUpdateResource>(cancellationToken);
         var apiKey = _repositoryDescriptor.ApiKey;
 

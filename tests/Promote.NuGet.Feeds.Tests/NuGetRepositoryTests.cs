@@ -13,6 +13,38 @@ public class NuGetRepositoryTests
     private static readonly NuGetRepositoryDescriptor _nugetOrgRepositoryDescriptor = new("https://api.nuget.org/v3/index.json", apiKey: null);
 
     [Test]
+    public async Task GetAllVersions_returns_all_versions_of_a_package()
+    {
+        await using var feed = await LocalNugetFeed.Create();
+
+        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestConsoleLogger.Instance);
+
+        var packageMetadataResult = await sourceRepo.Packages.GetAllVersions("System.Text.Json");
+
+        packageMetadataResult.IsSuccess.Should().BeTrue();
+
+        var actualVersions = packageMetadataResult.Value;
+
+        // New packages appear in the feed, so we can't check equivalency here.
+        actualVersions.Should().HaveCountGreaterThanOrEqualTo(113);
+        actualVersions.Should().Contain(new NuGetVersion[]
+                                        {
+                                            new(8, 0, 0),
+                                            new(8, 0, 0, "rc.2.23479.6"),
+                                            new(8, 0, 0, "rc.1.23419.4"),
+                                            new(8, 0, 0, "preview.7.23375.6"),
+                                            new(7, 0, 4),
+                                            new(7, 0, 3),
+                                            new(7, 0, 2),
+                                            new(7, 0, 1),
+                                            new(7, 0, 0),
+                                            new(5, 0, 0), // Marked as deprecated
+                                            new(2, 0, 0, 11), // Unlisted, with revision
+                                            new(1, 0, 0), // Unlisted
+                                        });
+    }
+
+    [Test]
     public async Task GetPackageMetadata_returns_package_metadata()
     {
         await using var feed = await LocalNugetFeed.Create();
