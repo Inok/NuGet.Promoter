@@ -96,6 +96,10 @@ public static class PromoteNugetProcessRunner
                                    ArgumentList = { "Promote.NuGet.dll" },
                                    RedirectStandardOutput = true,
                                    RedirectStandardError = true,
+                                   Environment =
+                                   {
+                                       ["NO_COLOR"] = "1"
+                                   }
                                };
 
         foreach (var argument in arguments)
