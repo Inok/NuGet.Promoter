@@ -109,14 +109,17 @@ partial class Build : NukeBuild
                                                           .SetConfiguration(Configuration)
                                                           .EnableNoBuild()
                                                           .EnableNoRestore()
-                                                          .SetResultsDirectory(TestResultsDirectory)
                                                           .SetDataCollector("XPlat Code Coverage")
                                                           .CombineWith(projects,
                                                                        (cs, v) =>
                                                                        {
-                                                                           var logFilePath = $"test-result-{v.NameWithoutExtension}-{Guid.NewGuid():N}.html";
+                                                                           var logFileName = $"test-result-{Guid.NewGuid():N}";
                                                                            return cs.SetProjectFile(v)
-                                                                                    .SetLoggers($"html;logfilename={logFilePath}");
+                                                                                    .SetResultsDirectory(TestResultsDirectory / v.NameWithoutExtension)
+                                                                                    .SetLoggers(
+                                                                                        $"html;LogFileName={logFileName}.html",
+                                                                                        $"trx;LogFileName={logFileName}.trx"
+                                                                                    );
                                                                        }),
                                                      degreeOfParallelism: Environment.ProcessorCount,
                                                      completeOnFailure: true
