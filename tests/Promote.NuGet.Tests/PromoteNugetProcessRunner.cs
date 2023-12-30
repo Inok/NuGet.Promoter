@@ -98,7 +98,7 @@ public static class PromoteNugetProcessRunner
                                    RedirectStandardError = true,
                                    Environment =
                                    {
-                                       ["NO_COLOR"] = "1"
+                                       ["__NO_ANSI_CONTROL_CODES"] = "1"
                                    }
                                };
 

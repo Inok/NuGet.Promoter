@@ -1,5 +1,4 @@
-﻿using System;
-using Promote.NuGet.Promote.FromFile;
+﻿using Promote.NuGet.Promote.FromFile;
 using Promote.NuGet.Promote.SinglePackage;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -10,6 +9,11 @@ public static class Program
 {
     private static async Task<int> Main(string[] args)
     {
+        if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("__NO_ANSI_CONTROL_CODES")))
+        {
+            AnsiConsole.Profile.Capabilities.Ansi = false;
+        }
+
         var app = new CommandApp();
 
         app.Configure(configurator =>
