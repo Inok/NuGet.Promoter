@@ -42,6 +42,14 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./test-results/
 
+      - name: Report tests
+        uses: dorny/test-reporter@v1
+        if: ${{ always() }}
+        with:
+          name: .NET Tests
+          path: ./test-results/**/*.trx
+          reporter: dotnet-trx
+
       - name: Upload packages
         uses: actions/upload-artifact@v3
         with:
