@@ -24,7 +24,7 @@ public static class Program
                               {
                                   x.SetDescription("Promote packages and its dependencies from one feed to another.");
 
-                                  x.AddCommand<PromoteSinglePackage>("package")
+                                  x.AddCommand<PromoteSinglePackageCommand>("package")
                                    .WithDescription("Promotes the specified package and its dependencies from one feed to another.");
 
                                   x.AddCommand<PromotePackagesFromFile>("from-file")

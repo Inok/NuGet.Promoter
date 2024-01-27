@@ -3,10 +3,10 @@ using NuGet.Versioning;
 using Promote.NuGet.Feeds;
 using Promote.NuGet.TestInfrastructure;
 
-namespace Promote.NuGet.Tests;
+namespace Promote.NuGet.Tests.Promote.SinglePackage;
 
 [TestFixture]
-public class PromoteSinglePackageTests
+public class PromoteSinglePackageCommandIntegrationTests
 {
     [Test, CancelAfter(30_000)]
     public async Task Promotes_a_package_with_its_dependencies_to_destination_feed()
