@@ -42,15 +42,6 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./test-results/
 
-      - name: Report tests
-        uses: dorny/test-reporter@v1
-        if: ${{ always() }}
-        with:
-          name: .NET Tests
-          path: ./test-results/**/*.trx
-          reporter: dotnet-trx
-          fail-on-error: false
-
       - name: Upload packages
         uses: actions/upload-artifact@v3
         with:
@@ -59,6 +50,23 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  test-report:
+    name: Report tests
+    runs-on: ubuntu-latest
+    needs: [ build ]
+    if: ${{ always() }}
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+    steps:
+      - name: Report tests
+        uses: dorny/test-reporter@v1
+        if: ${{ always() }}
+        with:
+          artifact: test-results
+          path: '**/*.trx'
+          reporter: dotnet-trx
 
   publish-to-nuget-org:
     name: Publish to NuGet.org
