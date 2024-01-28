@@ -1,8 +1,8 @@
 ﻿using NuGet.Versioning;
 using Promote.NuGet.Commands.Core;
-using Promote.NuGet.Promote.FromFile;
+using Promote.NuGet.Promote.List;
 
-namespace Promote.NuGet.Tests.Promote.FromFile;
+namespace Promote.NuGet.Tests.Promote.List;
 
 [TestFixture]
 public class PackageDescriptorParserTests

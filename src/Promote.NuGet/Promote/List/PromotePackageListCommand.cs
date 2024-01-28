@@ -10,12 +10,12 @@ using Promote.NuGet.Infrastructure;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-namespace Promote.NuGet.Promote.FromFile;
+namespace Promote.NuGet.Promote.List;
 
 [PublicAPI]
-internal sealed class PromotePackagesFromFileCommand : CancellableAsyncCommand<PromotePackagesFromFileSettings>
+internal sealed class PromotePackageListCommand : CancellableAsyncCommand<PromotePackageListSettings>
 {
-    public override async Task<int> ExecuteAsync(CommandContext context, PromotePackagesFromFileSettings promoteSettings, CancellationToken cancellationToken)
+    public override async Task<int> ExecuteAsync(CommandContext context, PromotePackageListSettings promoteSettings, CancellationToken cancellationToken)
     {
         using var cacheContext = new SourceCacheContext
                                  {

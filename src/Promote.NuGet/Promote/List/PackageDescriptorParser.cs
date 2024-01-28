@@ -3,7 +3,7 @@ using CSharpFunctionalExtensions;
 using NuGet.Versioning;
 using Promote.NuGet.Commands.Core;
 
-namespace Promote.NuGet.Promote.FromFile;
+namespace Promote.NuGet.Promote.List;
 
 internal static class PackageDescriptorParser
 {

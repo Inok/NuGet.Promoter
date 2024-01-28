@@ -1,4 +1,4 @@
-﻿using Promote.NuGet.Promote.FromFile;
+﻿using Promote.NuGet.Promote.List;
 using Promote.NuGet.Promote.SinglePackage;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -19,13 +19,14 @@ public static class Program
                               "promote",
                               x =>
                               {
-                                  x.SetDescription("Promote packages and its dependencies from one feed to another.");
+                                  x.SetDescription("Promote packages and their dependencies from one feed to another.");
 
                                   x.AddCommand<PromoteSinglePackageCommand>("package")
                                    .WithDescription("Promotes the specified package and its dependencies from one feed to another.");
 
-                                  x.AddCommand<PromotePackagesFromFileCommand>("from-file")
-                                   .WithDescription("Promotes packages listed in the specified file.");
+                                  x.AddCommand<PromotePackageListCommand>("list")
+                                   .WithAlias("from-file")
+                                   .WithDescription("Promotes packages listed in the specified file, and their dependencies.");
                               });
 
                           configurator.SetExceptionHandler(ex =>
