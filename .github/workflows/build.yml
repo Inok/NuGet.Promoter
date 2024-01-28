@@ -64,6 +64,7 @@ jobs:
         uses: dorny/test-reporter@v1
         if: ${{ always() }}
         with:
+          name: .NET Tests
           artifact: test-results
           path: '**/*.trx'
           reporter: dotnet-trx
