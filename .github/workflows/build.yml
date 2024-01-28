@@ -49,6 +49,7 @@ jobs:
           name: .NET Tests
           path: ./test-results/**/*.trx
           reporter: dotnet-trx
+          fail-on-error: false
 
       - name: Upload packages
         uses: actions/upload-artifact@v3

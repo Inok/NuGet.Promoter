@@ -1,5 +1,4 @@
-﻿using System;
-using Promote.NuGet.Promote.FromFile;
+﻿using Promote.NuGet.Promote.FromFile;
 using Promote.NuGet.Promote.SinglePackage;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -10,6 +9,8 @@ public static class Program
 {
     private static async Task<int> Main(string[] args)
     {
+        SetupConsole();
+
         var app = new CommandApp();
 
         app.Configure(configurator =>
@@ -20,10 +21,10 @@ public static class Program
                               {
                                   x.SetDescription("Promote packages and its dependencies from one feed to another.");
 
-                                  x.AddCommand<PromoteSinglePackage>("package")
+                                  x.AddCommand<PromoteSinglePackageCommand>("package")
                                    .WithDescription("Promotes the specified package and its dependencies from one feed to another.");
 
-                                  x.AddCommand<PromotePackagesFromFile>("from-file")
+                                  x.AddCommand<PromotePackagesFromFileCommand>("from-file")
                                    .WithDescription("Promotes packages listed in the specified file.");
                               });
 
@@ -43,5 +44,20 @@ public static class Program
                       });
 
         return await app.RunAsync(args);
+    }
+
+    private static void SetupConsole()
+    {
+        var noAnsiCodesEnvVar = Environment.GetEnvironmentVariable("__NO_ANSI_CONTROL_CODES");
+        if (!string.IsNullOrEmpty(noAnsiCodesEnvVar))
+        {
+            AnsiConsole.Profile.Capabilities.Ansi = false;
+        }
+
+        var consoleWidthEnvVar = Environment.GetEnvironmentVariable("__CONSOLE_WIDTH");
+        if (!string.IsNullOrEmpty(consoleWidthEnvVar) && int.TryParse(consoleWidthEnvVar, out var width) && width > 0)
+        {
+            AnsiConsole.Profile.Width = width;
+        }
     }
 }

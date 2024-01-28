@@ -1,23 +1,22 @@
 ﻿using System;
+using System.IO;
 using CSharpFunctionalExtensions;
 using JetBrains.Annotations;
 using NuGet.Common;
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
-using NuGet.Versioning;
-using Promote.NuGet.Commands.Core;
 using Promote.NuGet.Commands.Promote;
 using Promote.NuGet.Feeds;
 using Promote.NuGet.Infrastructure;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-namespace Promote.NuGet.Promote.SinglePackage;
+namespace Promote.NuGet.Promote.FromFile;
 
 [PublicAPI]
-internal sealed class PromoteSinglePackage : CancellableAsyncCommand<PromoteSinglePackageSettings>
+internal sealed class PromotePackagesFromFileCommand : CancellableAsyncCommand<PromotePackagesFromFileSettings>
 {
-    public override async Task<int> ExecuteAsync(CommandContext context, PromoteSinglePackageSettings promoteSettings, CancellationToken cancellationToken)
+    public override async Task<int> ExecuteAsync(CommandContext context, PromotePackagesFromFileSettings promoteSettings, CancellationToken cancellationToken)
     {
         using var cacheContext = new SourceCacheContext
                                  {
@@ -32,10 +31,10 @@ internal sealed class PromoteSinglePackage : CancellableAsyncCommand<PromoteSing
         var sourceRepository = new NuGetRepository(sourceDescriptor, cacheContext, nuGetLogger);
         var destinationRepository = new NuGetRepository(destinationDescriptor, cacheContext, nuGetLogger);
 
-        var identityResult = await CreatePackageIdentity(sourceRepository, promoteSettings, cancellationToken);
-        if (identityResult.IsFailure)
+        var identitiesResult = await ParsePackages(promoteSettings.File!, cancellationToken);
+        if (identitiesResult.IsFailure)
         {
-            AnsiConsole.WriteLine(identityResult.Error);
+            AnsiConsole.WriteLine(identitiesResult.Error);
             return -1;
         }
 
@@ -43,7 +42,7 @@ internal sealed class PromoteSinglePackage : CancellableAsyncCommand<PromoteSing
 
         var options = new PromotePackageCommandOptions(promoteSettings.DryRun, promoteSettings.AlwaysResolveDeps, promoteSettings.ForcePush);
 
-        var promotionResult = await promoter.Promote(identityResult.Value, options, cancellationToken);
+        var promotionResult = await promoter.Promote(identitiesResult.Value, options, cancellationToken);
         if (promotionResult.IsFailure)
         {
             AnsiConsole.WriteLine(promotionResult.Error);
@@ -53,17 +52,25 @@ internal sealed class PromoteSinglePackage : CancellableAsyncCommand<PromoteSing
         return 0;
     }
 
-    private async Task<Result<PackageIdentity>> CreatePackageIdentity(
-        INuGetRepository repository,
-        PromoteSinglePackageSettings promoteSettings,
-        CancellationToken cancellationToken)
+    private async Task<Result<IReadOnlySet<PackageDependency>>> ParsePackages(string file, CancellationToken cancellationToken)
     {
-        if (!promoteSettings.IsLatestVersion)
+        var packages = new HashSet<PackageDependency>();
+
+        var lines = await File.ReadAllLinesAsync(file, cancellationToken);
+
+        foreach (var line in lines)
         {
-            return new PackageIdentity(promoteSettings.Id, NuGetVersion.Parse(promoteSettings.Version));
+            if (string.IsNullOrWhiteSpace(line)) continue;
+
+            var parseIdentityResult = PackageDescriptorParser.ParseLine(line);
+            if (parseIdentityResult.IsFailure)
+            {
+                return Result.Failure<IReadOnlySet<PackageDependency>>(parseIdentityResult.Error);
+            }
+
+            packages.Add(parseIdentityResult.Value);
         }
 
-        var packageVersionFinder = new PackageVersionFinder(repository);
-        return await packageVersionFinder.FindLatestVersion(promoteSettings.Id!, cancellationToken);
+        return packages;
     }
 }

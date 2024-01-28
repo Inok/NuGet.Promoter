@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <ItemGroup>
         <ProjectReference Include="..\..\src\Promote.NuGet\Promote.NuGet.csproj" />
+        <ProjectReference Include="..\Promote.NuGet.TestInfrastructure\Promote.NuGet.TestInfrastructure.csproj" />
     </ItemGroup>
 </Project>
