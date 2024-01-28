@@ -5,6 +5,8 @@ namespace Promote.NuGet.Tests;
 
 public static class PromoteNugetProcessRunner
 {
+    public const int ConsoleWidth = 60;
+
     public static async Task<ProcessRunResult> RunForResultAsync(params string[] arguments)
     {
         var cancellationToken = TestContext.CurrentContext.CancellationToken;
@@ -27,7 +29,7 @@ public static class PromoteNugetProcessRunner
                                    Environment =
                                    {
                                        ["__NO_ANSI_CONTROL_CODES"] = "1",
-                                       ["__CONSOLE_WIDTH"] = "60",
+                                       ["__CONSOLE_WIDTH"] = ConsoleWidth.ToString(),
                                    }
                                };
 

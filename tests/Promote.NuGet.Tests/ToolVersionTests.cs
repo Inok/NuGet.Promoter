@@ -9,7 +9,7 @@ public class ToolVersionTests
     public async Task Returns_version_of_the_tool()
     {
         var expectedVersion = FileVersionInfo.GetVersionInfo(typeof(Program).Assembly.Location).ProductVersion ?? string.Empty;
-        var expectedVersionLines = expectedVersion.Chunk(80).Select(x => new string(x)).ToList();
+        var expectedVersionLines = expectedVersion.Chunk(PromoteNugetProcessRunner.ConsoleWidth).Select(x => new string(x)).ToList();
 
         // Act
         var result = await PromoteNugetProcessRunner.RunForResultAsync("--version");
