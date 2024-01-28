@@ -11,7 +11,9 @@ public static class PromoteNugetProcessRunner
 
         await using var process = Run(arguments);
 
-        return await process.WaitForExitAndGetResult(cancellationToken);
+        var result = await process.WaitForExitAndGetResult(cancellationToken);
+
+        return result;
     }
 
     public static ProcessWrapper Run(params string[] arguments)
@@ -24,7 +26,8 @@ public static class PromoteNugetProcessRunner
                                    RedirectStandardError = true,
                                    Environment =
                                    {
-                                       ["__NO_ANSI_CONTROL_CODES"] = "1"
+                                       ["__NO_ANSI_CONTROL_CODES"] = "1",
+                                       ["__CONSOLE_WIDTH"] = "60",
                                    }
                                };
 
@@ -32,6 +35,8 @@ public static class PromoteNugetProcessRunner
         {
             processStartInfo.ArgumentList.Add(argument);
         }
+
+        TestContext.WriteLine($"Running {processStartInfo.FileName} {string.Join(" ", processStartInfo.ArgumentList)}");
 
         Process? process = null;
         try

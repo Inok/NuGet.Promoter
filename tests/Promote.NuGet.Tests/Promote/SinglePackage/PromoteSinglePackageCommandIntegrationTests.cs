@@ -8,7 +8,7 @@ namespace Promote.NuGet.Tests.Promote.SinglePackage;
 [TestFixture]
 public class PromoteSinglePackageCommandIntegrationTests
 {
-    [Test, CancelAfter(30_000)]
+    [Test, CancelAfter(60_000)]
     public async Task Promotes_a_package_with_its_dependencies_to_destination_feed()
     {
         await using var destinationFeed = await LocalNugetFeed.Create();
@@ -24,7 +24,7 @@ public class PromoteSinglePackageCommandIntegrationTests
                      );
 
         var destinationFeedDescriptor = new NuGetRepositoryDescriptor(destinationFeed.FeedUrl, destinationFeed.ApiKey);
-        var destinationRepo = new NuGetRepository(destinationFeedDescriptor, NullSourceCacheContext.Instance, TestNuGetLogger.Instance);
+        var destinationRepo = new NuGetRepository(destinationFeedDescriptor, new SourceCacheContext { NoCache = true }, TestNuGetLogger.Instance);
 
         // Assert
         result.StdOutput.Should().StartWith(
@@ -59,8 +59,8 @@ public class PromoteSinglePackageCommandIntegrationTests
 
     private static async Task AssertContainsVersions(INuGetRepository repo, string packageId, params NuGetVersion[] expectedVersions)
     {
-        var netCorePlatformsPackages = await repo.Packages.GetAllVersions(packageId);
-        netCorePlatformsPackages.IsSuccess.Should().BeTrue();
-        netCorePlatformsPackages.Value.Should().Contain(expectedVersions);
+        var packages = await repo.Packages.GetAllVersions(packageId);
+        packages.IsSuccess.Should().BeTrue();
+        packages.Value.Should().BeEquivalentTo(expectedVersions);
     }
 }

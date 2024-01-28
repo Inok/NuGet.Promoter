@@ -14,7 +14,7 @@ using Spectre.Console.Cli;
 namespace Promote.NuGet.Promote.FromFile;
 
 [PublicAPI]
-internal sealed class PromotePackagesFromFile : CancellableAsyncCommand<PromotePackagesFromFileSettings>
+internal sealed class PromotePackagesFromFileCommand : CancellableAsyncCommand<PromotePackagesFromFileSettings>
 {
     public override async Task<int> ExecuteAsync(CommandContext context, PromotePackagesFromFileSettings promoteSettings, CancellationToken cancellationToken)
     {
