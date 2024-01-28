@@ -1,5 +1,4 @@
-﻿using System;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using JetBrains.Annotations;
 using NuGet.Common;
 using NuGet.Packaging.Core;

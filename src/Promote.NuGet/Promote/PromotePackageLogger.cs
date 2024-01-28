@@ -1,5 +1,6 @@
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
+using Promote.NuGet.Commands.Core;
 using Promote.NuGet.Commands.Promote;
 using Spectre.Console;
 
@@ -7,12 +8,13 @@ namespace Promote.NuGet.Promote;
 
 public class PromotePackageLogger : IPromotePackageLogger
 {
-    public void LogResolvingMatchingPackages(IReadOnlyCollection<PackageDependency> dependencies)
+    public void LogResolvingMatchingPackages(IReadOnlyCollection<PackageRequest> requests)
     {
         var tree = new Tree("[bold green]Resolving matching packages for:[/]");
-        foreach (var dep in dependencies.OrderBy(x => x.Id))
+        foreach (var dep in requests.OrderBy(x => x.Id))
         {
-            tree.AddNode(Markup.FromInterpolated($"{dep.Id} {dep.VersionRange.PrettyPrint()}"));
+            var rangesString = string.Join(", ", dep.Versions.Select(r => r.PrettyPrint()));
+            tree.AddNode(Markup.FromInterpolated($"{dep.Id} {rangesString}"));
         }
 
         AnsiConsole.Write(tree);

@@ -34,20 +34,20 @@ public sealed class PackageVersionFinder
     }
 
     public async Task<Result<IReadOnlySet<PackageIdentity>>> FindMatchingPackages(
-        IReadOnlyCollection<PackageDependency> dependencies,
+        IReadOnlyCollection<PackageRequest> requests,
         IFindMatchingPackagesLogger logger,
         CancellationToken cancellationToken = default
     )
     {
-        if (dependencies == null) throw new ArgumentNullException(nameof(dependencies));
+        if (requests == null) throw new ArgumentNullException(nameof(requests));
         if (logger == null) throw new ArgumentNullException(nameof(logger));
 
         var identities = new HashSet<PackageIdentity>();
 
-        foreach (var packageRanges in dependencies.GroupBy(d => d.Id, StringComparer.OrdinalIgnoreCase))
+        foreach (var packageRanges in requests.GroupBy(d => d.Id, StringComparer.OrdinalIgnoreCase))
         {
             var packageId = packageRanges.Key;
-            var versionRanges = packageRanges.Select(x => x.VersionRange).ToList();
+            var versionRanges = packageRanges.SelectMany(x => x.Versions).ToList();
 
             var matchingPackagesResult = await FindMatchingVersions(packageId, versionRanges, cancellationToken);
             if (matchingPackagesResult.IsFailure)
