@@ -1,4 +1,5 @@
-﻿using Promote.NuGet.Promote.List;
+﻿using Promote.NuGet.Promote.FromConfiguration;
+using Promote.NuGet.Promote.List;
 using Promote.NuGet.Promote.SinglePackage;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -27,6 +28,9 @@ public static class Program
                                   x.AddCommand<PromotePackageListCommand>("list")
                                    .WithAlias("from-file")
                                    .WithDescription("Promotes packages listed in the specified file, and their dependencies.");
+
+                                  x.AddCommand<PromoteFromConfigurationCommand>("from-config")
+                                   .WithDescription("Promotes packages as configured in the specified file.");
                               });
 
                           configurator.SetExceptionHandler(ex =>

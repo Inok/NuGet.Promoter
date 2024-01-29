@@ -27,6 +27,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Spectre.Console.Cli"/>
+        <PackageReference Include="YamlDotNet" />
     </ItemGroup>
 
     <ItemGroup>
