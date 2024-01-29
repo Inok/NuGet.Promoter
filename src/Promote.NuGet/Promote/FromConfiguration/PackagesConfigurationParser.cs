@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using FluentValidation;
 using NuGet.Versioning;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -30,7 +31,9 @@ public static class PackagesConfigurationParser
 
         var configuration = deserializer.Deserialize<PackagesConfiguration>(input);
 
-        // TODO: validation
+        var validator = new PackagesConfigurationValidator();
+        validator.ValidateAndThrow(configuration);
+
         return configuration;
     }
 

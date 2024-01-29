@@ -18,6 +18,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="FluentValidation" />
         <PackageReference Include="Humanizer.Core"/>
         <PackageReference Include="JetBrains.Annotations"/>
         <PackageReference Include="NuGet.Protocol"/>

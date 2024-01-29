@@ -1,4 +1,6 @@
-﻿using NuGet.Versioning;
+﻿using FluentValidation;
+using FluentValidation.Results;
+using NuGet.Versioning;
 using Promote.NuGet.Promote.FromConfiguration;
 
 namespace Promote.NuGet.Tests.Promote.FromConfiguration;
@@ -44,5 +46,24 @@ public class PackagesConfigurationParserTests
                                }
                            }
             });
+    }
+
+    [Test]
+    public void Throw_validation_error_if_no_versions()
+    {
+        var input =
+            "packages:\n"
+          + "  - id: System.Globalization\n"
+          + "    versions: []\n"
+          + "  - id: System.Runtime\n"
+          + "    versions:\n"
+          + "      - '[4.1.0,4.1.2)'\n"
+          + "      - 4.3.1\n";
+
+        var action = () => PackagesConfigurationParser.Parse(input);
+
+        // TODO: better message and assert
+        action.Should().Throw<ValidationException>().Which.Message.Should()
+              .Be($"Validation failed: {Environment.NewLine} -- Packages[0].Versions: 'Versions' must not be empty. Severity: Error");
     }
 }

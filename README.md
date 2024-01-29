@@ -145,3 +145,5 @@ COMMANDS:
 
 - This application uses [NuGet.Client](https://github.com/NuGet/NuGet.Client) libraries.
   These libraries are available under the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0).
+- This application uses [FluentValidation](https://github.com/FluentValidation/FluentValidation) library.
+  The library is available under the [Apache 2.0 license](https://licenses.nuget.org/Apache-2.0).
