@@ -1,5 +1,3 @@
-using System;
-
 namespace Promote.NuGet.Feeds;
 
 public static class NuGetFeedRegistry

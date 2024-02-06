@@ -28,16 +28,16 @@ public class PromotePackageCommand
         _promotePackageToFindMatchingPackagesLoggerAdapter = new PromotePackageToFindMatchingPackagesLoggerAdapter(promotePackageLogger);
     }
 
-    public async Task<Result> Promote(IReadOnlySet<PackageDependency> dependencies,
+    public async Task<Result> Promote(IReadOnlyCollection<PackageRequest> requests,
                                       PromotePackageCommandOptions options,
                                       CancellationToken cancellationToken = default)
     {
-        if (dependencies == null) throw new ArgumentNullException(nameof(dependencies));
+        if (requests == null) throw new ArgumentNullException(nameof(requests));
         if (options == null) throw new ArgumentNullException(nameof(options));
 
-        _promotePackageLogger.LogResolvingMatchingPackages(dependencies);
+        _promotePackageLogger.LogResolvingMatchingPackages(requests);
 
-        var packages = await _sourcePackageVersionFinder.FindMatchingPackages(dependencies,
+        var packages = await _sourcePackageVersionFinder.FindMatchingPackages(requests,
                                                                               _promotePackageToFindMatchingPackagesLoggerAdapter,
                                                                               cancellationToken);
         if (packages.IsFailure)

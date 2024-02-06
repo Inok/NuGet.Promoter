@@ -3,18 +3,22 @@ using NuGet.Versioning;
 using Promote.NuGet.Feeds;
 using Promote.NuGet.TestInfrastructure;
 
-namespace Promote.NuGet.Tests.Promote.FromFile;
+namespace Promote.NuGet.Tests.Promote.FromConfiguration;
 
 [TestFixture]
-public class PromotePackagesFromFileCommandIntegrationTests
+public class PromoteFromConfigurationCommandIntegrationTests
 {
     [Test, CancelAfter(60_000)]
     public async Task Promotes_a_set_of_packages_with_their_dependencies_to_destination_feed()
     {
         using var packagesFile = await TempFile.Create(
-                                     "System.Runtime [4.1.0,4.1.2)",
-                                     "System.Runtime 4.3.1",
-                                     "System.Globalization 4.3.0"
+                                     "packages:",
+                                     "  - id: System.Globalization",
+                                     "    versions: 4.3.0",
+                                     "  - id: System.Runtime",
+                                     "    versions:",
+                                     "      - '[4.1.0,4.1.2)'",
+                                     "      - 4.3.1"
                                  );
 
         await using var destinationFeed = await LocalNugetFeed.Create();
@@ -22,7 +26,7 @@ public class PromotePackagesFromFileCommandIntegrationTests
         // Act
         var result = await PromoteNugetProcessRunner.RunForResultAsync(
                          "promote",
-                         "from-file",
+                         "from-config",
                          packagesFile.Path,
                          "--destination", destinationFeed.FeedUrl,
                          "--destination-api-key", destinationFeed.ApiKey
@@ -37,16 +41,15 @@ public class PromotePackagesFromFileCommandIntegrationTests
             {
                 "Resolving matching packages for:",
                 "├── System.Globalization (= 4.3.0)",
-                "├── System.Runtime (>= 4.1.0 && < 4.1.2)",
-                "└── System.Runtime (= 4.3.1)",
+                "└── System.Runtime (>= 4.1.0 && < 4.1.2), (= 4.3.1)",
+                "Matching packages for System.Globalization (= 4.3.0): 4.3.0",
                 "Matching packages for System.Runtime (>= 4.1.0 && < 4.1.2), ",
                 "(= 4.3.1): 4.1.0, 4.1.1, 4.3.1",
-                "Matching packages for System.Globalization (= 4.3.0): 4.3.0",
                 "Resolving packages to promote:",
+                "├── System.Globalization 4.3.0",
                 "├── System.Runtime 4.1.0",
                 "├── System.Runtime 4.1.1",
-                "├── System.Runtime 4.3.1",
-                "└── System.Globalization 4.3.0",
+                "└── System.Runtime 4.3.1"
             }
         );
 

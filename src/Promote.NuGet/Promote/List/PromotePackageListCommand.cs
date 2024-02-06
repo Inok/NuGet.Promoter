@@ -1,22 +1,21 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using CSharpFunctionalExtensions;
 using JetBrains.Annotations;
 using NuGet.Common;
-using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
+using Promote.NuGet.Commands.Core;
 using Promote.NuGet.Commands.Promote;
 using Promote.NuGet.Feeds;
 using Promote.NuGet.Infrastructure;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-namespace Promote.NuGet.Promote.FromFile;
+namespace Promote.NuGet.Promote.List;
 
 [PublicAPI]
-internal sealed class PromotePackagesFromFileCommand : CancellableAsyncCommand<PromotePackagesFromFileSettings>
+internal sealed class PromotePackageListCommand : CancellableAsyncCommand<PromotePackageListSettings>
 {
-    public override async Task<int> ExecuteAsync(CommandContext context, PromotePackagesFromFileSettings promoteSettings, CancellationToken cancellationToken)
+    public override async Task<int> ExecuteAsync(CommandContext context, PromotePackageListSettings promoteSettings, CancellationToken cancellationToken)
     {
         using var cacheContext = new SourceCacheContext
                                  {
@@ -52,9 +51,9 @@ internal sealed class PromotePackagesFromFileCommand : CancellableAsyncCommand<P
         return 0;
     }
 
-    private async Task<Result<IReadOnlySet<PackageDependency>>> ParsePackages(string file, CancellationToken cancellationToken)
+    private static async Task<Result<IReadOnlyCollection<PackageRequest>>> ParsePackages(string file, CancellationToken cancellationToken)
     {
-        var packages = new HashSet<PackageDependency>();
+        var packages = new List<PackageRequest>();
 
         var lines = await File.ReadAllLinesAsync(file, cancellationToken);
 
@@ -65,7 +64,7 @@ internal sealed class PromotePackagesFromFileCommand : CancellableAsyncCommand<P
             var parseIdentityResult = PackageDescriptorParser.ParseLine(line);
             if (parseIdentityResult.IsFailure)
             {
-                return Result.Failure<IReadOnlySet<PackageDependency>>(parseIdentityResult.Error);
+                return Result.Failure<IReadOnlyCollection<PackageRequest>>(parseIdentityResult.Error);
             }
 
             packages.Add(parseIdentityResult.Value);

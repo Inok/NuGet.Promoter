@@ -2,9 +2,9 @@
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-namespace Promote.NuGet.Promote.FromFile;
+namespace Promote.NuGet.Promote.List;
 
-internal sealed class PromotePackagesFromFileSettings : PromoteSettings
+internal sealed class PromotePackageListSettings : PromoteSettings
 {
     [Description(
         "Path of a file with a list of packages. Each line contains package id and its version or version range. Allowed formats:"
