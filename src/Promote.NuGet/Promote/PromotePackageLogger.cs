@@ -42,7 +42,7 @@ public class PromotePackageLogger : IPromotePackageLogger
     public void LogResolvingPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities)
     {
         var tree = new Tree("[bold green]Resolving packages to promote:[/]");
-        foreach (var identity in identities)
+        foreach (var identity in identities.OrderBy(x => x.Id).ThenBy(x => x.Version))
         {
             tree.AddNode(Markup.FromInterpolated($"{identity.Id} {identity.Version}"));
         }
@@ -73,7 +73,7 @@ public class PromotePackageLogger : IPromotePackageLogger
     public void LogPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities)
     {
         var tree = new Tree(Markup.FromInterpolated($"[bold green]Found {identities.Count} package(s) to promote:[/]"));
-        foreach (var identity in identities)
+        foreach (var identity in identities.OrderBy(x => x.Id).ThenBy(x => x.Version))
         {
             tree.AddNode(Markup.FromInterpolated($"{identity.Id} {identity.Version}"));
         }
