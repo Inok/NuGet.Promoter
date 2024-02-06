@@ -46,22 +46,29 @@ promote-nuget promote package Newtonsoft.Json --destination '<TARGET-NUGET-FEED-
 promote-nuget promote package Newtonsoft.Json --version 13.0.1 --destination '<TARGET-NUGET-FEED-URL>' --destination-api-key '<API-KEY>'
 ```
 
-### Promote packages listed in a file
+### Promote a configured set of packages
 
-The `promote from-file` command promotes packages listed in a file from one feed to another.
-In a file, you can specify either the exact version to promote (e.g. `13.0.1`), or a version range (e.g. `[12.0.0,)`).
+The `promote from-config` command promotes packages specified in a configuration file from one feed to another.
+In the configuration, you can specify a set of packages with a list of versions, either exact (e.g., `13.0.1`) or range (e.g., `[12.0.0,)`).
 
 ```
-> promote-nuget promote from-file --help
+> promote-nuget promote from-config --help
+
+DESCRIPTION:
+Promotes packages as configured in the specified file.
 
 USAGE:
-    Promote.NuGet.exe promote from-file <file> [OPTIONS]
+    Promote.NuGet.dll promote from-config <file> [OPTIONS]
 
 ARGUMENTS:
-    <file>    Path of a file with a list of packages. Each line contains package id and its version or version range. Allowed formats:
-              - Space-separated: <id> <version/version-range>
-              - Package Manager: Install-Package <id> -Version <version/version-range>
-              - PackageReference: <PackageReference Include="<version>" Version="<version/version-range>" />
+    <file>    Path to the configuraton file (in YAML format). Example:
+              packages:
+                - id: System.Runtime
+                  versions: 4.3.1
+                - id: System.Text.Json
+                  versions:
+                    - '[6, 7)'
+                    - '[8, 9)'
 
 OPTIONS:
     -h, --help                   Prints help information
@@ -72,54 +79,73 @@ OPTIONS:
         --no-cache               Do not use local cache
         --dry-run                Evaluate packages to promote, but don't actually promote them
         --verbose                Enable verbose logs
+        --always-resolve-deps    Always resolve dependencies of a package, even if the package itself
+                                 exists in the destination repository. This option allows to restore
+                                 the integrity of the destination repository by promoting missing
+                                 dependencies
+        --force-push             Push packages and their dependencies even if they already exist in the
+                                 destination repository. Use that option to restore the integrity of
+                                 the destination repository (i.e. when some packages in the feed are
+                                 broken)
 ```
 
 Example:
 ```pwsh
-# packages.txt:
-# Install-Package System.IO -Version 4.3.0
-# <PackageReference Include="System.Memory" Version="4.5.3" />
-# Newtonsoft.Json [12.0.0,)
-# Install-Package System.Text.Json -Version [5.0.0,6)
+# packages:
+#   - id: System.Globalization
+#     versions: 4.3.0
+#   - id: System.Runtime
+#     versions:
+#       - '[4.1.0,4.1.2)'
+#       - 4.3.1
 
-# Determines a set of packages to promote according to the list of versions and version ranges, ant promotes them.
-promote-nuget promote from-file packages.txt --destination '<TARGET-NUGET-FEED-URL>' --destination-api-key '<API-KEY>'
+promote-nuget promote from-config packages.yml --destination '<TARGET-NUGET-FEED-URL>' --destination-api-key '<API-KEY>'
 
 # Resolving matching packages for:
-# ├── System.IO (= 4.3.0)
-# ├── System.Memory (= 4.5.3)
-# ├── Newtonsoft.Json (>= 12.0.0)
-# └── System.Text.Json (>= 5.0.0 && < 6.0.0)
-# Resolving dependencies for:
-# ├── System.IO 4.3.0
-# ├── System.Memory 4.5.3
-# ├── Newtonsoft.Json 12.0.1
-# ├── Newtonsoft.Json 12.0.2
-# ├── Newtonsoft.Json 12.0.3
-# ├── Newtonsoft.Json 13.0.1
-# ├── System.Text.Json 5.0.0
-# ├── System.Text.Json 5.0.1
-# └── System.Text.Json 5.0.2
-# Found 106 package(s) to promote:
-# ├── Microsoft.Bcl.AsyncInterfaces 5.0.0
-# ├── Microsoft.CSharp 4.3.0
+# ├── System.Globalization (= 4.3.0)
+# └── System.Runtime (>= 4.1.0 && < 4.1.2), (= 4.3.1)
+# Matching packages for System.Globalization (= 4.3.0): 4.3.0
+# Matching packages for System.Runtime (>= 4.1.0 && < 4.1.2), (= 4.3.1): 4.1.0, 4.1.1, 4.3.1
+# Resolving packages to promote:
+# ├── System.Globalization 4.3.0
+# ├── System.Runtime 4.1.0
+# ├── System.Runtime 4.1.1
+# └── System.Runtime 4.3.1
+# Processing package System.Globalization 4.3.0
+# New dependency to process: Microsoft.NETCore.Platforms (>=
+# 1.1.0)
+# New dependency to process: Microsoft.NETCore.Targets (>=
+# 1.1.0)
+# New dependency to process: System.Runtime (>= 4.3.0)
+# ... skipped ...
+# Found 13 package(s) to promote:
+# ├── Microsoft.NETCore.Platforms 1.0.1
+# ├── Microsoft.NETCore.Platforms 1.0.2
 # ├── Microsoft.NETCore.Platforms 1.1.0
+# ├── Microsoft.NETCore.Platforms 1.1.1
+# ├── Microsoft.NETCore.Targets 1.0.1
+# ├── Microsoft.NETCore.Targets 1.0.6
 # ├── Microsoft.NETCore.Targets 1.1.0
-# ├── Microsoft.Win32.Primitives 4.3.0
-# ├── NETStandard.Library 1.6.1
-# ├── Newtonsoft.Json 12.0.1
-# ├── Newtonsoft.Json 12.0.2
-# ├── Newtonsoft.Json 12.0.3
-# ...
-# (1/106) Promote Microsoft.Bcl.AsyncInterfaces 5.0.0
-# (2/106) Promote Microsoft.CSharp 4.3.0
-# (3/106) Promote Microsoft.NETCore.Platforms 1.1.0
-# (4/106) Promote Microsoft.NETCore.Targets 1.1.0
-# Minimal: Package 'C:\Users\...\AppData\Local\Temp\tmp513A.tmp' already exists at feed '...'.
-# (5/106) Promote Microsoft.Win32.Primitives 4.3.0
-# (6/106) Promote NETStandard.Library 1.6.1
-...
-
+# ├── Microsoft.NETCore.Targets 1.1.3
+# ├── System.Globalization 4.3.0
+# ├── System.Runtime 4.1.0
+# ├── System.Runtime 4.1.1
+# ├── System.Runtime 4.3.0
+# └── System.Runtime 4.3.1
+# (1/13) Promote Microsoft.NETCore.Platforms 1.0.1
+# (2/13) Promote Microsoft.NETCore.Platforms 1.0.2
+# (3/13) Promote Microsoft.NETCore.Platforms 1.1.0
+# (4/13) Promote Microsoft.NETCore.Platforms 1.1.1
+# (5/13) Promote Microsoft.NETCore.Targets 1.0.1
+# (6/13) Promote Microsoft.NETCore.Targets 1.0.6
+# (7/13) Promote Microsoft.NETCore.Targets 1.1.0
+# (8/13) Promote Microsoft.NETCore.Targets 1.1.3
+# (9/13) Promote System.Globalization 4.3.0
+# (10/13) Promote System.Runtime 4.1.0
+# (11/13) Promote System.Runtime 4.1.1
+# (12/13) Promote System.Runtime 4.3.0
+# (13/13) Promote System.Runtime 4.3.1
+# 13 package(s) promoted.
 ```
 
 
@@ -129,16 +155,19 @@ You can use `--help` argument to find all available commands and options. Exampl
 ```
 > promote-nuget promote --help
 
+DESCRIPTION:
+Promote packages and their dependencies from one feed to another.
+
 USAGE:
-    Promote.NuGet.exe promote [OPTIONS] <COMMAND>
+    Promote.NuGet.dll promote [OPTIONS] <COMMAND>
 
 OPTIONS:
     -h, --help    Prints help information
 
 COMMANDS:
-    package <id>        Promotes the specified package and its dependencies from one feed to another
-    from-file <file>    Promotes packages listed in the specified file
-
+    package <id>          Promotes the specified package and its dependencies from one feed to another
+    list <file>           Promotes packages listed in the specified file, and their dependencies
+    from-config <file>    Promotes packages as configured in the specified file
 ```
 
 # Third-party components
