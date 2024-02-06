@@ -13,8 +13,8 @@ internal sealed class PromoteFromConfigurationCommandSettings : PromoteSettings
       + "\n    versions: 4.3.1"
       + "\n  - id: System.Text.Json"
       + "\n    versions:"
-      + "\n      - [[6, 7)"
-      + "\n      - [[8, 9)"
+      + "\n      - '[6, 7)'"
+      + "\n      - '[8, 9)'"
     )]
     [CommandArgument(0, "<file>")]
     public string? File { get; init; }
