@@ -15,6 +15,7 @@ public class PackageConfigurationValidator : AbstractValidator<PackageConfigurat
     public PackageConfigurationValidator()
     {
         RuleFor(x => x.Id).NotEmpty();
-        RuleFor(x => x.Versions).NotEmpty();
+        RuleFor(x => x.Versions).NotEmpty()
+                                .ForEach(x => x.NotNull());
     }
 }

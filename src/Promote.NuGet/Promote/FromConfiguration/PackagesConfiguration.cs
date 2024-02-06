@@ -11,6 +11,6 @@ public class PackagesConfigurationValidator : AbstractValidator<PackagesConfigur
 {
     public PackagesConfigurationValidator()
     {
-        RuleFor(x => x.Packages).NotNull().ForEach(x => x.NotNull().SetValidator(new PackageConfigurationValidator()));
+        RuleFor(x => x.Packages).NotEmpty().ForEach(x => x.NotNull().SetValidator(new PackageConfigurationValidator()));
     }
 }
