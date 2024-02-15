@@ -1,17 +1,17 @@
 ﻿using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
 using Promote.NuGet.Commands.Core;
+using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
 
 namespace Promote.NuGet.Commands.Promote;
 
 public class PromotePackageCommand
 {
-    private readonly PackageVersionFinder _sourcePackageVersionFinder;
+    private readonly ResolvePackageRequestVisitor _sourceResolvePackageRequestVisitor;
     private readonly PackagesToPromoteEvaluator _packagesToPromoteEvaluator;
     private readonly SinglePackagePromoter _singlePackagePromoter;
     private readonly IPromotePackageLogger _promotePackageLogger;
-    private readonly PromotePackageToFindMatchingPackagesLoggerAdapter _promotePackageToFindMatchingPackagesLoggerAdapter;
 
     public PromotePackageCommand(INuGetRepository sourceRepository,
                                  INuGetRepository destinationRepository,
@@ -22,24 +22,19 @@ public class PromotePackageCommand
         if (promotePackageLogger == null) throw new ArgumentNullException(nameof(promotePackageLogger));
 
         _promotePackageLogger = promotePackageLogger;
-        _sourcePackageVersionFinder = new PackageVersionFinder(sourceRepository);
+        _sourceResolvePackageRequestVisitor = new ResolvePackageRequestVisitor(sourceRepository);
         _packagesToPromoteEvaluator = new PackagesToPromoteEvaluator(sourceRepository, destinationRepository, promotePackageLogger);
         _singlePackagePromoter = new SinglePackagePromoter(sourceRepository, destinationRepository);
-        _promotePackageToFindMatchingPackagesLoggerAdapter = new PromotePackageToFindMatchingPackagesLoggerAdapter(promotePackageLogger);
     }
 
-    public async Task<Result> Promote(IReadOnlyCollection<PackageRequest> requests,
+    public async Task<Result> Promote(IReadOnlyCollection<IPackageRequest> requests,
                                       PromotePackageCommandOptions options,
                                       CancellationToken cancellationToken = default)
     {
         if (requests == null) throw new ArgumentNullException(nameof(requests));
         if (options == null) throw new ArgumentNullException(nameof(options));
 
-        _promotePackageLogger.LogResolvingMatchingPackages(requests);
-
-        var packages = await _sourcePackageVersionFinder.FindMatchingPackages(requests,
-                                                                              _promotePackageToFindMatchingPackagesLoggerAdapter,
-                                                                              cancellationToken);
+        var packages = await ResolvePackageRequests(requests, cancellationToken);
         if (packages.IsFailure)
         {
             return Result.Failure(packages.Error);
@@ -48,20 +43,35 @@ public class PromotePackageCommand
         return await Promote(packages.Value, options, cancellationToken);
     }
 
-    public async Task<Result> Promote(PackageIdentity identity,
-                                      PromotePackageCommandOptions options,
-                                      CancellationToken cancellationToken = default)
+    private async Task<Result<IReadOnlySet<PackageIdentity>>> ResolvePackageRequests(
+        IReadOnlyCollection<IPackageRequest> requests,
+        CancellationToken cancellationToken)
     {
-        if (identity == null) throw new ArgumentNullException(nameof(identity));
-        if (options == null) throw new ArgumentNullException(nameof(options));
+        _promotePackageLogger.LogResolvingMatchingPackages(requests);
 
-        var identities = new HashSet<PackageIdentity> { identity };
-        return await Promote(identities, options, cancellationToken);
+        var identities = new HashSet<PackageIdentity>();
+
+        foreach (var request in requests)
+        {
+            var result = await request.Accept(_sourceResolvePackageRequestVisitor, cancellationToken);
+            if (result.IsFailure)
+            {
+                return result.ConvertFailure<IReadOnlySet<PackageIdentity>>();
+            }
+
+            var matchingPackages = result.Value;
+
+            _promotePackageLogger.LogPackageRequestResolution(request, matchingPackages);
+
+            identities.UnionWith(matchingPackages);
+        }
+
+        return identities;
     }
 
     public async Task<Result> Promote(IReadOnlySet<PackageIdentity> identities,
-                                                  PromotePackageCommandOptions options,
-                                                  CancellationToken cancellationToken = default)
+                                      PromotePackageCommandOptions options,
+                                      CancellationToken cancellationToken = default)
     {
         if (identities == null) throw new ArgumentNullException(nameof(identities));
         if (options == null) throw new ArgumentNullException(nameof(options));

@@ -3,17 +3,12 @@ using CSharpFunctionalExtensions;
 using JetBrains.Annotations;
 using NuGet.Common;
 using NuGet.Protocol.Core.Types;
-using NuGet.Versioning;
-using Promote.NuGet.Commands.Core;
 using Promote.NuGet.Commands.Promote;
+using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
 using Promote.NuGet.Infrastructure;
 using Spectre.Console;
 using Spectre.Console.Cli;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace Promote.NuGet.Promote.FromConfiguration;
 
@@ -56,17 +51,17 @@ internal sealed class PromoteFromConfigurationCommand : CancellableAsyncCommand<
         return 0;
     }
 
-    private static async Task<Result<IReadOnlyCollection<PackageRequest>>> ReadConfiguration(string file, CancellationToken cancellationToken)
+    private static async Task<Result<IReadOnlyCollection<VersionRangePackageRequest>>> ReadConfiguration(string file, CancellationToken cancellationToken)
     {
         var input = await File.ReadAllTextAsync(file, cancellationToken);
 
         var parseResult = PackagesConfigurationParser.TryParse(input);
         if (parseResult.IsFailure)
         {
-            return Result.Failure<IReadOnlyCollection<PackageRequest>>(parseResult.Error);
+            return Result.Failure<IReadOnlyCollection<VersionRangePackageRequest>>(parseResult.Error);
         }
 
-        return parseResult.Value.Packages.Select(x => new PackageRequest(x.Id, x.Versions)).ToList();
+        return parseResult.Value.Packages.Select(x => new VersionRangePackageRequest(x.Id, x.Versions)).ToList();
     }
 
 }

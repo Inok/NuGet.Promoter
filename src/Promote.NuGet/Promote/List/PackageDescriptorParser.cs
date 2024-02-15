@@ -1,13 +1,13 @@
 ﻿using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 using NuGet.Versioning;
-using Promote.NuGet.Commands.Core;
+using Promote.NuGet.Commands.Requests;
 
 namespace Promote.NuGet.Promote.List;
 
 internal static class PackageDescriptorParser
 {
-    public static Result<PackageRequest> ParseLine(string line)
+    public static Result<VersionRangePackageRequest> ParseLine(string line)
     {
         var parseResult = TryParseInstallPackage(line)
                           .OnFailureCompensate(_ => TryParsePackageReference(line))
@@ -15,22 +15,22 @@ internal static class PackageDescriptorParser
 
         if (parseResult.IsFailure)
         {
-            return Result.Failure<PackageRequest>($"Failed to parse '{line}'");
+            return Result.Failure<VersionRangePackageRequest>($"Failed to parse '{line}'");
         }
 
         var (id, versionString) = parseResult.Value;
 
         if (NuGetVersion.TryParse(versionString, out var version))
         {
-            return new PackageRequest(id, new VersionRange(version, true, version, true));
+            return new VersionRangePackageRequest(id, new VersionRange(version, true, version, true));
         }
 
         if (VersionRange.TryParse(versionString, out var versionRange))
         {
-            return new PackageRequest(id, versionRange);
+            return new VersionRangePackageRequest(id, versionRange);
         }
 
-        return Result.Failure<PackageRequest>($"Cannot parse '{versionString}' as a version or version range");
+        return Result.Failure<VersionRangePackageRequest>($"Cannot parse '{versionString}' as a version or version range");
     }
 
     private static Result<(string Id, string Version)> TryParseInstallPackage(string input)

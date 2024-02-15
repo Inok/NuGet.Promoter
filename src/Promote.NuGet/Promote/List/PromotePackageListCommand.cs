@@ -3,8 +3,8 @@ using CSharpFunctionalExtensions;
 using JetBrains.Annotations;
 using NuGet.Common;
 using NuGet.Protocol.Core.Types;
-using Promote.NuGet.Commands.Core;
 using Promote.NuGet.Commands.Promote;
+using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
 using Promote.NuGet.Infrastructure;
 using Spectre.Console;
@@ -51,9 +51,9 @@ internal sealed class PromotePackageListCommand : CancellableAsyncCommand<Promot
         return 0;
     }
 
-    private static async Task<Result<IReadOnlyCollection<PackageRequest>>> ParsePackages(string file, CancellationToken cancellationToken)
+    private static async Task<Result<IReadOnlyCollection<VersionRangePackageRequest>>> ParsePackages(string file, CancellationToken cancellationToken)
     {
-        var packages = new List<PackageRequest>();
+        var packages = new List<VersionRangePackageRequest>();
 
         var lines = await File.ReadAllLinesAsync(file, cancellationToken);
 
@@ -64,7 +64,7 @@ internal sealed class PromotePackageListCommand : CancellableAsyncCommand<Promot
             var parseIdentityResult = PackageDescriptorParser.ParseLine(line);
             if (parseIdentityResult.IsFailure)
             {
-                return Result.Failure<IReadOnlyCollection<PackageRequest>>(parseIdentityResult.Error);
+                return Result.Failure<IReadOnlyCollection<VersionRangePackageRequest>>(parseIdentityResult.Error);
             }
 
             packages.Add(parseIdentityResult.Value);

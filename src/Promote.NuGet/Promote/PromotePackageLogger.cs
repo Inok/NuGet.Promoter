@@ -1,32 +1,28 @@
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
-using Promote.NuGet.Commands.Core;
 using Promote.NuGet.Commands.Promote;
+using Promote.NuGet.Commands.Requests;
 using Spectre.Console;
 
 namespace Promote.NuGet.Promote;
 
 public class PromotePackageLogger : IPromotePackageLogger
 {
-    public void LogResolvingMatchingPackages(IReadOnlyCollection<PackageRequest> requests)
+    public void LogResolvingMatchingPackages(IReadOnlyCollection<IPackageRequest> requests)
     {
         var tree = new Tree("[bold green]Resolving matching packages for:[/]");
-        foreach (var dep in requests.OrderBy(x => x.Id))
+        foreach (var request in requests.OrderBy(x => x.Id))
         {
-            var rangesString = string.Join(", ", dep.Versions.Select(r => r.PrettyPrint()));
-            tree.AddNode(Markup.FromInterpolated($"{dep.Id} {rangesString}"));
+            tree.AddNode(Markup.Escape(request.ToString()));
         }
 
         AnsiConsole.Write(tree);
     }
 
-    public void LogMatchingPackagesResolved(string packageId,
-                                            IReadOnlyCollection<VersionRange> versionRanges,
-                                            IReadOnlyCollection<PackageIdentity> matchingPackages)
+    public void LogPackageRequestResolution(IPackageRequest request, IReadOnlyCollection<PackageIdentity> matchingPackages)
     {
-        var rangesString = string.Join(", ", versionRanges.Select(r => r.PrettyPrint()));
-        var versionsString = string.Join(", ", matchingPackages.Select(r => r.Version));
-        AnsiConsole.MarkupLineInterpolated($"[gray]Matching packages for {packageId} {rangesString}: {versionsString}[/]");
+        var versionsString = string.Join(", ", matchingPackages.OrderBy(x => x.Id).ThenBy(x => x.Version).Select(r => r.Version));
+        AnsiConsole.MarkupLineInterpolated($"[gray]Matching packages for {request}: {versionsString}[/]");
     }
 
     public void LogPackagePresentInDestination(PackageIdentity identity)

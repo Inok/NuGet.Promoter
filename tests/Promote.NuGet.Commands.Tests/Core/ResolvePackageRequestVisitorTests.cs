@@ -2,15 +2,16 @@
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 using Promote.NuGet.Commands.Core;
+using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
 
 namespace Promote.NuGet.Commands.Tests.Core;
 
 [TestFixture]
-public class PackageVersionFinderTests
+public class ResolvePackageRequestVisitorTests
 {
     [Test]
-    public async Task FindLatestVersion_finds_greatest_released_package_version()
+    public async Task Visit_LatestPackageRequest_finds_greatest_released_package_version()
     {
         var packageId = "package-id";
         var versions = Result.Success<IReadOnlyCollection<NuGetVersion>>(
@@ -24,16 +25,16 @@ public class PackageVersionFinderTests
 
         var nugetRepository = SetupRepository(packageId, versions);
 
-        var sut = new PackageVersionFinder(nugetRepository);
+        var sut = new ResolvePackageRequestVisitor(nugetRepository);
 
-        var latestVersion = await sut.FindLatestVersion(packageId);
+        var latestVersion = await sut.Visit(new LatestPackageRequest(packageId));
 
         latestVersion.IsSuccess.Should().BeTrue();
-        latestVersion.Value.Should().Be(new PackageIdentity(packageId, new NuGetVersion(1, 0, 1)));
+        latestVersion.Value.Should().BeEquivalentTo(new[] { new PackageIdentity(packageId, new NuGetVersion(1, 0, 1)) });
     }
 
     [Test]
-    public async Task FindLatestVersion_returns_error_when_there_are_no_released_packages()
+    public async Task Visit_LatestPackageRequest_returns_error_when_there_are_no_released_packages()
     {
         var packageId = "package-id";
         var versions = Result.Success<IReadOnlyCollection<NuGetVersion>>(
@@ -46,25 +47,25 @@ public class PackageVersionFinderTests
 
         var nugetRepository = SetupRepository(packageId, versions);
 
-        var sut = new PackageVersionFinder(nugetRepository);
+        var sut = new ResolvePackageRequestVisitor(nugetRepository);
 
-        var latestVersion = await sut.FindLatestVersion(packageId);
+        var latestVersion = await sut.Visit(new LatestPackageRequest(packageId));
 
         latestVersion.IsFailure.Should().BeTrue();
-        latestVersion.Error.Should().Be($"Package package-id has no released versions");
+        latestVersion.Error.Should().Be("Package package-id has no released versions");
     }
 
     [Test]
-    public async Task FindLatestVersion_returns_error_when_package_not_found()
+    public async Task Visit_LatestPackageRequest_returns_error_when_package_not_found()
     {
         var packageId = "package-id";
         var versions = Result.Failure<IReadOnlyCollection<NuGetVersion>>("error-text");
 
         var nugetRepository = SetupRepository(packageId, versions);
 
-        var sut = new PackageVersionFinder(nugetRepository);
+        var sut = new ResolvePackageRequestVisitor(nugetRepository);
 
-        var latestVersion = await sut.FindLatestVersion(packageId);
+        var latestVersion = await sut.Visit(new LatestPackageRequest(packageId));
 
         latestVersion.IsFailure.Should().BeTrue();
         latestVersion.Error.Should().Be("error-text");

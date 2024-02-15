@@ -1,14 +1,14 @@
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
-using Promote.NuGet.Commands.Core;
+using Promote.NuGet.Commands.Requests;
 
 namespace Promote.NuGet.Commands.Promote;
 
 public interface IPromotePackageLogger
 {
-    void LogResolvingMatchingPackages(IReadOnlyCollection<PackageRequest> requests);
+    void LogResolvingMatchingPackages(IReadOnlyCollection<IPackageRequest> requests);
 
-    void LogMatchingPackagesResolved(string packageId, IReadOnlyCollection<VersionRange> versionRanges, IReadOnlyCollection<PackageIdentity> matchingPackages);
+    void LogPackageRequestResolution(IPackageRequest request, IReadOnlyCollection<PackageIdentity> matchingPackages);
 
     void LogPackagePresentInDestination(PackageIdentity identity);
 
