@@ -86,4 +86,9 @@ public class PromotePackageLogger : IPromotePackageLogger
     {
         AnsiConsole.MarkupLine($"[bold green]{count} package(s) promoted.[/]");
     }
+
+    public void LogDryRun()
+    {
+        AnsiConsole.MarkupLine("[bold green]Packages won't be promoted in dry run mode.[/]");
+    }
 }

@@ -34,21 +34,13 @@ public class PromotePackageCommand
         if (requests == null) throw new ArgumentNullException(nameof(requests));
         if (options == null) throw new ArgumentNullException(nameof(options));
 
-        var packages = await _sourcePackageRequestResolver.ResolvePackageRequests(requests, cancellationToken);
-        if (packages.IsFailure)
+        var resolvePackagesResult = await _sourcePackageRequestResolver.ResolvePackageRequests(requests, cancellationToken);
+        if (resolvePackagesResult.IsFailure)
         {
-            return Result.Failure(packages.Error);
+            return Result.Failure(resolvePackagesResult.Error);
         }
 
-        return await Promote(packages.Value, options, cancellationToken);
-    }
-
-    public async Task<Result> Promote(IReadOnlySet<PackageIdentity> identities,
-                                      PromotePackageCommandOptions options,
-                                      CancellationToken cancellationToken = default)
-    {
-        if (identities == null) throw new ArgumentNullException(nameof(identities));
-        if (options == null) throw new ArgumentNullException(nameof(options));
+        var identities = resolvePackagesResult.Value;
 
         if (identities.Count == 0)
         {
@@ -64,15 +56,16 @@ public class PromotePackageCommand
 
         if (options.DryRun)
         {
+            _promotePackageLogger.LogDryRun();
             return Result.Success();
         }
 
-        return await PromotePackages(resolvedPackagesResult.Value, cancellationToken);
+        return await PromoteExactPackages(resolvedPackagesResult.Value, cancellationToken);
     }
 
     private async Task<Result<IReadOnlyCollection<PackageIdentity>>> ResolvePackagesToPromote(IReadOnlyCollection<PackageIdentity> identities,
-                                                                                                      PromotePackageCommandOptions options,
-                                                                                                      CancellationToken cancellationToken)
+                                                                                              PromotePackageCommandOptions options,
+                                                                                              CancellationToken cancellationToken)
     {
         _promotePackageLogger.LogResolvingPackagesToPromote(identities);
 
@@ -96,7 +89,7 @@ public class PromotePackageCommand
         return resolvedPackages;
     }
 
-    private async Task<Result> PromotePackages(IReadOnlyCollection<PackageIdentity> packages, CancellationToken cancellationToken)
+    private async Task<Result> PromoteExactPackages(IReadOnlyCollection<PackageIdentity> packages, CancellationToken cancellationToken)
     {
         if (packages.Count == 0)
         {

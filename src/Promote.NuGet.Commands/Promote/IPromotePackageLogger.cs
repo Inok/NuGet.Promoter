@@ -25,4 +25,6 @@ public interface IPromotePackageLogger : IPackageRequestResolverLogger
     void LogPromotePackage(PackageIdentity identity, int current, int total);
 
     void LogPromotedPackagesCount(int count);
+
+    void LogDryRun();
 }
