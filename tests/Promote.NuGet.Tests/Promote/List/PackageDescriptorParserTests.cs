@@ -7,14 +7,23 @@ namespace Promote.NuGet.Tests.Promote.List;
 [TestFixture]
 public class PackageDescriptorParserTests
 {
-    [TestCase("PackageName 1.2.3", "PackageName", "[1.2.3]")]
-    public void Parse_space_separated_package_descriptor(string input, string id, string versionRange)
+    [TestCaseSource(nameof(PackagesTestCases))]
+    public void Parse_package_descriptors(string input, IPackageRequest expectedRequest)
     {
-        var expected = new VersionRangePackageRequest(id, VersionRange.Parse(versionRange));
-
         var result = PackageDescriptorParser.ParseLine(input);
 
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().BeEquivalentTo(expected);
+        result.Value.Should().BeEquivalentTo(expectedRequest, x => x.RespectingRuntimeTypes());
+    }
+
+    private static IEnumerable<object[]> PackagesTestCases()
+    {
+        yield return new object[] { "Install-Package PackageName -Version 1.2.3", new ExactPackageRequest("PackageName", new NuGetVersion(1, 2, 3)) };
+        yield return new object[] { "PackageName 1.2.3", new ExactPackageRequest("PackageName", new NuGetVersion(1, 2, 3)) };
+        yield return new object[]
+                     {
+                         "PackageName [1.0.5,3)",
+                         new VersionRangePackageRequest("PackageName", new VersionRange(new NuGetVersion(1, 0, 5), true, new NuGetVersion(3, 0, 0), false))
+                     };
     }
 }

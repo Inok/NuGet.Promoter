@@ -51,14 +51,14 @@ internal sealed class PromoteFromConfigurationCommand : CancellableAsyncCommand<
         return 0;
     }
 
-    private static async Task<Result<IReadOnlyCollection<VersionRangePackageRequest>>> ReadConfiguration(string file, CancellationToken cancellationToken)
+    private static async Task<Result<IReadOnlyCollection<IPackageRequest>>> ReadConfiguration(string file, CancellationToken cancellationToken)
     {
         var input = await File.ReadAllTextAsync(file, cancellationToken);
 
         var parseResult = PackagesConfigurationParser.TryParse(input);
         if (parseResult.IsFailure)
         {
-            return Result.Failure<IReadOnlyCollection<VersionRangePackageRequest>>(parseResult.Error);
+            return Result.Failure<IReadOnlyCollection<IPackageRequest>>(parseResult.Error);
         }
 
         return parseResult.Value.Packages.Select(x => new VersionRangePackageRequest(x.Id, x.Versions)).ToList();

@@ -36,13 +36,13 @@ public class PromotePackageListCommandIntegrationTests
             new[]
             {
                 "Resolving matching packages for:",
-                "├── System.Globalization (= 4.3.0)",
+                "├── System.Globalization 4.3.0",
                 "├── System.Runtime (>= 4.1.0 && < 4.1.2)",
-                "└── System.Runtime (= 4.3.1)",
+                "└── System.Runtime 4.3.1",
                 "Matching packages for System.Runtime (>= 4.1.0 && < 4.1.2): ",
                 "4.1.0, 4.1.1",
-                "Matching packages for System.Runtime (= 4.3.1): 4.3.1",
-                "Matching packages for System.Globalization (= 4.3.0): 4.3.0",
+                "Matching packages for System.Runtime 4.3.1: 4.3.1",
+                "Matching packages for System.Globalization 4.3.0: 4.3.0",
                 "Resolving packages to promote:",
                 "├── System.Globalization 4.3.0",
                 "├── System.Runtime 4.1.0",
