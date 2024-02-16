@@ -48,9 +48,9 @@ internal sealed class PromoteSinglePackageCommand : CancellableAsyncCommand<Prom
     private static PackageRequest CreatePackageRequest(PromoteSinglePackageSettings promoteSettings)
     {
         IPackageVersionPolicy versionPolicy = promoteSettings.IsLatestVersion
-                                                    ? new LatestPackageVersionPolicy()
-                                                    : new ExactPackageVersionPolicy(NuGetVersion.Parse(promoteSettings.Version));
+                                                  ? new LatestPackageVersionPolicy()
+                                                  : new ExactPackageVersionPolicy(NuGetVersion.Parse(promoteSettings.Version));
 
-        return new PackageRequest(promoteSettings.Id!, new[] { versionPolicy });
+        return new PackageRequest(promoteSettings.Id!, versionPolicy);
     }
 }

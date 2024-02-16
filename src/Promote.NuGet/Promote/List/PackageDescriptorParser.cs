@@ -22,12 +22,12 @@ internal static class PackageDescriptorParser
 
         if (NuGetVersion.TryParse(versionString, out var version))
         {
-            return new PackageRequest(id, new[] { new ExactPackageVersionPolicy(version) });
+            return new PackageRequest(id, new ExactPackageVersionPolicy(version));
         }
 
         if (VersionRange.TryParse(versionString, out var versionRange))
         {
-            return new PackageRequest(id, new[] { new VersionRangePackageVersionPolicy(versionRange) });
+            return new PackageRequest(id, new VersionRangePackageVersionPolicy(versionRange));
         }
 
         return Result.Failure<PackageRequest>($"Cannot parse '{versionString}' as a version or version range");
