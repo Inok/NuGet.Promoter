@@ -71,6 +71,7 @@ public class PromoteFromConfigurationCommandIntegrationTests
         );
 
         result.StdOutput.Should().ContainInOrder(
+            "Promoting 13 package(s)...",
             "(1/13) Promote Microsoft.NETCore.Platforms 1.0.1",
             "(2/13) Promote Microsoft.NETCore.Platforms 1.0.2",
             "(3/13) Promote Microsoft.NETCore.Platforms 1.1.0",

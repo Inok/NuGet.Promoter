@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
+using Promote.NuGet.Commands.Mirroring;
 using Promote.NuGet.Commands.PackageResolution;
 using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
@@ -10,7 +11,7 @@ public class PromotePackageCommand
 {
     private readonly PackageRequestResolver _sourcePackageRequestResolver;
     private readonly PackagesToPromoteEvaluator _packagesToPromoteEvaluator;
-    private readonly SinglePackagePromoter _singlePackagePromoter;
+    private readonly PackageMirroringExecutor _packageMirroringExecutor;
     private readonly IPromotePackageLogger _promotePackageLogger;
 
     public PromotePackageCommand(INuGetRepository sourceRepository,
@@ -24,7 +25,7 @@ public class PromotePackageCommand
         _promotePackageLogger = promotePackageLogger;
         _sourcePackageRequestResolver = new PackageRequestResolver(sourceRepository, promotePackageLogger);
         _packagesToPromoteEvaluator = new PackagesToPromoteEvaluator(sourceRepository, destinationRepository, promotePackageLogger);
-        _singlePackagePromoter = new SinglePackagePromoter(sourceRepository, destinationRepository);
+        _packageMirroringExecutor = new PackageMirroringExecutor(sourceRepository, destinationRepository, promotePackageLogger);
     }
 
     public async Task<Result> Promote(IReadOnlyCollection<IPackageRequest> requests,
@@ -60,7 +61,7 @@ public class PromotePackageCommand
             return Result.Success();
         }
 
-        return await PromoteExactPackages(resolvedPackagesResult.Value, cancellationToken);
+        return await _packageMirroringExecutor.MirrorPackages(resolvedPackagesResult.Value, cancellationToken);
     }
 
     private async Task<Result<IReadOnlyCollection<PackageIdentity>>> ResolvePackagesToPromote(IReadOnlyCollection<PackageIdentity> identities,
@@ -87,34 +88,5 @@ public class PromotePackageCommand
         }
 
         return resolvedPackages;
-    }
-
-    private async Task<Result> PromoteExactPackages(IReadOnlyCollection<PackageIdentity> packages, CancellationToken cancellationToken)
-    {
-        if (packages.Count == 0)
-        {
-            return Result.Success();
-        }
-
-        var current = 0;
-        var total = packages.Count;
-
-        foreach (var package in packages)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            current++;
-            _promotePackageLogger.LogPromotePackage(package, current, total);
-
-            var promotionResult = await _singlePackagePromoter.Promote(package, skipDuplicate: true, cancellationToken);
-            if (promotionResult.IsFailure)
-            {
-                return promotionResult;
-            }
-        }
-
-        _promotePackageLogger.LogPromotedPackagesCount(total);
-
-        return Result.Success();
     }
 }

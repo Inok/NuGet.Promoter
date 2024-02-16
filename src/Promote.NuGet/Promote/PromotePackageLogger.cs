@@ -77,18 +77,23 @@ public class PromotePackageLogger : IPromotePackageLogger
         AnsiConsole.Write(tree);
     }
 
-    public void LogPromotePackage(PackageIdentity identity, int current, int total)
+    public void LogDryRun()
+    {
+        AnsiConsole.MarkupLine("[bold green]Packages won't be promoted in dry run mode.[/]");
+    }
+
+    public void LogStartMirroringPackagesCount(int count)
+    {
+        AnsiConsole.MarkupLine($"[bold green]Promoting {count} package(s)...[/]");
+    }
+
+    public void LogMirrorPackage(PackageIdentity identity, int current, int total)
     {
         AnsiConsole.MarkupLine($"[bold green]({current}/{total}) Promote {identity.Id} {identity.Version}[/]");
     }
 
-    public void LogPromotedPackagesCount(int count)
+    public void LogMirroredPackagesCount(int count)
     {
         AnsiConsole.MarkupLine($"[bold green]{count} package(s) promoted.[/]");
-    }
-
-    public void LogDryRun()
-    {
-        AnsiConsole.MarkupLine("[bold green]Packages won't be promoted in dry run mode.[/]");
     }
 }
