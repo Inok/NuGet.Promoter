@@ -4,7 +4,7 @@ public class PackageRequest
 {
     public string Id { get; }
 
-    public IReadOnlyCollection<IPackageVersionPolicy> VersionRequests { get; }
+    public IReadOnlyCollection<IPackageVersionPolicy> VersionPolicies { get; }
 
     public PackageRequest(string id, IPackageVersionPolicy versionPolicy)
     {
@@ -12,21 +12,21 @@ public class PackageRequest
         if (versionPolicy == null) throw new ArgumentNullException(nameof(versionPolicy));
 
         Id = id;
-        VersionRequests = new[] { versionPolicy };
+        VersionPolicies = new[] { versionPolicy };
     }
 
-    public PackageRequest(string id, IReadOnlyCollection<IPackageVersionPolicy> versionRequests)
+    public PackageRequest(string id, IReadOnlyCollection<IPackageVersionPolicy> versionPolicies)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentException("Value cannot be null or empty.", nameof(id));
-        if (versionRequests == null) throw new ArgumentNullException(nameof(versionRequests));
-        if (versionRequests.Count == 0) throw new ArgumentException("Value cannot be an empty collection.", nameof(versionRequests));
+        if (versionPolicies == null) throw new ArgumentNullException(nameof(versionPolicies));
+        if (versionPolicies.Count == 0) throw new ArgumentException("Value cannot be an empty collection.", nameof(versionPolicies));
 
         Id = id;
-        VersionRequests = versionRequests;
+        VersionPolicies = versionPolicies;
     }
 
     public override string ToString()
     {
-        return $"{Id} {string.Join(", ", VersionRequests)}";
+        return $"{Id} {string.Join(", ", VersionPolicies)}";
     }
 }

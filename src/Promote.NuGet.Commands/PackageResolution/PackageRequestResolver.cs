@@ -31,7 +31,7 @@ public sealed class PackageRequestResolver
 
             var visitor = new ResolvePackageVersionPolicyVisitor(request.Id, _repository);
 
-            foreach (var versionRequest in request.VersionRequests)
+            foreach (var versionRequest in request.VersionPolicies)
             {
                 var result = await versionRequest.Accept(visitor, cancellationToken);
                 if (result.IsFailure)

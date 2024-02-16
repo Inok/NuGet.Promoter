@@ -61,11 +61,6 @@ internal sealed class PromoteFromConfigurationCommand : CancellableAsyncCommand<
             return Result.Failure<IReadOnlyCollection<PackageRequest>>(parseResult.Error);
         }
 
-        return parseResult.Value.Packages
-                          .Select(x => new PackageRequest(
-                                      x.Id,
-                                      x.Versions.Select(range => new VersionRangePackageVersionPolicy(range)).ToList()
-                                  ))
-                          .ToList();
+        return parseResult.Value.Packages.Select(x => new PackageRequest(x.Id, x.Versions)).ToList();
     }
 }
