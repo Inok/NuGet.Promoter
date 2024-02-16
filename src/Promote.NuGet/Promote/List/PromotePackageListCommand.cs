@@ -51,9 +51,9 @@ internal sealed class PromotePackageListCommand : CancellableAsyncCommand<Promot
         return 0;
     }
 
-    private static async Task<Result<IReadOnlyCollection<IPackageRequest>>> ParsePackages(string file, CancellationToken cancellationToken)
+    private static async Task<Result<IReadOnlyCollection<PackageRequest>>> ParsePackages(string file, CancellationToken cancellationToken)
     {
-        var packages = new List<IPackageRequest>();
+        var packages = new List<PackageRequest>();
 
         var lines = await File.ReadAllLinesAsync(file, cancellationToken);
 
@@ -64,7 +64,7 @@ internal sealed class PromotePackageListCommand : CancellableAsyncCommand<Promot
             var parseIdentityResult = PackageDescriptorParser.ParseLine(line);
             if (parseIdentityResult.IsFailure)
             {
-                return Result.Failure<IReadOnlyCollection<IPackageRequest>>(parseIdentityResult.Error);
+                return Result.Failure<IReadOnlyCollection<PackageRequest>>(parseIdentityResult.Error);
             }
 
             packages.Add(parseIdentityResult.Value);

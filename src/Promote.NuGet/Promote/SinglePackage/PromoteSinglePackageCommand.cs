@@ -45,13 +45,12 @@ internal sealed class PromoteSinglePackageCommand : CancellableAsyncCommand<Prom
         return 0;
     }
 
-    private static IPackageRequest CreatePackageRequest(PromoteSinglePackageSettings promoteSettings)
+    private static PackageRequest CreatePackageRequest(PromoteSinglePackageSettings promoteSettings)
     {
-        if (!promoteSettings.IsLatestVersion)
-        {
-            return new ExactPackageRequest(promoteSettings.Id!, NuGetVersion.Parse(promoteSettings.Version));
-        }
+        IPackageVersionPolicy versionPolicy = promoteSettings.IsLatestVersion
+                                                    ? new LatestPackageVersionPolicy()
+                                                    : new ExactPackageVersionPolicy(NuGetVersion.Parse(promoteSettings.Version));
 
-        return new LatestPackageRequest(promoteSettings.Id!);
+        return new PackageRequest(promoteSettings.Id!, new[] { versionPolicy });
     }
 }

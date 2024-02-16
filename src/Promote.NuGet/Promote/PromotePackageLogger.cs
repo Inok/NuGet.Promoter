@@ -8,7 +8,7 @@ namespace Promote.NuGet.Promote;
 
 public class PromotePackageLogger : IPromotePackageLogger
 {
-    public void LogResolvingMatchingPackages(IReadOnlyCollection<IPackageRequest> requests)
+    public void LogResolvingMatchingPackages(IReadOnlyCollection<PackageRequest> requests)
     {
         var tree = new Tree("[bold green]Resolving matching packages for:[/]");
         foreach (var request in requests.OrderBy(x => x.Id))
@@ -19,7 +19,7 @@ public class PromotePackageLogger : IPromotePackageLogger
         AnsiConsole.Write(tree);
     }
 
-    public void LogPackageRequestResolution(IPackageRequest request, IReadOnlyCollection<PackageIdentity> matchingPackages)
+    public void LogPackageRequestResolution(PackageRequest request, IReadOnlyCollection<PackageIdentity> matchingPackages)
     {
         var versionsString = string.Join(", ", matchingPackages.OrderBy(x => x.Id).ThenBy(x => x.Version).Select(r => r.Version));
         AnsiConsole.MarkupLineInterpolated($"[gray]Matching packages for {request}: {versionsString}[/]");

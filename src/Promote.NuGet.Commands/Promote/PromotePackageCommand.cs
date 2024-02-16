@@ -28,7 +28,7 @@ public class PromotePackageCommand
         _packageMirroringExecutor = new PackageMirroringExecutor(sourceRepository, destinationRepository, promotePackageLogger);
     }
 
-    public async Task<Result> Promote(IReadOnlyCollection<IPackageRequest> requests,
+    public async Task<Result> Promote(IReadOnlyCollection<PackageRequest> requests,
                                       PromotePackageCommandOptions options,
                                       CancellationToken cancellationToken = default)
     {

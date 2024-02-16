@@ -17,27 +17,36 @@ public sealed class PackageRequestResolver
     }
 
     public async Task<Result<IReadOnlySet<PackageIdentity>>> ResolvePackageRequests(
-        IReadOnlyCollection<IPackageRequest> requests,
+        IReadOnlyCollection<PackageRequest> requests,
         CancellationToken cancellationToken)
     {
         _logger.LogResolvingMatchingPackages(requests);
 
-        var visitor = new ResolvePackageRequestVisitor(_repository);
-
         var identities = new HashSet<PackageIdentity>();
+        var requestIdentities = new HashSet<PackageIdentity>();
+
         foreach (var request in requests)
         {
-            var result = await request.Accept(visitor, cancellationToken);
-            if (result.IsFailure)
+            requestIdentities.Clear();
+
+            var visitor = new ResolvePackageVersionPolicyVisitor(request.Id, _repository);
+
+            foreach (var versionRequest in request.VersionRequests)
             {
-                return result.ConvertFailure<IReadOnlySet<PackageIdentity>>();
+                var result = await versionRequest.Accept(visitor, cancellationToken);
+                if (result.IsFailure)
+                {
+                    return result.ConvertFailure<IReadOnlySet<PackageIdentity>>();
+                }
+
+                var matchingPackages = result.Value;
+
+                requestIdentities.UnionWith(matchingPackages);
             }
 
-            var matchingPackages = result.Value;
+            _logger.LogPackageRequestResolution(request, requestIdentities);
 
-            _logger.LogPackageRequestResolution(request, matchingPackages);
-
-            identities.UnionWith(matchingPackages);
+            identities.UnionWith(requestIdentities);
         }
 
         return identities;

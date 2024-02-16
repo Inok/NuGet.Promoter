@@ -5,7 +5,7 @@ namespace Promote.NuGet.Commands.PackageResolution;
 
 public interface IPackageRequestResolverLogger
 {
-    void LogResolvingMatchingPackages(IReadOnlyCollection<IPackageRequest> requests);
+    void LogResolvingMatchingPackages(IReadOnlyCollection<PackageRequest> requests);
 
-    void LogPackageRequestResolution(IPackageRequest request, IReadOnlyCollection<PackageIdentity> matchingPackages);
+    void LogPackageRequestResolution(PackageRequest request, IReadOnlyCollection<PackageIdentity> matchingPackages);
 }

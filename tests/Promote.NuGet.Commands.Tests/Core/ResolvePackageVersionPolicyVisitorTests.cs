@@ -8,7 +8,7 @@ using Promote.NuGet.Feeds;
 namespace Promote.NuGet.Commands.Tests.Core;
 
 [TestFixture]
-public class ResolvePackageRequestVisitorTests
+public class ResolvePackageVersionPolicyVisitorTests
 {
     [Test]
     public async Task Visit_LatestPackageRequest_finds_greatest_released_package_version()
@@ -25,9 +25,9 @@ public class ResolvePackageRequestVisitorTests
 
         var nugetRepository = SetupRepository(packageId, versions);
 
-        var sut = new ResolvePackageRequestVisitor(nugetRepository);
+        var sut = new ResolvePackageVersionPolicyVisitor(packageId, nugetRepository);
 
-        var latestVersion = await sut.Visit(new LatestPackageRequest(packageId));
+        var latestVersion = await sut.Visit(new LatestPackageVersionPolicy());
 
         latestVersion.IsSuccess.Should().BeTrue();
         latestVersion.Value.Should().BeEquivalentTo(new[] { new PackageIdentity(packageId, new NuGetVersion(1, 0, 1)) });
@@ -47,9 +47,9 @@ public class ResolvePackageRequestVisitorTests
 
         var nugetRepository = SetupRepository(packageId, versions);
 
-        var sut = new ResolvePackageRequestVisitor(nugetRepository);
+        var sut = new ResolvePackageVersionPolicyVisitor(packageId, nugetRepository);
 
-        var latestVersion = await sut.Visit(new LatestPackageRequest(packageId));
+        var latestVersion = await sut.Visit(new LatestPackageVersionPolicy());
 
         latestVersion.IsFailure.Should().BeTrue();
         latestVersion.Error.Should().Be("Package package-id has no released versions");
@@ -63,9 +63,9 @@ public class ResolvePackageRequestVisitorTests
 
         var nugetRepository = SetupRepository(packageId, versions);
 
-        var sut = new ResolvePackageRequestVisitor(nugetRepository);
+        var sut = new ResolvePackageVersionPolicyVisitor(packageId, nugetRepository);
 
-        var latestVersion = await sut.Visit(new LatestPackageRequest(packageId));
+        var latestVersion = await sut.Visit(new LatestPackageVersionPolicy());
 
         latestVersion.IsFailure.Should().BeTrue();
         latestVersion.Error.Should().Be("error-text");

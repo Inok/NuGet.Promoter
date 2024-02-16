@@ -7,7 +7,7 @@ namespace Promote.NuGet.Promote.List;
 
 internal static class PackageDescriptorParser
 {
-    public static Result<IPackageRequest> ParseLine(string line)
+    public static Result<PackageRequest> ParseLine(string line)
     {
         var parseResult = TryParseInstallPackage(line)
                           .OnFailureCompensate(_ => TryParsePackageReference(line))
@@ -15,22 +15,22 @@ internal static class PackageDescriptorParser
 
         if (parseResult.IsFailure)
         {
-            return Result.Failure<IPackageRequest>($"Failed to parse '{line}'");
+            return Result.Failure<PackageRequest>($"Failed to parse '{line}'");
         }
 
         var (id, versionString) = parseResult.Value;
 
         if (NuGetVersion.TryParse(versionString, out var version))
         {
-            return new ExactPackageRequest(id, version);
+            return new PackageRequest(id, new[] { new ExactPackageVersionPolicy(version) });
         }
 
         if (VersionRange.TryParse(versionString, out var versionRange))
         {
-            return new VersionRangePackageRequest(id, versionRange);
+            return new PackageRequest(id, new[] { new VersionRangePackageVersionPolicy(versionRange) });
         }
 
-        return Result.Failure<IPackageRequest>($"Cannot parse '{versionString}' as a version or version range");
+        return Result.Failure<PackageRequest>($"Cannot parse '{versionString}' as a version or version range");
     }
 
     private static Result<(string Id, string Version)> TryParseInstallPackage(string input)
