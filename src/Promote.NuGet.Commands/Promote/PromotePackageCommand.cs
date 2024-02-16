@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
-using Promote.NuGet.Commands.Core;
+using Promote.NuGet.Commands.PackageResolution;
 using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
 
@@ -8,7 +8,7 @@ namespace Promote.NuGet.Commands.Promote;
 
 public class PromotePackageCommand
 {
-    private readonly ResolvePackageRequestVisitor _sourceResolvePackageRequestVisitor;
+    private readonly PackageRequestResolver _sourcePackageRequestResolver;
     private readonly PackagesToPromoteEvaluator _packagesToPromoteEvaluator;
     private readonly SinglePackagePromoter _singlePackagePromoter;
     private readonly IPromotePackageLogger _promotePackageLogger;
@@ -22,7 +22,7 @@ public class PromotePackageCommand
         if (promotePackageLogger == null) throw new ArgumentNullException(nameof(promotePackageLogger));
 
         _promotePackageLogger = promotePackageLogger;
-        _sourceResolvePackageRequestVisitor = new ResolvePackageRequestVisitor(sourceRepository);
+        _sourcePackageRequestResolver = new PackageRequestResolver(sourceRepository, promotePackageLogger);
         _packagesToPromoteEvaluator = new PackagesToPromoteEvaluator(sourceRepository, destinationRepository, promotePackageLogger);
         _singlePackagePromoter = new SinglePackagePromoter(sourceRepository, destinationRepository);
     }
@@ -34,39 +34,13 @@ public class PromotePackageCommand
         if (requests == null) throw new ArgumentNullException(nameof(requests));
         if (options == null) throw new ArgumentNullException(nameof(options));
 
-        var packages = await ResolvePackageRequests(requests, cancellationToken);
+        var packages = await _sourcePackageRequestResolver.ResolvePackageRequests(requests, cancellationToken);
         if (packages.IsFailure)
         {
             return Result.Failure(packages.Error);
         }
 
         return await Promote(packages.Value, options, cancellationToken);
-    }
-
-    private async Task<Result<IReadOnlySet<PackageIdentity>>> ResolvePackageRequests(
-        IReadOnlyCollection<IPackageRequest> requests,
-        CancellationToken cancellationToken)
-    {
-        _promotePackageLogger.LogResolvingMatchingPackages(requests);
-
-        var identities = new HashSet<PackageIdentity>();
-
-        foreach (var request in requests)
-        {
-            var result = await request.Accept(_sourceResolvePackageRequestVisitor, cancellationToken);
-            if (result.IsFailure)
-            {
-                return result.ConvertFailure<IReadOnlySet<PackageIdentity>>();
-            }
-
-            var matchingPackages = result.Value;
-
-            _promotePackageLogger.LogPackageRequestResolution(request, matchingPackages);
-
-            identities.UnionWith(matchingPackages);
-        }
-
-        return identities;
     }
 
     public async Task<Result> Promote(IReadOnlySet<PackageIdentity> identities,

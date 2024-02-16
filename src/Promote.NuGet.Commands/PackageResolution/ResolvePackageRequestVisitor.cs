@@ -3,9 +3,9 @@ using NuGet.Packaging.Core;
 using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
 
-namespace Promote.NuGet.Commands.Core;
+namespace Promote.NuGet.Commands.PackageResolution;
 
-public sealed class ResolvePackageRequestVisitor : IPackageRequestVisitor<Result<IReadOnlySet<PackageIdentity>>>
+internal sealed class ResolvePackageRequestVisitor : IPackageRequestVisitor<Result<IReadOnlySet<PackageIdentity>>>
 {
     private readonly INuGetRepository _repository;
 

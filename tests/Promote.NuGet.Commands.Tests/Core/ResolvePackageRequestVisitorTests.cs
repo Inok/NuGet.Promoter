@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
-using Promote.NuGet.Commands.Core;
+using Promote.NuGet.Commands.PackageResolution;
 using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
 
