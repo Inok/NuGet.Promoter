@@ -1,7 +1,6 @@
 ﻿using NuGet.Packaging.Core;
-using Promote.NuGet.Commands.Requests;
 
-namespace Promote.NuGet.Commands.PackageResolution;
+namespace Promote.NuGet.Commands.Requests.Resolution;
 
 public interface IPackageRequestResolverLogger
 {

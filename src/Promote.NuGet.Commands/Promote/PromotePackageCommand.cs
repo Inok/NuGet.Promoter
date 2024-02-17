@@ -1,8 +1,8 @@
 ﻿using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
 using Promote.NuGet.Commands.Mirroring;
-using Promote.NuGet.Commands.PackageResolution;
 using Promote.NuGet.Commands.Requests;
+using Promote.NuGet.Commands.Requests.Resolution;
 using Promote.NuGet.Feeds;
 
 namespace Promote.NuGet.Commands.Promote;
