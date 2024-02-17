@@ -40,11 +40,11 @@ public class PromoteFromConfigurationCommandIntegrationTests
             new[]
             {
                 "Resolving matching packages for:",
-                "├── System.Globalization (= 4.3.0)",
-                "└── System.Runtime (>= 4.1.0 && < 4.1.2), (= 4.3.1)",
-                "Matching packages for System.Globalization (= 4.3.0): 4.3.0",
+                "├── System.Globalization 4.3.0",
+                "└── System.Runtime (>= 4.1.0 && < 4.1.2), 4.3.1",
+                "Matching packages for System.Globalization 4.3.0: 4.3.0",
                 "Matching packages for System.Runtime (>= 4.1.0 && < 4.1.2), ",
-                "(= 4.3.1): 4.1.0, 4.1.1, 4.3.1",
+                "4.3.1: 4.1.0, 4.1.1, 4.3.1",
                 "Resolving packages to promote:",
                 "├── System.Globalization 4.3.0",
                 "├── System.Runtime 4.1.0",
@@ -71,6 +71,7 @@ public class PromoteFromConfigurationCommandIntegrationTests
         );
 
         result.StdOutput.Should().ContainInOrder(
+            "Promoting 13 package(s)...",
             "(1/13) Promote Microsoft.NETCore.Platforms 1.0.1",
             "(2/13) Promote Microsoft.NETCore.Platforms 1.0.2",
             "(3/13) Promote Microsoft.NETCore.Platforms 1.1.0",

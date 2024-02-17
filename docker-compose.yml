@@ -1,6 +1,6 @@
 services:
   bagetter:
-    image: bagetter/bagetter:1.0.0
+    image: bagetter/bagetter:1.0.4
     restart: on-failure
     environment:
       ApiKey: ${BAGETTER_API_KEY}

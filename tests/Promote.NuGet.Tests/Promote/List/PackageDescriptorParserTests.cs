@@ -1,5 +1,5 @@
 ﻿using NuGet.Versioning;
-using Promote.NuGet.Commands.Core;
+using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Promote.List;
 
 namespace Promote.NuGet.Tests.Promote.List;
@@ -7,14 +7,36 @@ namespace Promote.NuGet.Tests.Promote.List;
 [TestFixture]
 public class PackageDescriptorParserTests
 {
-    [TestCase("PackageName 1.2.3", "PackageName", "[1.2.3]")]
-    public void Parse_space_separated_package_descriptor(string input, string id, string versionRange)
+    [TestCaseSource(nameof(PackagesTestCases))]
+    public void Parse_package_descriptors(string input, PackageRequest expectedVersionRequest)
     {
-        var expected = new PackageRequest(id, VersionRange.Parse(versionRange));
-
         var result = PackageDescriptorParser.ParseLine(input);
 
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().BeEquivalentTo(expected);
+        result.Value.Should().BeEquivalentTo(expectedVersionRequest, x => x.RespectingRuntimeTypes());
+    }
+
+    private static IEnumerable<object[]> PackagesTestCases()
+    {
+        yield return new object[]
+                     {
+                         "Install-Package PackageName -Version 1.2.3",
+                         new PackageRequest("PackageName", new ExactPackageVersionPolicy(new NuGetVersion(1, 2, 3)))
+                     };
+
+        yield return new object[]
+                     {
+                         "PackageName 1.2.3",
+                         new PackageRequest("PackageName", new ExactPackageVersionPolicy(new NuGetVersion(1, 2, 3)))
+                     };
+
+        yield return new object[]
+                     {
+                         "PackageName [1.0.5,3)",
+                         new PackageRequest(
+                             "PackageName",
+                             new VersionRangePackageVersionPolicy(new VersionRange(new NuGetVersion(1, 0, 5), true, new NuGetVersion(3, 0, 0), false))
+                         )
+                     };
     }
 }

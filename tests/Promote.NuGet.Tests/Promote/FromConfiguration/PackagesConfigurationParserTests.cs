@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
-using FluentValidation.Results;
 using NuGet.Versioning;
+using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Promote.FromConfiguration;
 
 namespace Promote.NuGet.Tests.Promote.FromConfiguration;
@@ -30,22 +30,22 @@ public class PackagesConfigurationParserTests
                                new PackageConfiguration
                                {
                                    Id = "System.Globalization",
-                                   Versions = new[]
-                                              {
-                                                  new VersionRange(new NuGetVersion(4, 3, 0), true, new NuGetVersion(4, 3, 0), true)
-                                              }
+                                   Versions = new IPackageVersionPolicy[]
+                                                     {
+                                                         new ExactPackageVersionPolicy(new NuGetVersion(4, 3, 0))
+                                                     }
                                },
                                new PackageConfiguration
                                {
                                    Id = "System.Runtime",
-                                   Versions = new[]
+                                   Versions = new IPackageVersionPolicy[]
                                               {
-                                                  new VersionRange(new NuGetVersion(4, 1, 0), true, new NuGetVersion(4, 1, 2), false),
-                                                  new VersionRange(new NuGetVersion(4, 3, 1), true, new NuGetVersion(4, 3, 1), true),
+                                                  new VersionRangePackageVersionPolicy(new VersionRange(new NuGetVersion(4, 1, 0), true, new NuGetVersion(4, 1, 2), false)),
+                                                  new ExactPackageVersionPolicy(new NuGetVersion(4, 3, 1)),
                                               }
                                }
                            }
-            });
+            }, x => x.RespectingRuntimeTypes());
     }
 
     [Test]

@@ -1,15 +1,12 @@
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
-using Promote.NuGet.Commands.Core;
+using Promote.NuGet.Commands.Mirroring;
+using Promote.NuGet.Commands.PackageResolution;
 
 namespace Promote.NuGet.Commands.Promote;
 
-public interface IPromotePackageLogger
+public interface IPromotePackageLogger : IPackageRequestResolverLogger, IPackageMirroringExecutorLogger
 {
-    void LogResolvingMatchingPackages(IReadOnlyCollection<PackageRequest> requests);
-
-    void LogMatchingPackagesResolved(string packageId, IReadOnlyCollection<VersionRange> versionRanges, IReadOnlyCollection<PackageIdentity> matchingPackages);
-
     void LogPackagePresentInDestination(PackageIdentity identity);
 
     void LogNoPackagesToPromote();
@@ -26,7 +23,5 @@ public interface IPromotePackageLogger
 
     void LogPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities);
 
-    void LogPromotePackage(PackageIdentity identity, int current, int total);
-
-    void LogPromotedPackagesCount(int count);
+    void LogDryRun();
 }

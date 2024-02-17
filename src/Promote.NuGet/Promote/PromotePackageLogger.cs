@@ -1,7 +1,7 @@
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
-using Promote.NuGet.Commands.Core;
 using Promote.NuGet.Commands.Promote;
+using Promote.NuGet.Commands.Requests;
 using Spectre.Console;
 
 namespace Promote.NuGet.Promote;
@@ -11,22 +11,18 @@ public class PromotePackageLogger : IPromotePackageLogger
     public void LogResolvingMatchingPackages(IReadOnlyCollection<PackageRequest> requests)
     {
         var tree = new Tree("[bold green]Resolving matching packages for:[/]");
-        foreach (var dep in requests.OrderBy(x => x.Id))
+        foreach (var request in requests.OrderBy(x => x.Id))
         {
-            var rangesString = string.Join(", ", dep.Versions.Select(r => r.PrettyPrint()));
-            tree.AddNode(Markup.FromInterpolated($"{dep.Id} {rangesString}"));
+            tree.AddNode(Markup.Escape(request.ToString()));
         }
 
         AnsiConsole.Write(tree);
     }
 
-    public void LogMatchingPackagesResolved(string packageId,
-                                            IReadOnlyCollection<VersionRange> versionRanges,
-                                            IReadOnlyCollection<PackageIdentity> matchingPackages)
+    public void LogPackageRequestResolution(PackageRequest request, IReadOnlyCollection<PackageIdentity> matchingPackages)
     {
-        var rangesString = string.Join(", ", versionRanges.Select(r => r.PrettyPrint()));
-        var versionsString = string.Join(", ", matchingPackages.Select(r => r.Version));
-        AnsiConsole.MarkupLineInterpolated($"[gray]Matching packages for {packageId} {rangesString}: {versionsString}[/]");
+        var versionsString = string.Join(", ", matchingPackages.OrderBy(x => x.Id).ThenBy(x => x.Version).Select(r => r.Version));
+        AnsiConsole.MarkupLineInterpolated($"[gray]Matching packages for {request}: {versionsString}[/]");
     }
 
     public void LogPackagePresentInDestination(PackageIdentity identity)
@@ -81,12 +77,22 @@ public class PromotePackageLogger : IPromotePackageLogger
         AnsiConsole.Write(tree);
     }
 
-    public void LogPromotePackage(PackageIdentity identity, int current, int total)
+    public void LogDryRun()
+    {
+        AnsiConsole.MarkupLine("[bold green]Packages won't be promoted in dry run mode.[/]");
+    }
+
+    public void LogStartMirroringPackagesCount(int count)
+    {
+        AnsiConsole.MarkupLine($"[bold green]Promoting {count} package(s)...[/]");
+    }
+
+    public void LogMirrorPackage(PackageIdentity identity, int current, int total)
     {
         AnsiConsole.MarkupLine($"[bold green]({current}/{total}) Promote {identity.Id} {identity.Version}[/]");
     }
 
-    public void LogPromotedPackagesCount(int count)
+    public void LogMirroredPackagesCount(int count)
     {
         AnsiConsole.MarkupLine($"[bold green]{count} package(s) promoted.[/]");
     }

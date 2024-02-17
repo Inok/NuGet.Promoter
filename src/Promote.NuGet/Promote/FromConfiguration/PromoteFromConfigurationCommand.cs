@@ -3,17 +3,12 @@ using CSharpFunctionalExtensions;
 using JetBrains.Annotations;
 using NuGet.Common;
 using NuGet.Protocol.Core.Types;
-using NuGet.Versioning;
-using Promote.NuGet.Commands.Core;
 using Promote.NuGet.Commands.Promote;
+using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
 using Promote.NuGet.Infrastructure;
 using Spectre.Console;
 using Spectre.Console.Cli;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace Promote.NuGet.Promote.FromConfiguration;
 
@@ -68,5 +63,4 @@ internal sealed class PromoteFromConfigurationCommand : CancellableAsyncCommand<
 
         return parseResult.Value.Packages.Select(x => new PackageRequest(x.Id, x.Versions)).ToList();
     }
-
 }

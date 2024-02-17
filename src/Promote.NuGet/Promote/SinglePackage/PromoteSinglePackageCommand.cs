@@ -1,11 +1,9 @@
-﻿using CSharpFunctionalExtensions;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using NuGet.Common;
-using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using Promote.NuGet.Commands.Core;
 using Promote.NuGet.Commands.Promote;
+using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
 using Promote.NuGet.Infrastructure;
 using Spectre.Console;
@@ -31,18 +29,13 @@ internal sealed class PromoteSinglePackageCommand : CancellableAsyncCommand<Prom
         var sourceRepository = new NuGetRepository(sourceDescriptor, cacheContext, nuGetLogger);
         var destinationRepository = new NuGetRepository(destinationDescriptor, cacheContext, nuGetLogger);
 
-        var identityResult = await CreatePackageIdentity(sourceRepository, promoteSettings, cancellationToken);
-        if (identityResult.IsFailure)
-        {
-            AnsiConsole.WriteLine(identityResult.Error);
-            return -1;
-        }
+        var packageRequest = CreatePackageRequest(promoteSettings);
 
         var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, new PromotePackageLogger());
 
         var options = new PromotePackageCommandOptions(promoteSettings.DryRun, promoteSettings.AlwaysResolveDeps, promoteSettings.ForcePush);
 
-        var promotionResult = await promoter.Promote(identityResult.Value, options, cancellationToken);
+        var promotionResult = await promoter.Promote(new[] { packageRequest }, options, cancellationToken);
         if (promotionResult.IsFailure)
         {
             AnsiConsole.WriteLine(promotionResult.Error);
@@ -52,17 +45,12 @@ internal sealed class PromoteSinglePackageCommand : CancellableAsyncCommand<Prom
         return 0;
     }
 
-    private async Task<Result<PackageIdentity>> CreatePackageIdentity(
-        INuGetRepository repository,
-        PromoteSinglePackageSettings promoteSettings,
-        CancellationToken cancellationToken)
+    private static PackageRequest CreatePackageRequest(PromoteSinglePackageSettings promoteSettings)
     {
-        if (!promoteSettings.IsLatestVersion)
-        {
-            return new PackageIdentity(promoteSettings.Id, NuGetVersion.Parse(promoteSettings.Version));
-        }
+        IPackageVersionPolicy versionPolicy = promoteSettings.IsLatestVersion
+                                                  ? new LatestPackageVersionPolicy()
+                                                  : new ExactPackageVersionPolicy(NuGetVersion.Parse(promoteSettings.Version));
 
-        var packageVersionFinder = new PackageVersionFinder(repository);
-        return await packageVersionFinder.FindLatestVersion(promoteSettings.Id!, cancellationToken);
+        return new PackageRequest(promoteSettings.Id!, versionPolicy);
     }
 }

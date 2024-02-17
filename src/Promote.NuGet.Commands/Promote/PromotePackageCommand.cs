@@ -1,17 +1,18 @@
 ﻿using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
-using Promote.NuGet.Commands.Core;
+using Promote.NuGet.Commands.Mirroring;
+using Promote.NuGet.Commands.PackageResolution;
+using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
 
 namespace Promote.NuGet.Commands.Promote;
 
 public class PromotePackageCommand
 {
-    private readonly PackageVersionFinder _sourcePackageVersionFinder;
+    private readonly PackageRequestResolver _sourcePackageRequestResolver;
     private readonly PackagesToPromoteEvaluator _packagesToPromoteEvaluator;
-    private readonly SinglePackagePromoter _singlePackagePromoter;
+    private readonly PackageMirroringExecutor _packageMirroringExecutor;
     private readonly IPromotePackageLogger _promotePackageLogger;
-    private readonly PromotePackageToFindMatchingPackagesLoggerAdapter _promotePackageToFindMatchingPackagesLoggerAdapter;
 
     public PromotePackageCommand(INuGetRepository sourceRepository,
                                  INuGetRepository destinationRepository,
@@ -22,10 +23,9 @@ public class PromotePackageCommand
         if (promotePackageLogger == null) throw new ArgumentNullException(nameof(promotePackageLogger));
 
         _promotePackageLogger = promotePackageLogger;
-        _sourcePackageVersionFinder = new PackageVersionFinder(sourceRepository);
+        _sourcePackageRequestResolver = new PackageRequestResolver(sourceRepository, promotePackageLogger);
         _packagesToPromoteEvaluator = new PackagesToPromoteEvaluator(sourceRepository, destinationRepository, promotePackageLogger);
-        _singlePackagePromoter = new SinglePackagePromoter(sourceRepository, destinationRepository);
-        _promotePackageToFindMatchingPackagesLoggerAdapter = new PromotePackageToFindMatchingPackagesLoggerAdapter(promotePackageLogger);
+        _packageMirroringExecutor = new PackageMirroringExecutor(sourceRepository, destinationRepository, promotePackageLogger);
     }
 
     public async Task<Result> Promote(IReadOnlyCollection<PackageRequest> requests,
@@ -35,36 +35,13 @@ public class PromotePackageCommand
         if (requests == null) throw new ArgumentNullException(nameof(requests));
         if (options == null) throw new ArgumentNullException(nameof(options));
 
-        _promotePackageLogger.LogResolvingMatchingPackages(requests);
-
-        var packages = await _sourcePackageVersionFinder.FindMatchingPackages(requests,
-                                                                              _promotePackageToFindMatchingPackagesLoggerAdapter,
-                                                                              cancellationToken);
-        if (packages.IsFailure)
+        var resolvePackagesResult = await _sourcePackageRequestResolver.ResolvePackageRequests(requests, cancellationToken);
+        if (resolvePackagesResult.IsFailure)
         {
-            return Result.Failure(packages.Error);
+            return Result.Failure(resolvePackagesResult.Error);
         }
 
-        return await Promote(packages.Value, options, cancellationToken);
-    }
-
-    public async Task<Result> Promote(PackageIdentity identity,
-                                      PromotePackageCommandOptions options,
-                                      CancellationToken cancellationToken = default)
-    {
-        if (identity == null) throw new ArgumentNullException(nameof(identity));
-        if (options == null) throw new ArgumentNullException(nameof(options));
-
-        var identities = new HashSet<PackageIdentity> { identity };
-        return await Promote(identities, options, cancellationToken);
-    }
-
-    public async Task<Result> Promote(IReadOnlySet<PackageIdentity> identities,
-                                                  PromotePackageCommandOptions options,
-                                                  CancellationToken cancellationToken = default)
-    {
-        if (identities == null) throw new ArgumentNullException(nameof(identities));
-        if (options == null) throw new ArgumentNullException(nameof(options));
+        var identities = resolvePackagesResult.Value;
 
         if (identities.Count == 0)
         {
@@ -80,15 +57,16 @@ public class PromotePackageCommand
 
         if (options.DryRun)
         {
+            _promotePackageLogger.LogDryRun();
             return Result.Success();
         }
 
-        return await PromotePackages(resolvedPackagesResult.Value, cancellationToken);
+        return await _packageMirroringExecutor.MirrorPackages(resolvedPackagesResult.Value, cancellationToken);
     }
 
     private async Task<Result<IReadOnlyCollection<PackageIdentity>>> ResolvePackagesToPromote(IReadOnlyCollection<PackageIdentity> identities,
-                                                                                                      PromotePackageCommandOptions options,
-                                                                                                      CancellationToken cancellationToken)
+                                                                                              PromotePackageCommandOptions options,
+                                                                                              CancellationToken cancellationToken)
     {
         _promotePackageLogger.LogResolvingPackagesToPromote(identities);
 
@@ -110,34 +88,5 @@ public class PromotePackageCommand
         }
 
         return resolvedPackages;
-    }
-
-    private async Task<Result> PromotePackages(IReadOnlyCollection<PackageIdentity> packages, CancellationToken cancellationToken)
-    {
-        if (packages.Count == 0)
-        {
-            return Result.Success();
-        }
-
-        var current = 0;
-        var total = packages.Count;
-
-        foreach (var package in packages)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            current++;
-            _promotePackageLogger.LogPromotePackage(package, current, total);
-
-            var promotionResult = await _singlePackagePromoter.Promote(package, skipDuplicate: true, cancellationToken);
-            if (promotionResult.IsFailure)
-            {
-                return promotionResult;
-            }
-        }
-
-        _promotePackageLogger.LogPromotedPackagesCount(total);
-
-        return Result.Success();
     }
 }

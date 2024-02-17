@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using FluentValidation;
 using NuGet.Versioning;
+using Promote.NuGet.Commands.Requests;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -43,7 +44,7 @@ public static class PackagesConfigurationParser
 
         public bool Accepts(Type type)
         {
-            return type == typeof(VersionRange[]);
+            return type == typeof(IPackageVersionPolicy[]);
         }
 
         public object ReadYaml(IParser parser, Type type)
@@ -55,7 +56,7 @@ public static class PackagesConfigurationParser
 
             if (parser.TryConsume<SequenceStart>(out _))
             {
-                var items = new List<VersionRange>();
+                var items = new List<IPackageVersionPolicy>();
 
                 while (parser.TryConsume<Scalar>(out var scalarItem))
                 {
@@ -69,7 +70,7 @@ public static class PackagesConfigurationParser
             throw new YamlException($"Unexpected token: {parser.Current?.GetType()}");
         }
 
-        private static VersionRange ParseScalarAsVersionRange(Scalar scalar)
+        private static IPackageVersionPolicy ParseScalarAsVersionRange(Scalar scalar)
         {
             if (scalar.IsKey)
             {
@@ -78,12 +79,12 @@ public static class PackagesConfigurationParser
 
             if (NuGetVersion.TryParse(scalar.Value, out var version))
             {
-                return new VersionRange(version, true, version, true);
+                return new ExactPackageVersionPolicy(version);
             }
 
             if (VersionRange.TryParse(scalar.Value, out var versionRange))
             {
-                return versionRange;
+                return new VersionRangePackageVersionPolicy(versionRange);
             }
 
             throw new YamlException($"Expected a valid version or version range, but got '{scalar.Value}'.");
