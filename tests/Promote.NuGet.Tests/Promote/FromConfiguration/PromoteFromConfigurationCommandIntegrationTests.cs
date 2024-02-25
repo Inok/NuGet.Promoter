@@ -13,6 +13,8 @@ public class PromoteFromConfigurationCommandIntegrationTests
     {
         using var packagesFile = await TempFile.Create(
                                      "packages:",
+                                     "  - id: System.Collections",
+                                     "    versions: 4.3.0",
                                      "  - id: System.Globalization",
                                      "    versions: 4.3.0",
                                      "  - id: System.Runtime",
@@ -40,12 +42,15 @@ public class PromoteFromConfigurationCommandIntegrationTests
             new[]
             {
                 "Resolving matching packages for:",
+                "├── System.Collections 4.3.0",
                 "├── System.Globalization 4.3.0",
                 "└── System.Runtime (>= 4.1.0 && < 4.1.2), 4.3.1",
+                "Matching packages for System.Collections 4.3.0: 4.3.0",
                 "Matching packages for System.Globalization 4.3.0: 4.3.0",
                 "Matching packages for System.Runtime (>= 4.1.0 && < 4.1.2), ",
                 "4.3.1: 4.1.0, 4.1.1, 4.3.1",
                 "Resolving packages to promote:",
+                "├── System.Collections 4.3.0",
                 "├── System.Globalization 4.3.0",
                 "├── System.Runtime 4.1.0",
                 "├── System.Runtime 4.1.1",
@@ -54,7 +59,31 @@ public class PromoteFromConfigurationCommandIntegrationTests
         );
 
         result.StdOutput.Should().ContainInConsecutiveOrder(
-            "Found 13 package(s) to promote:",
+            "Resolved package tree:",
+            "├── System.Collections 4.3.0",
+            "│   ├── Microsoft.NETCore.Platforms 1.1.0",
+            "│   ├── Microsoft.NETCore.Targets 1.1.0",
+            "│   └── System.Runtime 4.3.0",
+            "│       ├── Microsoft.NETCore.Platforms 1.1.0",
+            "│       └── Microsoft.NETCore.Targets 1.1.0",
+            "├── System.Globalization 4.3.0",
+            "│   ├── Microsoft.NETCore.Platforms 1.1.0",
+            "│   ├── Microsoft.NETCore.Targets 1.1.0",
+            "│   └── System.Runtime 4.3.0",
+            "│       └── + 2 direct dependencies (expanded above)",
+            "├── System.Runtime 4.1.0",
+            "│   ├── Microsoft.NETCore.Platforms 1.0.1",
+            "│   └── Microsoft.NETCore.Targets 1.0.1",
+            "├── System.Runtime 4.1.1",
+            "│   ├── Microsoft.NETCore.Platforms 1.0.2",
+            "│   └── Microsoft.NETCore.Targets 1.0.6",
+            "└── System.Runtime 4.3.1",
+            "    ├── Microsoft.NETCore.Platforms 1.1.1",
+            "    └── Microsoft.NETCore.Targets 1.1.3"
+        );
+
+        result.StdOutput.Should().ContainInConsecutiveOrder(
+            "Found 14 package(s) to promote:",
             "├── Microsoft.NETCore.Platforms 1.0.1",
             "├── Microsoft.NETCore.Platforms 1.0.2",
             "├── Microsoft.NETCore.Platforms 1.1.0",
@@ -63,6 +92,7 @@ public class PromoteFromConfigurationCommandIntegrationTests
             "├── Microsoft.NETCore.Targets 1.0.6",
             "├── Microsoft.NETCore.Targets 1.1.0",
             "├── Microsoft.NETCore.Targets 1.1.3",
+            "├── System.Collections 4.3.0",
             "├── System.Globalization 4.3.0",
             "├── System.Runtime 4.1.0",
             "├── System.Runtime 4.1.1",
@@ -71,21 +101,22 @@ public class PromoteFromConfigurationCommandIntegrationTests
         );
 
         result.StdOutput.Should().ContainInOrder(
-            "Promoting 13 package(s)...",
-            "(1/13) Promote Microsoft.NETCore.Platforms 1.0.1",
-            "(2/13) Promote Microsoft.NETCore.Platforms 1.0.2",
-            "(3/13) Promote Microsoft.NETCore.Platforms 1.1.0",
-            "(4/13) Promote Microsoft.NETCore.Platforms 1.1.1",
-            "(5/13) Promote Microsoft.NETCore.Targets 1.0.1",
-            "(6/13) Promote Microsoft.NETCore.Targets 1.0.6",
-            "(7/13) Promote Microsoft.NETCore.Targets 1.1.0",
-            "(8/13) Promote Microsoft.NETCore.Targets 1.1.3",
-            "(9/13) Promote System.Globalization 4.3.0",
-            "(10/13) Promote System.Runtime 4.1.0",
-            "(11/13) Promote System.Runtime 4.1.1",
-            "(12/13) Promote System.Runtime 4.3.0",
-            "(13/13) Promote System.Runtime 4.3.1",
-            "13 package(s) promoted."
+            "Promoting 14 package(s)...",
+            "(1/14) Promote Microsoft.NETCore.Platforms 1.0.1",
+            "(2/14) Promote Microsoft.NETCore.Platforms 1.0.2",
+            "(3/14) Promote Microsoft.NETCore.Platforms 1.1.0",
+            "(4/14) Promote Microsoft.NETCore.Platforms 1.1.1",
+            "(5/14) Promote Microsoft.NETCore.Targets 1.0.1",
+            "(6/14) Promote Microsoft.NETCore.Targets 1.0.6",
+            "(7/14) Promote Microsoft.NETCore.Targets 1.1.0",
+            "(8/14) Promote Microsoft.NETCore.Targets 1.1.3",
+            "(9/14) Promote System.Collections 4.3.0",
+            "(10/14) Promote System.Globalization 4.3.0",
+            "(11/14) Promote System.Runtime 4.1.0",
+            "(12/14) Promote System.Runtime 4.1.1",
+            "(13/14) Promote System.Runtime 4.3.0",
+            "(14/14) Promote System.Runtime 4.3.1",
+            "14 package(s) promoted."
         );
 
         result.StdError.Should().BeEmpty();
@@ -99,6 +130,11 @@ public class PromoteFromConfigurationCommandIntegrationTests
         await AssertContainsVersions(
             destinationRepo,
             "System.Globalization",
+            new NuGetVersion(4, 3, 0)
+        );
+        await AssertContainsVersions(
+            destinationRepo,
+            "System.Collections",
             new NuGetVersion(4, 3, 0)
         );
         await AssertContainsVersions(

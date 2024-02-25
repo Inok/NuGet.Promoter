@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
 using Promote.NuGet.Commands.Mirroring;
+using Promote.NuGet.Commands.Promote.Resolution;
 using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Commands.Requests.Resolution;
 using Promote.NuGet.Feeds;
@@ -49,10 +50,17 @@ public class PromotePackageCommand
             return Result.Success();
         }
 
-        var resolvedPackagesResult = await ResolvePackagesToPromote(identities, options, cancellationToken);
-        if (resolvedPackagesResult.IsFailure)
+        var packagesToPromoteResult = await ResolvePackagesToPromote(identities, options, cancellationToken);
+        if (packagesToPromoteResult.IsFailure)
         {
-            return Result.Failure(resolvedPackagesResult.Error);
+            return Result.Failure(packagesToPromoteResult.Error);
+        }
+
+        var packagesToPromote = packagesToPromoteResult.Value;
+        if (packagesToPromote.Count == 0)
+        {
+            _promotePackageLogger.LogNoPackagesToPromote();
+            return Result.Success();
         }
 
         if (options.DryRun)
@@ -61,32 +69,42 @@ public class PromotePackageCommand
             return Result.Success();
         }
 
-        return await _packageMirroringExecutor.MirrorPackages(resolvedPackagesResult.Value, cancellationToken);
+        return await _packageMirroringExecutor.MirrorPackages(packagesToPromote, cancellationToken);
     }
 
-    private async Task<Result<IReadOnlyCollection<PackageIdentity>>> ResolvePackagesToPromote(IReadOnlyCollection<PackageIdentity> identities,
+    private async Task<Result<IReadOnlyCollection<PackageIdentity>>> ResolvePackagesToPromote(IReadOnlySet<PackageIdentity> identities,
                                                                                               PromotePackageCommandOptions options,
                                                                                               CancellationToken cancellationToken)
     {
         _promotePackageLogger.LogResolvingPackagesToPromote(identities);
 
-        var packagesToPromote = await _packagesToPromoteEvaluator.ListPackagesToPromote(identities, options, cancellationToken);
-        if (packagesToPromote.IsFailure)
+        var packageTreeResult = await _packagesToPromoteEvaluator.ResolvePackageTree(identities, options, cancellationToken);
+        if (packageTreeResult.IsFailure)
         {
-            return Result.Failure<IReadOnlyCollection<PackageIdentity>>(packagesToPromote.Error);
+            return Result.Failure<IReadOnlyCollection<PackageIdentity>>(packageTreeResult.Error);
         }
 
-        var resolvedPackages = packagesToPromote.Value.OrderBy(x => x).ToList();
+        var packageTree = packageTreeResult.Value;
 
-        if (resolvedPackages.Count > 0)
+        _promotePackageLogger.LogPackageResolutionTree(packageTree);
+
+        var packagesToPromote = ListPackagesToPromote(packageTree, options).OrderBy(x => x).ToList();
+        _promotePackageLogger.LogPackagesToPromote(packagesToPromote);
+
+        return packagesToPromote;
+    }
+
+    private static IReadOnlySet<PackageIdentity> ListPackagesToPromote(PackageResolutionTree packageTree, PromotePackageCommandOptions options)
+    {
+        var packages = new HashSet<PackageIdentity>();
+        foreach (var package in packageTree.AllPackages)
         {
-            _promotePackageLogger.LogPackagesToPromote(resolvedPackages);
-        }
-        else
-        {
-            _promotePackageLogger.LogNoPackagesToPromote();
+            if (options.ForcePush || !packageTree.IsInTargetFeed(package))
+            {
+                packages.Add(package);
+            }
         }
 
-        return resolvedPackages;
+        return packages;
     }
 }

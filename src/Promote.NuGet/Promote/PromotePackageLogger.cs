@@ -1,6 +1,7 @@
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 using Promote.NuGet.Commands.Promote;
+using Promote.NuGet.Commands.Promote.Resolution;
 using Promote.NuGet.Commands.Requests;
 using Spectre.Console;
 
@@ -51,19 +52,65 @@ public class PromotePackageLogger : IPromotePackageLogger
         AnsiConsole.MarkupLine($"[gray]Processing package {identity.Id} {identity.Version}[/]");
     }
 
-    public void LogProcessingDependency(string packageId, VersionRange versionRange)
+    public void LogNewDependencyToProcess(PackageIdentity source, string dependencyPackageId, VersionRange dependencyVersionRange)
     {
-        AnsiConsole.MarkupLine($"[gray]Processing dependency {packageId} {versionRange.PrettyPrint()}[/]");
+        AnsiConsole.MarkupLine($"[gray]New dependency of {source} to process: {dependencyPackageId} {dependencyVersionRange.PrettyPrint()}[/]");
     }
 
-    public void LogNewDependencyToProcess(string packageId, VersionRange versionRange)
+    public void LogProcessingDependency(PackageIdentity source, string dependencyPackageId, VersionRange dependencyVersionRange)
     {
-        AnsiConsole.MarkupLine($"[gray]New dependency to process: {packageId} {versionRange.PrettyPrint()}[/]");
+        AnsiConsole.MarkupLine($"[gray]Processing dependency of {source.Id} {source.Version}: {dependencyPackageId} {dependencyVersionRange.PrettyPrint()}[/]");
+    }
+
+    public void LogResolvedDependency(PackageIdentity source, PackageIdentity resolvedDependency)
+    {
+        AnsiConsole.MarkupLine($"[gray]Dependency of {source.Id} {source.Version} resolved: {resolvedDependency.Id} {resolvedDependency.Version}[/]");
     }
 
     public void LogNewDependencyFound(PackageIdentity identity)
     {
         AnsiConsole.MarkupLine($"[gray]New dependency found: {identity.Id} {identity.Version}[/]");
+    }
+
+    public void LogPackageResolutionTree(PackageResolutionTree packageTree)
+    {
+        var expanded = new HashSet<PackageIdentity>();
+
+        var tree = new Tree("[bold green]Resolved package tree:[/]");
+        foreach (var rootPackage in packageTree.Roots.OrderBy(x => x.Id))
+        {
+            AddNodeAndChildren(tree, packageTree, rootPackage, expanded);
+        }
+
+        AnsiConsole.Write(tree);
+    }
+
+    private static void AddNodeAndChildren(IHasTreeNodes parentNode,
+                                           PackageResolutionTree packageTree,
+                                           PackageIdentity package,
+                                           HashSet<PackageIdentity> expanded)
+    {
+        var isInTargetFeed = packageTree.IsInTargetFeed(package);
+
+        var node = parentNode.AddNode(Markup.FromInterpolated($"{package.Id} {package.Version}{(isInTargetFeed ? " [already promoted]" : "")}"));
+
+        var dependencies = packageTree.GetDependencies(package);
+
+        var expandedBefore = !expanded.Add(package);
+        if (expandedBefore)
+        {
+            if (dependencies.Count > 0)
+            {
+                node.AddNode(Markup.FromInterpolated($"+ {dependencies.Count} direct dependencies (expanded above)"));
+            }
+
+            return;
+        }
+
+        foreach (var child in dependencies.OrderBy(x => x))
+        {
+            AddNodeAndChildren(node, packageTree, child, expanded);
+        }
     }
 
     public void LogPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities)
