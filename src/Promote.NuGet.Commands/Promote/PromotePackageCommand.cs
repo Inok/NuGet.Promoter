@@ -11,7 +11,7 @@ namespace Promote.NuGet.Commands.Promote;
 public class PromotePackageCommand
 {
     private readonly PackageRequestResolver _sourcePackageRequestResolver;
-    private readonly PackagesToPromoteEvaluator _packagesToPromoteEvaluator;
+    private readonly PackagesToPromoteResolver _packagesToPromoteResolver;
     private readonly PackageMirroringExecutor _packageMirroringExecutor;
     private readonly IPromotePackageLogger _promotePackageLogger;
 
@@ -25,7 +25,7 @@ public class PromotePackageCommand
 
         _promotePackageLogger = promotePackageLogger;
         _sourcePackageRequestResolver = new PackageRequestResolver(sourceRepository, promotePackageLogger);
-        _packagesToPromoteEvaluator = new PackagesToPromoteEvaluator(sourceRepository, destinationRepository, promotePackageLogger);
+        _packagesToPromoteResolver = new PackagesToPromoteResolver(sourceRepository, destinationRepository, promotePackageLogger);
         _packageMirroringExecutor = new PackageMirroringExecutor(sourceRepository, destinationRepository, promotePackageLogger);
     }
 
@@ -78,17 +78,13 @@ public class PromotePackageCommand
     {
         _promotePackageLogger.LogResolvingPackagesToPromote(identities);
 
-        var packageTreeResult = await _packagesToPromoteEvaluator.ResolvePackageTree(identities, options, cancellationToken);
+        var packageTreeResult = await _packagesToPromoteResolver.ResolvePackageTree(identities, options, cancellationToken);
         if (packageTreeResult.IsFailure)
         {
             return Result.Failure<IReadOnlyCollection<PackageIdentity>>(packageTreeResult.Error);
         }
 
-        var packageTree = packageTreeResult.Value;
-
-        _promotePackageLogger.LogPackageResolutionTree(packageTree);
-
-        var packagesToPromote = ListPackagesToPromote(packageTree, options).OrderBy(x => x).ToList();
+        var packagesToPromote = ListPackagesToPromote(packageTreeResult.Value, options).OrderBy(x => x).ToList();
         _promotePackageLogger.LogPackagesToPromote(packagesToPromote);
 
         return packagesToPromote;

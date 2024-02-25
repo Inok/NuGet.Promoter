@@ -3,20 +3,19 @@ using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using Promote.NuGet.Commands.Core;
-using Promote.NuGet.Commands.Promote.Resolution;
 using Promote.NuGet.Feeds;
 
-namespace Promote.NuGet.Commands.Promote;
+namespace Promote.NuGet.Commands.Promote.Resolution;
 
-public class PackagesToPromoteEvaluator
+public class PackagesToPromoteResolver
 {
     private readonly INuGetRepository _sourceRepository;
     private readonly INuGetRepository _destinationRepository;
-    private readonly IPromotePackageLogger _logger;
+    private readonly IPackagesToPromoteResolverLogger _logger;
 
-    public PackagesToPromoteEvaluator(INuGetRepository sourceRepository,
-                                      INuGetRepository destinationRepository,
-                                      IPromotePackageLogger logger)
+    public PackagesToPromoteResolver(INuGetRepository sourceRepository,
+                                     INuGetRepository destinationRepository,
+                                     IPackagesToPromoteResolverLogger logger)
     {
         _sourceRepository = sourceRepository ?? throw new ArgumentNullException(nameof(sourceRepository));
         _destinationRepository = destinationRepository ?? throw new ArgumentNullException(nameof(destinationRepository));
@@ -66,7 +65,11 @@ public class PackagesToPromoteEvaluator
             }
         }
 
-        return PackageResolutionTree.CreateTree(resolvedPackages, identities, packagesAlreadyInTarget, resolvedDependencies);
+        var packageResolutionTree = PackageResolutionTree.CreateTree(resolvedPackages, identities, packagesAlreadyInTarget, resolvedDependencies);
+
+        _logger.LogPackageResolutionTree(packageResolutionTree);
+
+        return packageResolutionTree;
     }
 
     private async Task<Result> ProcessPackage(PackageIdentity packageIdentity,
