@@ -1,7 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
-using NuGet.Versioning;
 using Promote.NuGet.Commands.Core;
 using Promote.NuGet.Feeds;
 
@@ -33,37 +32,20 @@ public class PackagesToPromoteResolver
         _logger.LogResolvingPackagesToPromote(identities);
 
         var packagesToResolveQueue = new DistinctQueue<PackageIdentity>(identities);
-        var dependenciesToResolveQueue = new DistinctQueue<DependencyRequest>();
         var packageInfoAccessor = new CachedNuGetPackageInfoAccessor(_sourceRepository.Packages);
 
         var resolvedPackages = new HashSet<PackageIdentity>();
         var packagesAlreadyInTarget = new HashSet<PackageIdentity>();
         var resolvedDependencies = new HashSet<(PackageIdentity Dependant, PackageIdentity Dependency)>();
 
-        while (packagesToResolveQueue.HasItems || dependenciesToResolveQueue.HasItems)
+        while (packagesToResolveQueue.TryDequeue(out var packageIdentity))
         {
-            // Resolve all packages known at this point
-            while (packagesToResolveQueue.TryDequeue(out var packageIdentity))
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var processingResult = await ProcessPackage(packageIdentity, options, resolvedPackages, packagesAlreadyInTarget, resolvedDependencies, packagesToResolveQueue, packageInfoAccessor, cancellationToken);
+            if (processingResult.IsFailure)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                var processingResult = await ProcessPackage(packageIdentity, options, resolvedPackages, packagesAlreadyInTarget, dependenciesToResolveQueue, cancellationToken);
-                if (processingResult.IsFailure)
-                {
-                    return Result.Failure<PackageResolutionTree>(processingResult.Error);
-                }
-            }
-
-            // Resolve dependencies known at this point
-            while (dependenciesToResolveQueue.TryDequeue(out var dependency))
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                var processingResult = await ProcessDependencyRequest(dependency, packagesToResolveQueue, resolvedDependencies, packageInfoAccessor, cancellationToken);
-                if (processingResult.IsFailure)
-                {
-                    return Result.Failure<PackageResolutionTree>(processingResult.Error);
-                }
+                return Result.Failure<PackageResolutionTree>(processingResult.Error);
             }
         }
 
@@ -78,7 +60,9 @@ public class PackagesToPromoteResolver
                                               PromotePackageCommandOptions options,
                                               ISet<PackageIdentity> resolvedPackages,
                                               ISet<PackageIdentity> packagesAlreadyInTarget,
-                                              DistinctQueue<DependencyRequest> dependencyResolutionQueue,
+                                              ISet<(PackageIdentity Dependant, PackageIdentity Dependency)> resolvedDependencies,
+                                              DistinctQueue<PackageIdentity> packagesToResolveQueue,
+                                              INuGetPackageInfoAccessor packageInfoAccessor,
                                               CancellationToken cancellationToken)
     {
         _logger.LogProcessingPackage(packageIdentity);
@@ -112,8 +96,11 @@ public class PackagesToPromoteResolver
 
         if (!packageExistInDestination || options.AlwaysResolveDeps)
         {
-            var dependencyRequests = EnqueuePackageDependencies(metadata, dependencyResolutionQueue);
-            _logger.LogPackageDependenciesToResolve(packageIdentity, dependencyRequests);
+            var processDependenciesResult = await ProcessPackageDependencies(metadata, packagesToResolveQueue, resolvedDependencies, packageInfoAccessor, cancellationToken);
+            if (processDependenciesResult.IsFailure)
+            {
+                return Result.Failure(processDependenciesResult.Error);
+            }
         }
         else
         {
@@ -123,39 +110,60 @@ public class PackagesToPromoteResolver
         return Result.Success();
     }
 
-    private IReadOnlySet<DependencyDescriptor> EnqueuePackageDependencies(IPackageSearchMetadata metadata,
-                                                                          DistinctQueue<DependencyRequest> dependencyResolutionQueue)
+    private async Task<Result> ProcessPackageDependencies(IPackageSearchMetadata metadata,
+                                                          DistinctQueue<PackageIdentity> packagesToResolveQueue,
+                                                          ISet<(PackageIdentity Dependant, PackageIdentity Dependency)> resolvedDependencies,
+                                                          INuGetPackageInfoAccessor packageInfoAccessor,
+                                                          CancellationToken cancellationToken)
+    {
+        var dependencies = ListPackageDependencies(metadata);
+        if (dependencies.Count == 0)
+        {
+            _logger.LogNoDependencies(metadata.Identity);
+            return Result.Success();
+        }
+
+        foreach (var dependency in dependencies)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var processingResult = await ProcessDependency(metadata.Identity, dependency, packagesToResolveQueue, resolvedDependencies, packageInfoAccessor, cancellationToken);
+            if (processingResult.IsFailure)
+            {
+                return Result.Failure(processingResult.Error);
+            }
+        }
+
+        return Result.Success();
+    }
+
+    private static IReadOnlySet<DependencyDescriptor> ListPackageDependencies(IPackageSearchMetadata metadata)
     {
         var dependencies = metadata.DependencySets.SelectMany(x => x.Packages);
 
-        var dependencyRequests = new HashSet<DependencyDescriptor>();
+        var dependencyDescriptors = new HashSet<DependencyDescriptor>();
         foreach (var dependency in dependencies)
         {
             var dependencyId = new PackageIdentity(dependency.Id, null);
             var dependencyDescriptor = new DependencyDescriptor(dependencyId, dependency.VersionRange);
 
-            dependencyRequests.Add(dependencyDescriptor);
+            dependencyDescriptors.Add(dependencyDescriptor);
         }
 
-        foreach (var descriptor in dependencyRequests)
-        {
-            dependencyResolutionQueue.Enqueue(new DependencyRequest(metadata.Identity, descriptor.Identity, descriptor.VersionRange));
-        }
-
-        return dependencyRequests;
+        return dependencyDescriptors;
     }
 
-    private async Task<Result<PackageIdentity>> ProcessDependencyRequest(DependencyRequest request,
-                                                                         DistinctQueue<PackageIdentity> packageResolutionQueue,
-                                                                         ISet<(PackageIdentity Dependant, PackageIdentity Dependency)> resolvedDependencies,
-                                                                         INuGetPackageInfoAccessor packageInfoAccessor,
-                                                                         CancellationToken cancellationToken)
+    private async Task<Result<PackageIdentity>> ProcessDependency(PackageIdentity source,
+                                                                  DependencyDescriptor dependency,
+                                                                  DistinctQueue<PackageIdentity> packageResolutionQueue,
+                                                                  ISet<(PackageIdentity Dependant, PackageIdentity Dependency)> resolvedDependencies,
+                                                                  INuGetPackageInfoAccessor packageInfoAccessor,
+                                                                  CancellationToken cancellationToken)
     {
-        var source = request.Source;
-        var dependencyId = request.Identity.Id;
-        var dependencyVersionRange = request.VersionRange;
+        var dependencyId = dependency.Identity.Id;
+        var dependencyVersionRange = dependency.VersionRange;
 
-        _logger.LogResolvingDependency(source, dependencyId, dependencyVersionRange);
+        _logger.LogResolvingDependency(source, dependency);
 
         var allVersionsOfDepResult = await packageInfoAccessor.GetAllVersions(dependencyId, cancellationToken);
         if (allVersionsOfDepResult.IsFailure)
@@ -181,6 +189,4 @@ public class PackagesToPromoteResolver
 
         return Result.Success(resolvedPackage);
     }
-
-    public sealed record DependencyRequest(PackageIdentity Source, PackageIdentity Identity, VersionRange VersionRange);
 }

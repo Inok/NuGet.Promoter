@@ -1,5 +1,4 @@
 using NuGet.Packaging.Core;
-using NuGet.Versioning;
 using Promote.NuGet.Commands.Promote;
 using Promote.NuGet.Commands.Promote.Resolution;
 using Promote.NuGet.Commands.Requests;
@@ -9,7 +8,7 @@ namespace Promote.NuGet.Promote;
 
 public class PromotePackageLogger : IPromotePackageLogger
 {
-    private const int DefaultLeftPadding = 2;
+    private const int SingleLeftPaddingSize = 2;
 
     public void LogResolvingMatchingPackages(IReadOnlyCollection<PackageRequest> requests)
     {
@@ -36,41 +35,28 @@ public class PromotePackageLogger : IPromotePackageLogger
     public void LogPackagePresentInDestination(PackageIdentity identity)
     {
         var text = Markup.FromInterpolated($"[gray]{identity.Id} {identity.Version} is already in the destination.[/]");
-        var padder = new Padder(text).Padding(left: DefaultLeftPadding, top: 0, right: 0, bottom: 0);
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
     }
 
     public void LogPackageNotInDestination(PackageIdentity identity)
     {
         var text = Markup.FromInterpolated($"[gray]{identity.Id} {identity.Version} is not in the destination.[/]");
-        var padder = new Padder(text).Padding(left: DefaultLeftPadding, top: 0, right: 0, bottom: 0);
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
     }
 
-    public void LogPackageDependenciesToResolve(PackageIdentity source, IReadOnlySet<DependencyDescriptor> dependencies)
+    public void LogNoDependencies(PackageIdentity identity)
     {
-        if (dependencies.Count == 0)
-        {
-            var text = Markup.FromInterpolated($"[gray]{source.Id} {source.Version} has no dependencies to resolve.[/]");
-            var textPadder = new Padder(text).Padding(left: DefaultLeftPadding, top: 0, right: 0, bottom: 0);
-            AnsiConsole.Write(textPadder);
-            return;
-        }
-
-        var tree = new Tree(Markup.FromInterpolated($"[gray]Dependencies of {source.Id} {source.Version} to resolve:[/]"));
-        foreach (var request in dependencies.OrderBy(x => x.Identity).ThenBy(x => x.VersionRange))
-        {
-            tree.AddNode(Markup.FromInterpolated($"[gray]{request.Identity.Id} {request.VersionRange.PrettyPrint()}[/]"));
-        }
-
-        var padder = new Padder(tree).Padding(left: DefaultLeftPadding, top: 0, right: 0, bottom: 0);
+        var text = Markup.FromInterpolated($"[gray]{identity.Id} {identity.Version} has no dependencies.[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
     }
 
     public void LogPackageDependenciesSkipped(PackageIdentity identity)
     {
         var text = Markup.FromInterpolated($"[gray]Skipping dependencies of {identity.Id} {identity.Version}.[/]");
-        var padder = new Padder(text).Padding(left: DefaultLeftPadding, top: 0, right: 0, bottom: 0);
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
     }
 
@@ -90,29 +76,31 @@ public class PromotePackageLogger : IPromotePackageLogger
         AnsiConsole.Write(tree);
     }
 
-    public void LogResolvingDependency(PackageIdentity source, string dependencyPackageId, VersionRange dependencyVersionRange)
+    public void LogResolvingDependency(PackageIdentity source, DependencyDescriptor dependency)
     {
-        AnsiConsole.MarkupLine($"[bold]Resolving dependency of {source.Id} {source.Version}: {dependencyPackageId} {dependencyVersionRange.PrettyPrint()}[/]");
+        var text = Markup.FromInterpolated($"[gray]Resolving dependency {dependency.Identity.Id} {dependency.VersionRange.PrettyPrint()}[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
     }
 
     public void LogResolvedDependency(PackageIdentity identity)
     {
         var text = Markup.FromInterpolated($"[gray]Resolved as {identity.Id} {identity.Version}[/]");
-        var padder = new Padder(text).Padding(left: DefaultLeftPadding, top: 0, right: 0, bottom: 0);
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
     }
 
     public void LogNewPackageQueuedForProcessing(PackageIdentity identity)
     {
         var text = Markup.FromInterpolated($"[gray]{identity.Id} {identity.Version} is queued for processing.[/]");
-        var padder = new Padder(text).Padding(left: DefaultLeftPadding, top: 0, right: 0, bottom: 0);
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
     }
 
     public void LogPackageIsAlreadyProcessedOrQueued(PackageIdentity identity)
     {
         var text = Markup.FromInterpolated($"[gray]{identity.Id} {identity.Version} is already processed or queued.[/]");
-        var padder = new Padder(text).Padding(left: DefaultLeftPadding, top: 0, right: 0, bottom: 0);
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
     }
 
