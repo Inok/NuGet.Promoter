@@ -28,7 +28,7 @@ public class PromotePackageLogger : IPromotePackageLogger
 
     public void LogPackagePresentInDestination(PackageIdentity identity)
     {
-        AnsiConsole.MarkupLineInterpolated($"[gray]Package {identity.Id} {identity.Version} is already present in the destination repository.[/]");
+        AnsiConsole.MarkupLineInterpolated($"[gray]Package {identity.Id} {identity.Version} is already in the destination repository.[/]");
     }
 
     public void LogNoPackagesToPromote()
@@ -52,24 +52,30 @@ public class PromotePackageLogger : IPromotePackageLogger
         AnsiConsole.MarkupLine($"[gray]Processing package {identity.Id} {identity.Version}[/]");
     }
 
-    public void LogNewDependencyToProcess(PackageIdentity source, string dependencyPackageId, VersionRange dependencyVersionRange)
+    public void LogPackageDependenciesQueuedForResolving(PackageIdentity source, IReadOnlySet<DependencyDescriptor> dependencies)
     {
-        AnsiConsole.MarkupLine($"[gray]New dependency of {source} to process: {dependencyPackageId} {dependencyVersionRange.PrettyPrint()}[/]");
+        var tree = new Tree(Markup.FromInterpolated($"[bold green]Dependencies of {source.Id} {source.Version} queued for resolution:[/]"));
+        foreach (var request in dependencies.OrderBy(x => x.Identity).ThenBy(x => x.VersionRange))
+        {
+            tree.AddNode(Markup.FromInterpolated($"{request.Identity.Id} {request.VersionRange.PrettyPrint()}"));
+        }
+
+        AnsiConsole.Write(tree);
     }
 
-    public void LogProcessingDependency(PackageIdentity source, string dependencyPackageId, VersionRange dependencyVersionRange)
+    public void LogResolvingDependency(PackageIdentity source, string dependencyPackageId, VersionRange dependencyVersionRange)
     {
-        AnsiConsole.MarkupLine($"[gray]Processing dependency of {source.Id} {source.Version}: {dependencyPackageId} {dependencyVersionRange.PrettyPrint()}[/]");
+        AnsiConsole.MarkupLine($"[gray]Resolving dependency of {source.Id} {source.Version}: {dependencyPackageId} {dependencyVersionRange.PrettyPrint()}[/]");
     }
 
-    public void LogResolvedDependency(PackageIdentity source, PackageIdentity resolvedDependency)
+    public void LogResolvedDependency(PackageIdentity identity)
     {
-        AnsiConsole.MarkupLine($"[gray]Dependency of {source.Id} {source.Version} resolved: {resolvedDependency.Id} {resolvedDependency.Version}[/]");
+        AnsiConsole.MarkupLine($"[gray]Dependency resolved: {identity.Id} {identity.Version}[/]");
     }
 
-    public void LogNewDependencyFound(PackageIdentity identity)
+    public void LogNewPackageQueuedForProcessing(PackageIdentity identity)
     {
-        AnsiConsole.MarkupLine($"[gray]New dependency found: {identity.Id} {identity.Version}[/]");
+        AnsiConsole.MarkupLine($"[gray]Package {identity.Id} {identity.Version} is queued for processing.[/]");
     }
 
     public void LogResolvedPackageTree(PackageResolutionTree packageTree)

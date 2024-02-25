@@ -108,26 +108,31 @@ public class PackagesToPromoteResolver
 
         if (!packageExistInDestination || options.AlwaysResolveDeps)
         {
-            ProcessPackageDependencies(metadata, dependencyResolutionQueue);
+            EnqueuePackageDependencies(metadata, dependencyResolutionQueue);
         }
 
         return Result.Success();
     }
 
-    private void ProcessPackageDependencies(IPackageSearchMetadata metadata, DistinctQueue<DependencyRequest> dependencyResolutionQueue)
+    private void EnqueuePackageDependencies(IPackageSearchMetadata metadata, DistinctQueue<DependencyRequest> dependencyResolutionQueue)
     {
         var dependencies = metadata.DependencySets.SelectMany(x => x.Packages);
 
+        var dependencyRequests = new HashSet<DependencyDescriptor>();
         foreach (var dependency in dependencies)
         {
             var dependencyId = new PackageIdentity(dependency.Id, null);
-            var dependencyRequest = new DependencyRequest(metadata.Identity, dependencyId, dependency.VersionRange);
+            var dependencyDescriptor = new DependencyDescriptor(dependencyId, dependency.VersionRange);
 
-            if (dependencyResolutionQueue.Enqueue(dependencyRequest))
-            {
-                _logger.LogNewDependencyToProcess(metadata.Identity, dependencyId.Id, dependency.VersionRange);
-            }
+            dependencyRequests.Add(dependencyDescriptor);
         }
+
+        foreach (var descriptor in dependencyRequests)
+        {
+            dependencyResolutionQueue.Enqueue(new DependencyRequest(metadata.Identity, descriptor.Identity, descriptor.VersionRange));
+        }
+
+        _logger.LogPackageDependenciesQueuedForResolving(metadata.Identity, dependencyRequests);
     }
 
     private async Task<Result<PackageIdentity>> ProcessDependencyRequest(DependencyRequest request,
@@ -140,7 +145,7 @@ public class PackagesToPromoteResolver
         var dependencyId = request.Identity.Id;
         var dependencyVersionRange = request.VersionRange;
 
-        _logger.LogProcessingDependency(source, dependencyId, dependencyVersionRange);
+        _logger.LogResolvingDependency(source, dependencyId, dependencyVersionRange);
 
         var allVersionsOfDepResult = await packageInfoAccessor.GetAllVersions(dependencyId, cancellationToken);
         if (allVersionsOfDepResult.IsFailure)
@@ -151,11 +156,11 @@ public class PackagesToPromoteResolver
         var bestMatchVersion = dependencyVersionRange.FindBestMatch(allVersionsOfDepResult.Value);
         var resolvedPackage = new PackageIdentity(dependencyId, bestMatchVersion);
 
-        _logger.LogResolvedDependency(source, resolvedPackage);
+        _logger.LogResolvedDependency(resolvedPackage);
 
         if (packageResolutionQueue.Enqueue(resolvedPackage))
         {
-            _logger.LogNewDependencyFound(resolvedPackage);
+            _logger.LogNewPackageQueuedForProcessing(resolvedPackage);
         }
 
         resolvedDependencies.Add((source, resolvedPackage));
@@ -163,5 +168,5 @@ public class PackagesToPromoteResolver
         return Result.Success(resolvedPackage);
     }
 
-    private sealed record DependencyRequest(PackageIdentity Source, PackageIdentity Identity, VersionRange VersionRange);
+    public sealed record DependencyRequest(PackageIdentity Source, PackageIdentity Identity, VersionRange VersionRange);
 }
