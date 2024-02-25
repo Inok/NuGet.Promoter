@@ -1,12 +1,10 @@
 ﻿using CSharpFunctionalExtensions;
 using NuGet.Versioning;
-using Promote.NuGet.Commands.Promote;
-using Promote.NuGet.Feeds;
 
-namespace Promote.NuGet.Commands.Tests.Promote;
+namespace Promote.NuGet.Feeds.Tests;
 
 [TestFixture]
-public class CachedPackageVersionFinderTests
+public class CachedNuGetPackageInfoAccessorTests
 {
     [Test]
     public async Task Get_all_versions_from_repository()

@@ -3,11 +3,10 @@ using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using Promote.NuGet.Feeds;
 
-namespace Promote.NuGet.Commands.Promote;
+namespace Promote.NuGet.Feeds;
 
-internal class CachedNuGetPackageInfoAccessor : INuGetPackageInfoAccessor
+public class CachedNuGetPackageInfoAccessor : INuGetPackageInfoAccessor
 {
     private readonly INuGetPackageInfoAccessor _inner;
     private readonly Dictionary<PackageIdentity, IReadOnlyCollection<NuGetVersion>> _packageVersionsCache;
