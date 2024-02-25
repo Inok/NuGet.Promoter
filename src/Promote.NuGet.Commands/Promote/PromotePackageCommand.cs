@@ -43,7 +43,6 @@ public class PromotePackageCommand
         }
 
         var identities = resolvePackagesResult.Value;
-
         if (identities.Count == 0)
         {
             _promotePackageLogger.LogNoPackagesToPromote();
@@ -59,7 +58,6 @@ public class PromotePackageCommand
         var packagesToPromote = packagesToPromoteResult.Value;
         if (packagesToPromote.Count == 0)
         {
-            _promotePackageLogger.LogNoPackagesToPromote();
             return Result.Success();
         }
 
@@ -76,31 +74,28 @@ public class PromotePackageCommand
                                                                                               PromotePackageCommandOptions options,
                                                                                               CancellationToken cancellationToken)
     {
-        _promotePackageLogger.LogResolvingPackagesToPromote(identities);
-
         var packageTreeResult = await _packagesToPromoteResolver.ResolvePackageTree(identities, options, cancellationToken);
         if (packageTreeResult.IsFailure)
         {
             return Result.Failure<IReadOnlyCollection<PackageIdentity>>(packageTreeResult.Error);
         }
 
-        var packagesToPromote = ListPackagesToPromote(packageTreeResult.Value, options).OrderBy(x => x).ToList();
-        _promotePackageLogger.LogPackagesToPromote(packagesToPromote);
+        var packageTree = packageTreeResult.Value;
 
-        return packagesToPromote;
-    }
+        var packagesToPromote = packageTree.AllPackages
+                                           .Where(x => options.ForcePush || !packageTree.IsInTargetFeed(x))
+                                           .OrderBy(x => x)
+                                           .ToList();
 
-    private static IReadOnlySet<PackageIdentity> ListPackagesToPromote(PackageResolutionTree packageTree, PromotePackageCommandOptions options)
-    {
-        var packages = new HashSet<PackageIdentity>();
-        foreach (var package in packageTree.AllPackages)
+        if (packagesToPromote.Count > 0)
         {
-            if (options.ForcePush || !packageTree.IsInTargetFeed(package))
-            {
-                packages.Add(package);
-            }
+            _promotePackageLogger.LogPackagesToPromote(packagesToPromote);
+        }
+        else
+        {
+            _promotePackageLogger.LogNoPackagesToPromote();
         }
 
-        return packages;
+        return packagesToPromote;
     }
 }

@@ -5,11 +5,11 @@ namespace Promote.NuGet.Commands.Promote.Resolution;
 
 public interface IPackagesToPromoteResolverLogger
 {
-    void LogPackagePresentInDestination(PackageIdentity identity);
+    void LogResolvingPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities);
 
     void LogProcessingPackage(PackageIdentity identity);
 
-    void LogNewDependencyToProcess(PackageIdentity source, string dependencyPackageId, VersionRange dependencyVersionRange);
+    void LogPackagePresentInDestination(PackageIdentity identity);
 
     void LogProcessingDependency(PackageIdentity source, string dependencyPackageId, VersionRange dependencyVersionRange);
 
@@ -17,5 +17,7 @@ public interface IPackagesToPromoteResolverLogger
 
     void LogNewDependencyFound(PackageIdentity identity);
 
-    void LogPackageResolutionTree(PackageResolutionTree packageTree);
+    void LogNewDependencyToProcess(PackageIdentity source, string dependencyPackageId, VersionRange dependencyVersionRange);
+
+    void LogResolvedPackageTree(PackageResolutionTree packageTree);
 }

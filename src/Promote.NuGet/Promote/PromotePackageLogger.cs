@@ -72,7 +72,7 @@ public class PromotePackageLogger : IPromotePackageLogger
         AnsiConsole.MarkupLine($"[gray]New dependency found: {identity.Id} {identity.Version}[/]");
     }
 
-    public void LogPackageResolutionTree(PackageResolutionTree packageTree)
+    public void LogResolvedPackageTree(PackageResolutionTree packageTree)
     {
         var expanded = new HashSet<PackageIdentity>();
 

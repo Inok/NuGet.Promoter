@@ -30,6 +30,8 @@ public class PackagesToPromoteResolver
         if (identities.Any(i => !i.HasVersion)) throw new ArgumentException("Version of a package must be specified.", nameof(identities));
         if (options == null) throw new ArgumentNullException(nameof(options));
 
+        _logger.LogResolvingPackagesToPromote(identities);
+
         var packagesToResolveQueue = new DistinctQueue<PackageIdentity>(identities);
         var dependenciesToResolveQueue = new DistinctQueue<DependencyRequest>();
         var packageInfoAccessor = new CachedNuGetPackageInfoAccessor(_sourceRepository.Packages);
@@ -67,7 +69,7 @@ public class PackagesToPromoteResolver
 
         var packageResolutionTree = PackageResolutionTree.CreateTree(resolvedPackages, identities, packagesAlreadyInTarget, resolvedDependencies);
 
-        _logger.LogPackageResolutionTree(packageResolutionTree);
+        _logger.LogResolvedPackageTree(packageResolutionTree);
 
         return packageResolutionTree;
     }

@@ -7,8 +7,6 @@ namespace Promote.NuGet.Commands.Promote;
 
 public interface IPromotePackageLogger : IPackageRequestResolverLogger, IPackageMirroringExecutorLogger, IPackagesToPromoteResolverLogger
 {
-    void LogResolvingPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities);
-
     void LogPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities);
 
     void LogNoPackagesToPromote();

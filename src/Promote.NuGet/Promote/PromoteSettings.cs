@@ -42,7 +42,7 @@ internal class PromoteSettings : CommandSettings
     public bool AlwaysResolveDeps { get; init; }
 
     [Description("Push packages even if they are already exist in the destination repository. "
-               + "Use that option to restore the integrity of the destination repository (i.e. when some packages in the feed are broken). "
+               + "Use this option to restore the integrity of packages in the destination repository (i.e., when some packages are broken). "
                + "When using this option, `--always-resolve-deps` must also be specified.")]
     [CommandOption("--force-push")]
     public bool ForcePush { get; init; }
