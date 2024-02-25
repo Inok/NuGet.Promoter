@@ -11,13 +11,19 @@ public interface IPackagesToPromoteResolverLogger
 
     void LogPackagePresentInDestination(PackageIdentity identity);
 
+    void LogPackageNotInDestination(PackageIdentity identity);
+
+    void LogPackageDependenciesToResolve(PackageIdentity source, IReadOnlySet<DependencyDescriptor> dependencies);
+
+    void LogPackageDependenciesSkipped(PackageIdentity identity);
+
     void LogResolvingDependency(PackageIdentity source, string dependencyPackageId, VersionRange dependencyVersionRange);
 
     void LogResolvedDependency(PackageIdentity identity);
 
     void LogNewPackageQueuedForProcessing(PackageIdentity identity);
 
-    void LogPackageDependenciesQueuedForResolving(PackageIdentity source, IReadOnlySet<DependencyDescriptor> dependencies);
+    void LogPackageIsAlreadyProcessedOrQueued(PackageIdentity identity);
 
     void LogResolvedPackageTree(PackageResolutionTree packageTree);
 }

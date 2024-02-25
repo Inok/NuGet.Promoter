@@ -105,16 +105,26 @@ public class PackagesToPromoteResolver
             _logger.LogPackagePresentInDestination(packageIdentity);
             packagesAlreadyInTarget.Add(packageIdentity);
         }
+        else
+        {
+            _logger.LogPackageNotInDestination(packageIdentity);
+        }
 
         if (!packageExistInDestination || options.AlwaysResolveDeps)
         {
-            EnqueuePackageDependencies(metadata, dependencyResolutionQueue);
+            var dependencyRequests = EnqueuePackageDependencies(metadata, dependencyResolutionQueue);
+            _logger.LogPackageDependenciesToResolve(packageIdentity, dependencyRequests);
+        }
+        else
+        {
+            _logger.LogPackageDependenciesSkipped(packageIdentity);
         }
 
         return Result.Success();
     }
 
-    private void EnqueuePackageDependencies(IPackageSearchMetadata metadata, DistinctQueue<DependencyRequest> dependencyResolutionQueue)
+    private IReadOnlySet<DependencyDescriptor> EnqueuePackageDependencies(IPackageSearchMetadata metadata,
+                                                                          DistinctQueue<DependencyRequest> dependencyResolutionQueue)
     {
         var dependencies = metadata.DependencySets.SelectMany(x => x.Packages);
 
@@ -132,7 +142,7 @@ public class PackagesToPromoteResolver
             dependencyResolutionQueue.Enqueue(new DependencyRequest(metadata.Identity, descriptor.Identity, descriptor.VersionRange));
         }
 
-        _logger.LogPackageDependenciesQueuedForResolving(metadata.Identity, dependencyRequests);
+        return dependencyRequests;
     }
 
     private async Task<Result<PackageIdentity>> ProcessDependencyRequest(DependencyRequest request,
@@ -161,6 +171,10 @@ public class PackagesToPromoteResolver
         if (packageResolutionQueue.Enqueue(resolvedPackage))
         {
             _logger.LogNewPackageQueuedForProcessing(resolvedPackage);
+        }
+        else
+        {
+            _logger.LogPackageIsAlreadyProcessedOrQueued(resolvedPackage);
         }
 
         resolvedDependencies.Add((source, resolvedPackage));
