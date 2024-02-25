@@ -33,7 +33,7 @@ public class PackagesToPromoteEvaluator
 
         var packagesToResolveQueue = new DistinctQueue<PackageIdentity>(identities);
         var dependenciesToResolveQueue = new DistinctQueue<DependencyRequest>();
-        var versionFinder = new CachedPackageVersionFinder(_sourceRepository);
+        var packageInfoAccessor = new CachedNuGetPackageInfoAccessor(_sourceRepository.Packages);
 
         var resolvedPackages = new HashSet<PackageIdentity>();
         var packagesAlreadyInTarget = new HashSet<PackageIdentity>();
@@ -58,7 +58,7 @@ public class PackagesToPromoteEvaluator
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var processingResult = await ProcessDependencyRequest(dependency, packagesToResolveQueue, resolvedDependencies, versionFinder, cancellationToken);
+                var processingResult = await ProcessDependencyRequest(dependency, packagesToResolveQueue, resolvedDependencies, packageInfoAccessor, cancellationToken);
                 if (processingResult.IsFailure)
                 {
                     return Result.Failure<PackageResolutionTree>(processingResult.Error);
@@ -128,7 +128,7 @@ public class PackagesToPromoteEvaluator
     private async Task<Result<PackageIdentity>> ProcessDependencyRequest(DependencyRequest request,
                                                                          DistinctQueue<PackageIdentity> packageResolutionQueue,
                                                                          ISet<(PackageIdentity Dependant, PackageIdentity Dependency)> resolvedDependencies,
-                                                                         CachedPackageVersionFinder versionFinder,
+                                                                         INuGetPackageInfoAccessor packageInfoAccessor,
                                                                          CancellationToken cancellationToken)
     {
         var source = request.Source;
@@ -137,7 +137,7 @@ public class PackagesToPromoteEvaluator
 
         _logger.LogProcessingDependency(source, dependencyId, dependencyVersionRange);
 
-        var allVersionsOfDepResult = await versionFinder.GetAllVersions(dependencyId, cancellationToken);
+        var allVersionsOfDepResult = await packageInfoAccessor.GetAllVersions(dependencyId, cancellationToken);
         if (allVersionsOfDepResult.IsFailure)
         {
             return Result.Failure<PackageIdentity>(allVersionsOfDepResult.Error);
