@@ -35,7 +35,7 @@ public class PromotePackageListCommandIntegrationTests
         result.StdOutput.Should().StartWith(
             new[]
             {
-                "Resolving matching packages for:",
+                "Resolving package requests:",
                 "├── System.Globalization 4.3.0",
                 "├── System.Runtime (>= 4.1.0 && < 4.1.2)",
                 "└── System.Runtime 4.3.1",

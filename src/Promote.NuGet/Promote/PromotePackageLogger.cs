@@ -11,7 +11,7 @@ public class PromotePackageLogger : IPromotePackageLogger
 {
     public void LogResolvingMatchingPackages(IReadOnlyCollection<PackageRequest> requests)
     {
-        var tree = new Tree("[bold green]Resolving matching packages for:[/]");
+        var tree = new Tree("[bold green]Resolving package requests:[/]");
         foreach (var request in requests.OrderBy(x => x.Id))
         {
             tree.AddNode(Markup.Escape(request.ToString()));
@@ -79,7 +79,7 @@ public class PromotePackageLogger : IPromotePackageLogger
         var tree = new Tree("[bold green]Resolved package tree:[/]");
         foreach (var rootPackage in packageTree.Roots.OrderBy(x => x.Id))
         {
-            AddNodeAndChildren(tree, packageTree, rootPackage, expanded);
+            AddNodeAndChildren(tree, packageTree, rootPackage, expanded, rootLevel: true);
         }
 
         AnsiConsole.Write(tree);
@@ -88,13 +88,39 @@ public class PromotePackageLogger : IPromotePackageLogger
     private static void AddNodeAndChildren(IHasTreeNodes parentNode,
                                            PackageResolutionTree packageTree,
                                            PackageIdentity package,
-                                           HashSet<PackageIdentity> expanded)
+                                           HashSet<PackageIdentity> expanded,
+                                           bool rootLevel)
     {
         var isInTargetFeed = packageTree.IsInTargetFeed(package);
+        var isRootPackage = packageTree.Roots.Contains(package);
 
-        var node = parentNode.AddNode(Markup.FromInterpolated($"{package.Id} {package.Version}{(isInTargetFeed ? " [already promoted]" : "")}"));
+        var labels = new List<string>();
+
+        if (isInTargetFeed)
+        {
+            labels.Add("exists");
+        }
+
+        if (!rootLevel && isRootPackage)
+        {
+            labels.Add("root");
+        }
+
+        var labelsStr = labels.Count > 0 ? string.Join(", ", labels) : null;
+
+        var node = parentNode.AddNode(Markup.FromInterpolated($"{package.Id} {package.Version}{(labelsStr != null ? $" [{labelsStr}]" : "")}"));
 
         var dependencies = packageTree.GetDependencies(package);
+
+        if (!rootLevel && isRootPackage)
+        {
+            if (dependencies.Count > 0)
+            {
+                node.AddNode(Markup.FromInterpolated($"+ {dependencies.Count} direct dependencies (expanded below)"));
+            }
+
+            return;
+        }
 
         var expandedBefore = !expanded.Add(package);
         if (expandedBefore)
@@ -109,7 +135,7 @@ public class PromotePackageLogger : IPromotePackageLogger
 
         foreach (var child in dependencies.OrderBy(x => x))
         {
-            AddNodeAndChildren(node, packageTree, child, expanded);
+            AddNodeAndChildren(node, packageTree, child, expanded, rootLevel: false);
         }
     }
 

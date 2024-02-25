@@ -16,6 +16,11 @@ public sealed class TempFile : IDisposable
         await File.WriteAllLinesAsync(Path, lines);
     }
 
+    public Stream OpenStream()
+    {
+        return File.Open(Path, FileMode.OpenOrCreate);
+    }
+
     public static async Task<TempFile> Create(params string[] lines)
     {
         var file = Create();

@@ -101,7 +101,7 @@ Example:
 
 promote-nuget promote from-config packages.yml --destination '<TARGET-NUGET-FEED-URL>' --destination-api-key '<API-KEY>'
 
-# Resolving matching packages for:
+# Resolving package requests:
 # ├── System.Globalization (= 4.3.0)
 # └── System.Runtime (>= 4.1.0 && < 4.1.2), (= 4.3.1)
 # Matching packages for System.Globalization (= 4.3.0): 4.3.0

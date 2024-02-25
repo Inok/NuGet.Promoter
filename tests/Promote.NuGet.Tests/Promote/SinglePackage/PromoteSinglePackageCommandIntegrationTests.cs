@@ -30,7 +30,7 @@ public class PromoteSinglePackageCommandIntegrationTests
         result.StdOutput.Should().StartWith(
             new[]
             {
-                "Resolving matching packages for:",
+                "Resolving package requests:",
                 "└── System.Runtime 4.3.0",
                 "Matching packages for System.Runtime 4.3.0: 4.3.0",
                 "Resolving packages to promote:",
