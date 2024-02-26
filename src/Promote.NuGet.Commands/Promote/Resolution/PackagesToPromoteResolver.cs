@@ -38,11 +38,13 @@ public class PackagesToPromoteResolver
         var packagesAlreadyInTarget = new HashSet<PackageIdentity>();
         var resolvedDependencies = new HashSet<(PackageIdentity Dependant, PackageIdentity Dependency)>();
 
+        var context = new ResolutionContext(packagesToResolveQueue, packageInfoAccessor, resolvedPackages, packagesAlreadyInTarget, resolvedDependencies);
+
         while (packagesToResolveQueue.TryDequeue(out var packageIdentity))
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var processingResult = await ProcessPackage(packageIdentity, options, resolvedPackages, packagesAlreadyInTarget, resolvedDependencies, packagesToResolveQueue, packageInfoAccessor, cancellationToken);
+            var processingResult = await ProcessPackage(context, packageIdentity, options, cancellationToken);
             if (processingResult.IsFailure)
             {
                 return Result.Failure<PackageResolutionTree>(processingResult.Error);
@@ -56,28 +58,24 @@ public class PackagesToPromoteResolver
         return packageResolutionTree;
     }
 
-    private async Task<Result> ProcessPackage(PackageIdentity packageIdentity,
+    private async Task<Result> ProcessPackage(ResolutionContext context,
+                                              PackageIdentity identity,
                                               PromotePackageCommandOptions options,
-                                              ISet<PackageIdentity> resolvedPackages,
-                                              ISet<PackageIdentity> packagesAlreadyInTarget,
-                                              ISet<(PackageIdentity Dependant, PackageIdentity Dependency)> resolvedDependencies,
-                                              DistinctQueue<PackageIdentity> packagesToResolveQueue,
-                                              INuGetPackageInfoAccessor packageInfoAccessor,
                                               CancellationToken cancellationToken)
     {
-        _logger.LogProcessingPackage(packageIdentity);
+        _logger.LogProcessingPackage(identity);
 
-        var metadataResult = await _sourceRepository.Packages.GetPackageMetadata(packageIdentity, cancellationToken);
+        var metadataResult = await _sourceRepository.Packages.GetPackageMetadata(identity, cancellationToken);
         if (metadataResult.IsFailure)
         {
             return Result.Failure(metadataResult.Error);
         }
 
-        resolvedPackages.Add(packageIdentity);
+        context.ResolvedPackages.Add(identity);
 
         var metadata = metadataResult.Value;
 
-        var packageExistInDestinationResult = await _destinationRepository.Packages.DoesPackageExist(packageIdentity, cancellationToken);
+        var packageExistInDestinationResult = await _destinationRepository.Packages.DoesPackageExist(identity, cancellationToken);
         if (packageExistInDestinationResult.IsFailure)
         {
             return Result.Failure(packageExistInDestinationResult.Error);
@@ -86,17 +84,17 @@ public class PackagesToPromoteResolver
         var packageExistInDestination = packageExistInDestinationResult.Value;
         if (packageExistInDestination)
         {
-            _logger.LogPackagePresentInDestination(packageIdentity);
-            packagesAlreadyInTarget.Add(packageIdentity);
+            _logger.LogPackagePresentInDestination(identity);
+            context.PackagesAlreadyInTarget.Add(identity);
         }
         else
         {
-            _logger.LogPackageNotInDestination(packageIdentity);
+            _logger.LogPackageNotInDestination(identity);
         }
 
         if (!packageExistInDestination || options.AlwaysResolveDeps)
         {
-            var processDependenciesResult = await ProcessPackageDependencies(metadata, packagesToResolveQueue, resolvedDependencies, packageInfoAccessor, cancellationToken);
+            var processDependenciesResult = await ProcessPackageDependencies(context, metadata, cancellationToken);
             if (processDependenciesResult.IsFailure)
             {
                 return Result.Failure(processDependenciesResult.Error);
@@ -104,17 +102,13 @@ public class PackagesToPromoteResolver
         }
         else
         {
-            _logger.LogPackageDependenciesSkipped(packageIdentity);
+            _logger.LogPackageDependenciesSkipped(identity);
         }
 
         return Result.Success();
     }
 
-    private async Task<Result> ProcessPackageDependencies(IPackageSearchMetadata metadata,
-                                                          DistinctQueue<PackageIdentity> packagesToResolveQueue,
-                                                          ISet<(PackageIdentity Dependant, PackageIdentity Dependency)> resolvedDependencies,
-                                                          INuGetPackageInfoAccessor packageInfoAccessor,
-                                                          CancellationToken cancellationToken)
+    private async Task<Result> ProcessPackageDependencies(ResolutionContext context, IPackageSearchMetadata metadata, CancellationToken cancellationToken)
     {
         var dependencies = ListPackageDependencies(metadata);
         if (dependencies.Count == 0)
@@ -127,7 +121,7 @@ public class PackagesToPromoteResolver
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var processingResult = await ProcessDependency(metadata.Identity, dependency, packagesToResolveQueue, resolvedDependencies, packageInfoAccessor, cancellationToken);
+            var processingResult = await ProcessDependency(context, metadata.Identity, dependency, cancellationToken);
             if (processingResult.IsFailure)
             {
                 return Result.Failure(processingResult.Error);
@@ -153,11 +147,9 @@ public class PackagesToPromoteResolver
         return dependencyDescriptors;
     }
 
-    private async Task<Result<PackageIdentity>> ProcessDependency(PackageIdentity source,
+    private async Task<Result<PackageIdentity>> ProcessDependency(ResolutionContext context,
+                                                                  PackageIdentity source,
                                                                   DependencyDescriptor dependency,
-                                                                  DistinctQueue<PackageIdentity> packageResolutionQueue,
-                                                                  ISet<(PackageIdentity Dependant, PackageIdentity Dependency)> resolvedDependencies,
-                                                                  INuGetPackageInfoAccessor packageInfoAccessor,
                                                                   CancellationToken cancellationToken)
     {
         var dependencyId = dependency.Identity.Id;
@@ -165,7 +157,7 @@ public class PackagesToPromoteResolver
 
         _logger.LogResolvingDependency(source, dependency);
 
-        var allVersionsOfDepResult = await packageInfoAccessor.GetAllVersions(dependencyId, cancellationToken);
+        var allVersionsOfDepResult = await context.PackageInfoAccessor.GetAllVersions(dependencyId, cancellationToken);
         if (allVersionsOfDepResult.IsFailure)
         {
             return Result.Failure<PackageIdentity>(allVersionsOfDepResult.Error);
@@ -176,7 +168,7 @@ public class PackagesToPromoteResolver
 
         _logger.LogResolvedDependency(resolvedPackage);
 
-        if (packageResolutionQueue.Enqueue(resolvedPackage))
+        if (context.PackagesToResolveQueue.Enqueue(resolvedPackage))
         {
             _logger.LogNewPackageQueuedForProcessing(resolvedPackage);
         }
@@ -185,8 +177,16 @@ public class PackagesToPromoteResolver
             _logger.LogPackageIsAlreadyProcessedOrQueued(resolvedPackage);
         }
 
-        resolvedDependencies.Add((source, resolvedPackage));
+        context.ResolvedDependencies.Add((source, resolvedPackage));
 
         return Result.Success(resolvedPackage);
     }
+
+    private record ResolutionContext(
+        DistinctQueue<PackageIdentity> PackagesToResolveQueue,
+        CachedNuGetPackageInfoAccessor PackageInfoAccessor,
+        HashSet<PackageIdentity> ResolvedPackages,
+        HashSet<PackageIdentity> PackagesAlreadyInTarget,
+        HashSet<(PackageIdentity Dependant, PackageIdentity Dependency)> ResolvedDependencies
+    );
 }
