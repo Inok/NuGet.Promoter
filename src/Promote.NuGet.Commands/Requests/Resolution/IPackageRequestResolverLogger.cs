@@ -1,11 +1,12 @@
 ﻿using NuGet.Packaging.Core;
-using Promote.NuGet.Commands.Requests;
 
-namespace Promote.NuGet.Commands.PackageResolution;
+namespace Promote.NuGet.Commands.Requests.Resolution;
 
 public interface IPackageRequestResolverLogger
 {
-    void LogResolvingMatchingPackages(IReadOnlyCollection<PackageRequest> requests);
+    void LogResolvingPackageRequests();
+
+    void LogResolvingPackageRequest(PackageRequest request);
 
     void LogPackageRequestResolution(PackageRequest request, IReadOnlyCollection<PackageIdentity> matchingPackages);
 }

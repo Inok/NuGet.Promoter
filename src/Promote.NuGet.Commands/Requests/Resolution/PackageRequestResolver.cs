@@ -1,9 +1,8 @@
 ﻿using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
-using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
 
-namespace Promote.NuGet.Commands.PackageResolution;
+namespace Promote.NuGet.Commands.Requests.Resolution;
 
 public sealed class PackageRequestResolver
 {
@@ -20,7 +19,7 @@ public sealed class PackageRequestResolver
         IReadOnlyCollection<PackageRequest> requests,
         CancellationToken cancellationToken)
     {
-        _logger.LogResolvingMatchingPackages(requests);
+        _logger.LogResolvingPackageRequests();
 
         var identities = new HashSet<PackageIdentity>();
         var requestIdentities = new HashSet<PackageIdentity>();
@@ -28,6 +27,8 @@ public sealed class PackageRequestResolver
         foreach (var request in requests)
         {
             requestIdentities.Clear();
+
+            _logger.LogResolvingPackageRequest(request);
 
             var visitor = new ResolvePackageVersionPolicyVisitor(request.Id, _repository);
 

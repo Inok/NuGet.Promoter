@@ -41,8 +41,9 @@ internal class PromoteSettings : CommandSettings
     [CommandOption("--always-resolve-deps")]
     public bool AlwaysResolveDeps { get; init; }
 
-    [Description("Push packages and their dependencies even if they already exist in the destination repository. "
-               + "Use that option to restore the integrity of the destination repository (i.e. when some packages in the feed are broken).")]
+    [Description("Push packages even if they are already exist in the destination repository. "
+               + "Use this option to restore the integrity of packages in the destination repository (i.e., when some packages are broken). "
+               + "When using this option, `--always-resolve-deps` must also be specified.")]
     [CommandOption("--force-push")]
     public bool ForcePush { get; init; }
 
@@ -57,6 +58,12 @@ internal class PromoteSettings : CommandSettings
         {
             return ValidationResult.Error("Destination repository must be specified.");
         }
+
+        if (ForcePush && !AlwaysResolveDeps)
+        {
+            return ValidationResult.Error("When --force-push is specified, --always-resolve-deps should also be set.");
+        }
+
 
         return ValidationResult.Success();
     }

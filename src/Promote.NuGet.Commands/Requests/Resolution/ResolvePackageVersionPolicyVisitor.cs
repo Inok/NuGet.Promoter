@@ -1,9 +1,8 @@
 using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
-using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
 
-namespace Promote.NuGet.Commands.PackageResolution;
+namespace Promote.NuGet.Commands.Requests.Resolution;
 
 internal sealed class ResolvePackageVersionPolicyVisitor : IPackageVersionPolicyVisitor<Result<IReadOnlySet<PackageIdentity>>>
 {

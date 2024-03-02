@@ -1,12 +1,10 @@
 ﻿using CSharpFunctionalExtensions;
 using NuGet.Versioning;
-using Promote.NuGet.Commands.Promote;
-using Promote.NuGet.Feeds;
 
-namespace Promote.NuGet.Commands.Tests.Promote;
+namespace Promote.NuGet.Feeds.Tests;
 
 [TestFixture]
-public class CachedPackageVersionFinderTests
+public class CachedNuGetPackageInfoAccessorTests
 {
     [Test]
     public async Task Get_all_versions_from_repository()
@@ -14,10 +12,8 @@ public class CachedPackageVersionFinderTests
         var packageId = "package.1";
         var expectedVersions = new[] { new NuGetVersion(1, 0, 0), new NuGetVersion(1, 1, 0) };
         var packageInfoAccessor = CreateRepository(packageId, expectedVersions);
-        var repository = Substitute.For<INuGetRepository>();
-        repository.Packages.Returns(packageInfoAccessor);
 
-        var sut = new CachedPackageVersionFinder(repository);
+        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor);
 
         var result = await sut.GetAllVersions("package.1", CancellationToken.None);
 
@@ -33,10 +29,8 @@ public class CachedPackageVersionFinderTests
         var packageId = "package.1";
         var expectedVersions = new[] { new NuGetVersion(1, 0, 0), new NuGetVersion(1, 1, 0) };
         var packageInfoAccessor = CreateRepository(packageId, expectedVersions);
-        var repository = Substitute.For<INuGetRepository>();
-        repository.Packages.Returns(packageInfoAccessor);
 
-        var sut = new CachedPackageVersionFinder(repository);
+        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor);
 
         for (var i = 0; i < 5; i++)
         {
@@ -64,10 +58,8 @@ public class CachedPackageVersionFinderTests
                        };
 
         var packageInfoAccessor = CreateRepository(versions);
-        var repository = Substitute.For<INuGetRepository>();
-        repository.Packages.Returns(packageInfoAccessor);
 
-        var sut = new CachedPackageVersionFinder(repository);
+        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor);
 
         // Get versions from repository
 
@@ -104,10 +96,8 @@ public class CachedPackageVersionFinderTests
         var packageId = "package.1";
         var packageVersions = new[] { new NuGetVersion(1, 0, 0), new NuGetVersion(1, 1, 0) };
         var packageInfoAccessor = CreateRepository(packageId, packageVersions);
-        var repository = Substitute.For<INuGetRepository>();
-        repository.Packages.Returns(packageInfoAccessor);
 
-        var sut = new CachedPackageVersionFinder(repository);
+        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor);
 
         var result = await sut.GetAllVersions("package.1", CancellationToken.None);
         result.IsSuccess.Should().BeTrue();
@@ -131,10 +121,8 @@ public class CachedPackageVersionFinderTests
         var packageId = "package.1";
         var failure = Result.Failure<IReadOnlyCollection<NuGetVersion>>("Ooops");
         var packageInfoAccessor = CreateRepository(packageId, failure);
-        var repository = Substitute.For<INuGetRepository>();
-        repository.Packages.Returns(packageInfoAccessor);
 
-        var sut = new CachedPackageVersionFinder(repository);
+        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor);
 
         var result = await sut.GetAllVersions("package.1", CancellationToken.None);
 
@@ -150,10 +138,8 @@ public class CachedPackageVersionFinderTests
         var packageId = "package.1";
         var failure = Result.Failure<IReadOnlyCollection<NuGetVersion>>("Ooops");
         var packageInfoAccessor = CreateRepository(packageId, failure);
-        var repository = Substitute.For<INuGetRepository>();
-        repository.Packages.Returns(packageInfoAccessor);
 
-        var sut = new CachedPackageVersionFinder(repository);
+        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor);
 
         var firstResult = await sut.GetAllVersions("package.1", CancellationToken.None);
         firstResult.IsFailure.Should().BeTrue();

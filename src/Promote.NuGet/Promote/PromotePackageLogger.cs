@@ -1,6 +1,6 @@
 using NuGet.Packaging.Core;
-using NuGet.Versioning;
 using Promote.NuGet.Commands.Promote;
+using Promote.NuGet.Commands.Promote.Resolution;
 using Promote.NuGet.Commands.Requests;
 using Spectre.Console;
 
@@ -8,26 +8,59 @@ namespace Promote.NuGet.Promote;
 
 public class PromotePackageLogger : IPromotePackageLogger
 {
-    public void LogResolvingMatchingPackages(IReadOnlyCollection<PackageRequest> requests)
-    {
-        var tree = new Tree("[bold green]Resolving matching packages for:[/]");
-        foreach (var request in requests.OrderBy(x => x.Id))
-        {
-            tree.AddNode(Markup.Escape(request.ToString()));
-        }
+    private const int SingleLeftPaddingSize = 2;
 
-        AnsiConsole.Write(tree);
+    public void LogResolvingPackageRequests()
+    {
+        AnsiConsole.MarkupLineInterpolated($"[bold green]Resolving package requests...[/]");
+    }
+
+    public void LogResolvingPackageRequest(PackageRequest request)
+    {
+        AnsiConsole.MarkupLineInterpolated($"[gray]Resolving {request}[/]");
     }
 
     public void LogPackageRequestResolution(PackageRequest request, IReadOnlyCollection<PackageIdentity> matchingPackages)
     {
-        var versionsString = string.Join(", ", matchingPackages.OrderBy(x => x.Id).ThenBy(x => x.Version).Select(r => r.Version));
-        AnsiConsole.MarkupLineInterpolated($"[gray]Matching packages for {request}: {versionsString}[/]");
+        var tree = new Tree(Markup.FromInterpolated($"[gray]Found {matchingPackages.Count} matching package(s):[/]"));
+        foreach (var identity in matchingPackages.OrderBy(x => x.Id).ThenBy(x => x.Version))
+        {
+            tree.AddNode(Markup.FromInterpolated($"{identity.Version}"));
+        }
+        AnsiConsole.Write(tree);
+    }
+
+    public void LogProcessingPackage(PackageIdentity identity)
+    {
+        AnsiConsole.MarkupLine($"[bold]Processing {identity.Id} {identity.Version}[/]");
     }
 
     public void LogPackagePresentInDestination(PackageIdentity identity)
     {
-        AnsiConsole.MarkupLineInterpolated($"[gray]Package {identity.Id} {identity.Version} is already present in the destination repository.[/]");
+        var text = Markup.FromInterpolated($"[gray]{identity.Id} {identity.Version} is already in the destination.[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
+    }
+
+    public void LogPackageNotInDestination(PackageIdentity identity)
+    {
+        var text = Markup.FromInterpolated($"[gray]{identity.Id} {identity.Version} is not in the destination.[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
+    }
+
+    public void LogNoDependencies(PackageIdentity identity)
+    {
+        var text = Markup.FromInterpolated($"[gray]{identity.Id} {identity.Version} has no dependencies.[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
+    }
+
+    public void LogPackageDependenciesSkipped(PackageIdentity identity)
+    {
+        var text = Markup.FromInterpolated($"[gray]Skipping dependencies of {identity.Id} {identity.Version}.[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
     }
 
     public void LogNoPackagesToPromote()
@@ -37,33 +70,102 @@ public class PromotePackageLogger : IPromotePackageLogger
 
     public void LogResolvingPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities)
     {
-        var tree = new Tree("[bold green]Resolving packages to promote:[/]");
-        foreach (var identity in identities.OrderBy(x => x.Id).ThenBy(x => x.Version))
+        AnsiConsole.MarkupLineInterpolated($"[bold green]Resolving {identities.Count} package(s) to promote...[/]");
+    }
+
+    public void LogResolvingDependency(PackageIdentity source, DependencyDescriptor dependency)
+    {
+        var text = Markup.FromInterpolated($"[gray]Resolving dependency {dependency.Identity.Id} {dependency.VersionRange.PrettyPrint()}[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
+    }
+
+    public void LogResolvedDependency(PackageIdentity identity)
+    {
+        var text = Markup.FromInterpolated($"[gray]Resolved as {identity.Id} {identity.Version}[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
+    }
+
+    public void LogNewPackageQueuedForProcessing(PackageIdentity identity)
+    {
+        var text = Markup.FromInterpolated($"[gray]{identity.Id} {identity.Version} is queued for processing.[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
+    }
+
+    public void LogPackageIsAlreadyProcessedOrQueued(PackageIdentity identity)
+    {
+        var text = Markup.FromInterpolated($"[gray]{identity.Id} {identity.Version} is already processed or queued.[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
+    }
+
+    public void LogResolvedPackageTree(PackageResolutionTree packageTree)
+    {
+        var expanded = new HashSet<PackageIdentity>();
+
+        var tree = new Tree("[bold green]Resolved package tree:[/]");
+        foreach (var rootPackage in packageTree.Roots.OrderBy(x => x.Id))
         {
-            tree.AddNode(Markup.FromInterpolated($"{identity.Id} {identity.Version}"));
+            AddNodeAndChildren(tree, packageTree, rootPackage, expanded, rootLevel: true);
         }
 
         AnsiConsole.Write(tree);
     }
 
-    public void LogProcessingPackage(PackageIdentity identity)
+    private static void AddNodeAndChildren(IHasTreeNodes parentNode,
+                                           PackageResolutionTree packageTree,
+                                           PackageIdentity package,
+                                           HashSet<PackageIdentity> expanded,
+                                           bool rootLevel)
     {
-        AnsiConsole.MarkupLine($"[gray]Processing package {identity.Id} {identity.Version}[/]");
-    }
+        var isInTargetFeed = packageTree.IsInTargetFeed(package);
+        var isRootPackage = packageTree.Roots.Contains(package);
 
-    public void LogProcessingDependency(string packageId, VersionRange versionRange)
-    {
-        AnsiConsole.MarkupLine($"[gray]Processing dependency {packageId} {versionRange.PrettyPrint()}[/]");
-    }
+        var labels = new List<string>();
 
-    public void LogNewDependencyToProcess(string packageId, VersionRange versionRange)
-    {
-        AnsiConsole.MarkupLine($"[gray]New dependency to process: {packageId} {versionRange.PrettyPrint()}[/]");
-    }
+        if (isInTargetFeed)
+        {
+            labels.Add("exists");
+        }
 
-    public void LogNewDependencyFound(PackageIdentity identity)
-    {
-        AnsiConsole.MarkupLine($"[gray]New dependency found: {identity.Id} {identity.Version}[/]");
+        if (!rootLevel && isRootPackage)
+        {
+            labels.Add("root");
+        }
+
+        var labelsStr = labels.Count > 0 ? string.Join(", ", labels) : null;
+
+        var node = parentNode.AddNode(Markup.FromInterpolated($"{package.Id} {package.Version}{(labelsStr != null ? $" [{labelsStr}]" : "")}"));
+
+        var dependencies = packageTree.GetDependencies(package);
+
+        if (!rootLevel && isRootPackage)
+        {
+            if (dependencies.Count > 0)
+            {
+                node.AddNode(Markup.FromInterpolated($"+ {dependencies.Count} direct dependencies (expanded below)"));
+            }
+
+            return;
+        }
+
+        var expandedBefore = !expanded.Add(package);
+        if (expandedBefore)
+        {
+            if (dependencies.Count > 0)
+            {
+                node.AddNode(Markup.FromInterpolated($"+ {dependencies.Count} direct dependencies (expanded above)"));
+            }
+
+            return;
+        }
+
+        foreach (var child in dependencies.OrderBy(x => x))
+        {
+            AddNodeAndChildren(node, packageTree, child, expanded, rootLevel: false);
+        }
     }
 
     public void LogPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities)

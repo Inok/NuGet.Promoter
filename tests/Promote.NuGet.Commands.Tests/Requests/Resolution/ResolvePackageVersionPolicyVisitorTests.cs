@@ -1,11 +1,11 @@
 ﻿using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
-using Promote.NuGet.Commands.PackageResolution;
 using Promote.NuGet.Commands.Requests;
+using Promote.NuGet.Commands.Requests.Resolution;
 using Promote.NuGet.Feeds;
 
-namespace Promote.NuGet.Commands.Tests.Core;
+namespace Promote.NuGet.Commands.Tests.Requests.Resolution;
 
 [TestFixture]
 public class ResolvePackageVersionPolicyVisitorTests
