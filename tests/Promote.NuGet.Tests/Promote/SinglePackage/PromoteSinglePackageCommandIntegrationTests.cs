@@ -30,12 +30,18 @@ public class PromoteSinglePackageCommandIntegrationTests
         result.StdOutput.Should().StartWith(
             new[]
             {
-                "Resolving package requests:",
-                "└── System.Runtime 4.3.0",
-                "Matching packages for System.Runtime 4.3.0: 4.3.0",
-                "Resolving packages to promote:",
-                "└── System.Runtime 4.3.0"
+                "Resolving package requests...",
+                "Resolving System.Runtime 4.3.0",
+                "Found 1 matching package(s):",
+                "└── 4.3.0",
             }
+        );
+
+        result.StdOutput.Should().ContainInConsecutiveOrder(
+            "Resolved package tree:",
+            "└── System.Runtime 4.3.0",
+            "    ├── Microsoft.NETCore.Platforms 1.1.0",
+            "    └── Microsoft.NETCore.Targets 1.1.0"
         );
 
         result.StdOutput.Should().ContainInConsecutiveOrder(

@@ -19,7 +19,7 @@ public sealed class PackageRequestResolver
         IReadOnlyCollection<PackageRequest> requests,
         CancellationToken cancellationToken)
     {
-        _logger.LogResolvingMatchingPackages(requests);
+        _logger.LogResolvingPackageRequests();
 
         var identities = new HashSet<PackageIdentity>();
         var requestIdentities = new HashSet<PackageIdentity>();
@@ -27,6 +27,8 @@ public sealed class PackageRequestResolver
         foreach (var request in requests)
         {
             requestIdentities.Clear();
+
+            _logger.LogResolvingPackageRequest(request);
 
             var visitor = new ResolvePackageVersionPolicyVisitor(request.Id, _repository);
 

@@ -50,22 +50,19 @@ public class PromoteFromConfigurationCommandIntegrationTests
         result.StdOutput.Should().StartWith(
             new[]
             {
-                "Resolving package requests:",
-                "├── System.Collections 4.3.0",
-                "├── System.Globalization 4.0.11, 4.3.0",
-                "└── System.Runtime (>= 4.1.0 && < 4.1.2), 4.3.1",
-                "Matching packages for System.Collections 4.3.0: 4.3.0",
-                "Matching packages for System.Globalization 4.0.11, 4.3.0: ",
-                "4.0.11, 4.3.0",
-                "Matching packages for System.Runtime (>= 4.1.0 && < 4.1.2), ",
-                "4.3.1: 4.1.0, 4.1.1, 4.3.1",
-                "Resolving packages to promote:",
-                "├── System.Collections 4.3.0",
-                "├── System.Globalization 4.0.11",
-                "├── System.Globalization 4.3.0",
-                "├── System.Runtime 4.1.0",
-                "├── System.Runtime 4.1.1",
-                "└── System.Runtime 4.3.1",
+                "Resolving package requests...",
+                "Resolving System.Collections 4.3.0",
+                "Found 1 matching package(s):",
+                "└── 4.3.0",
+                "Resolving System.Globalization 4.0.11, 4.3.0",
+                "Found 2 matching package(s):",
+                "├── 4.0.11",
+                "└── 4.3.0",
+                "Resolving System.Runtime (>= 4.1.0 && < 4.1.2), 4.3.1",
+                "Found 3 matching package(s):",
+                "├── 4.1.0",
+                "├── 4.1.1",
+                "└── 4.3.1",
             }
         );
 

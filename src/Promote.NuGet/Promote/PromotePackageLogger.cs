@@ -10,26 +10,29 @@ public class PromotePackageLogger : IPromotePackageLogger
 {
     private const int SingleLeftPaddingSize = 2;
 
-    public void LogResolvingMatchingPackages(IReadOnlyCollection<PackageRequest> requests)
+    public void LogResolvingPackageRequests()
     {
-        var tree = new Tree("[bold green]Resolving package requests:[/]");
-        foreach (var request in requests.OrderBy(x => x.Id))
-        {
-            tree.AddNode(Markup.Escape(request.ToString()));
-        }
+        AnsiConsole.MarkupLineInterpolated($"[bold green]Resolving package requests...[/]");
+    }
 
+    public void LogResolvingPackageRequest(PackageRequest request)
+    {
+        AnsiConsole.MarkupLineInterpolated($"[gray]Resolving {request}[/]");
+    }
+
+    public void LogPackageRequestResolution(PackageRequest request, IReadOnlyCollection<PackageIdentity> matchingPackages)
+    {
+        var tree = new Tree(Markup.FromInterpolated($"[gray]Found {matchingPackages.Count} matching package(s):[/]"));
+        foreach (var identity in matchingPackages.OrderBy(x => x.Id).ThenBy(x => x.Version))
+        {
+            tree.AddNode(Markup.FromInterpolated($"{identity.Version}"));
+        }
         AnsiConsole.Write(tree);
     }
 
     public void LogProcessingPackage(PackageIdentity identity)
     {
         AnsiConsole.MarkupLine($"[bold]Processing {identity.Id} {identity.Version}[/]");
-    }
-
-    public void LogPackageRequestResolution(PackageRequest request, IReadOnlyCollection<PackageIdentity> matchingPackages)
-    {
-        var versionsString = string.Join(", ", matchingPackages.OrderBy(x => x.Id).ThenBy(x => x.Version).Select(r => r.Version));
-        AnsiConsole.MarkupLineInterpolated($"[gray]Matching packages for {request}: {versionsString}[/]");
     }
 
     public void LogPackagePresentInDestination(PackageIdentity identity)
@@ -67,13 +70,7 @@ public class PromotePackageLogger : IPromotePackageLogger
 
     public void LogResolvingPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities)
     {
-        var tree = new Tree("[bold green]Resolving packages to promote:[/]");
-        foreach (var identity in identities.OrderBy(x => x.Id).ThenBy(x => x.Version))
-        {
-            tree.AddNode(Markup.FromInterpolated($"{identity.Id} {identity.Version}"));
-        }
-
-        AnsiConsole.Write(tree);
+        AnsiConsole.MarkupLineInterpolated($"[bold green]Resolving {identities.Count} package(s) to promote...[/]");
     }
 
     public void LogResolvingDependency(PackageIdentity source, DependencyDescriptor dependency)

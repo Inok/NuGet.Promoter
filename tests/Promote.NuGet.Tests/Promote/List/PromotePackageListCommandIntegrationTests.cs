@@ -35,20 +35,37 @@ public class PromotePackageListCommandIntegrationTests
         result.StdOutput.Should().StartWith(
             new[]
             {
-                "Resolving package requests:",
-                "├── System.Globalization 4.3.0",
-                "├── System.Runtime (>= 4.1.0 && < 4.1.2)",
-                "└── System.Runtime 4.3.1",
-                "Matching packages for System.Runtime (>= 4.1.0 && < 4.1.2): ",
-                "4.1.0, 4.1.1",
-                "Matching packages for System.Runtime 4.3.1: 4.3.1",
-                "Matching packages for System.Globalization 4.3.0: 4.3.0",
-                "Resolving packages to promote:",
-                "├── System.Globalization 4.3.0",
-                "├── System.Runtime 4.1.0",
-                "├── System.Runtime 4.1.1",
-                "└── System.Runtime 4.3.1"
+                "Resolving package requests...",
+                "Resolving System.Runtime (>= 4.1.0 && < 4.1.2)",
+                "Found 2 matching package(s):",
+                "├── 4.1.0",
+                "└── 4.1.1",
+                "Resolving System.Runtime 4.3.1",
+                "Found 1 matching package(s):",
+                "└── 4.3.1",
+                "Resolving System.Globalization 4.3.0",
+                "Found 1 matching package(s):",
+                "└── 4.3.0",
             }
+        );
+
+        result.StdOutput.Should().ContainInConsecutiveOrder(
+            "Resolved package tree:",
+            "├── System.Globalization 4.3.0",
+            "│   ├── Microsoft.NETCore.Platforms 1.1.0",
+            "│   ├── Microsoft.NETCore.Targets 1.1.0",
+            "│   └── System.Runtime 4.3.0",
+            "│       ├── Microsoft.NETCore.Platforms 1.1.0",
+            "│       └── Microsoft.NETCore.Targets 1.1.0",
+            "├── System.Runtime 4.1.0",
+            "│   ├── Microsoft.NETCore.Platforms 1.0.1",
+            "│   └── Microsoft.NETCore.Targets 1.0.1",
+            "├── System.Runtime 4.1.1",
+            "│   ├── Microsoft.NETCore.Platforms 1.0.2",
+            "│   └── Microsoft.NETCore.Targets 1.0.6",
+            "└── System.Runtime 4.3.1",
+            "    ├── Microsoft.NETCore.Platforms 1.1.1",
+            "    └── Microsoft.NETCore.Targets 1.1.3"
         );
 
         result.StdOutput.Should().ContainInConsecutiveOrder(
