@@ -12,9 +12,11 @@ public class PromotePackageListCommandIntegrationTests
     public async Task Promotes_a_set_of_packages_with_their_dependencies_to_destination_feed()
     {
         using var packagesFile = await TempFile.Create(
-                                     "System.Runtime [4.1.0,4.1.2)",
-                                     "System.Runtime 4.3.1",
-                                     "System.Globalization 4.3.0"
+                                     """
+                                     System.Runtime [4.1.0,4.1.2)
+                                     System.Runtime 4.3.1
+                                     System.Globalization 4.3.0
+                                     """
                                  );
 
         await using var destinationFeed = await LocalNugetFeed.Create();

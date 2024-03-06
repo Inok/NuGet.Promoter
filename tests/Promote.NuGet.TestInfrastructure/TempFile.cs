@@ -11,9 +11,9 @@ public sealed class TempFile : IDisposable
         Path = path;
     }
 
-    public async Task WriteLines(params string[] lines)
+    public async Task Write(string text)
     {
-        await File.WriteAllLinesAsync(Path, lines);
+        await File.WriteAllTextAsync(Path, text);
     }
 
     public Stream OpenStream()
@@ -21,10 +21,10 @@ public sealed class TempFile : IDisposable
         return File.Open(Path, FileMode.OpenOrCreate);
     }
 
-    public static async Task<TempFile> Create(params string[] lines)
+    public static async Task<TempFile> Create(string text)
     {
         var file = Create();
-        await file.WriteLines(lines);
+        await file.Write(text);
         return file;
     }
 
