@@ -145,7 +145,7 @@ public class PromotePackageLogger : IPromotePackageLogger
         {
             if (dependencies.Count > 0)
             {
-                node.AddNode(Markup.FromInterpolated($"+ {dependencies.Count} direct dependencies (expanded below)"));
+                node.AddNode(Markup.FromInterpolated($"[gray]+ {dependencies.Count} direct dependencies (expanded below)[/]"));
             }
 
             return;
@@ -156,7 +156,7 @@ public class PromotePackageLogger : IPromotePackageLogger
         {
             if (dependencies.Count > 0)
             {
-                node.AddNode(Markup.FromInterpolated($"+ {dependencies.Count} direct dependencies (expanded above)"));
+                node.AddNode(Markup.FromInterpolated($"[gray]+ {dependencies.Count} direct dependencies (expanded above)[/]"));
             }
 
             return;
