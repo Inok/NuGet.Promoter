@@ -76,14 +76,14 @@ public class PackagesToPromoteResolver
 
         var metadata = metadataResult.Value;
 
+        var licenseInfo = PackageLicenseInfoConverter.FromPackageSearchMetadata(metadata);
+        _logger.LogPackageLicense(identity, licenseInfo);
+
         var packageExistInDestinationResult = await _destinationRepository.Packages.DoesPackageExist(identity, cancellationToken);
         if (packageExistInDestinationResult.IsFailure)
         {
             return Result.Failure(packageExistInDestinationResult.Error);
         }
-
-        var licenseInfo = PackageLicenseInfoConverter.FromPackageSearchMetadata(metadata);
-        _logger.LogPackageLicense(identity, licenseInfo);
 
         var packageExistInDestination = packageExistInDestinationResult.Value;
         if (packageExistInDestination)

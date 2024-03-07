@@ -38,11 +38,15 @@ public class PromotePackageLogger : IPromotePackageLogger
 
     public void LogPackageLicense(PackageIdentity identity, PackageLicenseInfo license)
     {
-        var text = Markup.FromInterpolated(license switch
+        Markup text;
+        if (license.Url != null && !string.Equals(license.Url.ToString(), license.License, StringComparison.OrdinalIgnoreCase))
         {
-            { Url: not null } _ => $"[gray]Package license: [bold][link={license.Url}]{license.License}[/][/][/]",
-            _                   => $"[gray]Package license: [bold]{license.License}[/][/]",
-        });
+            text = Markup.FromInterpolated($"[gray]Package license: [bold]{license.License} ({license.License})[/][/]");
+        }
+        else
+        {
+            text = Markup.FromInterpolated($"[gray]Package license: [bold]{license.License}[/][/]");
+        }
 
         var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
