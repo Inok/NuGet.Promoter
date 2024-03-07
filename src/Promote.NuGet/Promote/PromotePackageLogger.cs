@@ -1,4 +1,5 @@
 using NuGet.Packaging.Core;
+using Promote.NuGet.Commands.Licensing;
 using Promote.NuGet.Commands.Promote;
 using Promote.NuGet.Commands.Promote.Resolution;
 using Promote.NuGet.Commands.Requests;
@@ -33,6 +34,18 @@ public class PromotePackageLogger : IPromotePackageLogger
     public void LogProcessingPackage(PackageIdentity identity)
     {
         AnsiConsole.MarkupLine($"[bold]Processing {identity.Id} {identity.Version}[/]");
+    }
+
+    public void LogPackageLicense(PackageIdentity identity, PackageLicenseInfo license)
+    {
+        var text = Markup.FromInterpolated(license switch
+        {
+            { Url: not null } _ => $"[gray]Package license: [bold][link={license.Url}]{license.License}[/][/][/]",
+            _                   => $"[gray]Package license: [bold]{license.License}[/][/]",
+        });
+
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
     }
 
     public void LogPackagePresentInDestination(PackageIdentity identity)
