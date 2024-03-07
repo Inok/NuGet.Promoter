@@ -323,6 +323,10 @@ public class PromoteFromConfigurationCommandIntegrationTests
             destinationRepo,
             "System.Runtime.CompilerServices.Unsafe",
             new NuGetVersion(6, 0, 0));
+        await AssertContainsVersions(
+            destinationRepo,
+            "Microsoft.Data.SqlClient.SNI.runtime",
+            new NuGetVersion(5, 2, 0));
     }
 
     private static async Task PromotePackageToFeed(INuGetRepository destinationRepo, PackageIdentity packageId)
