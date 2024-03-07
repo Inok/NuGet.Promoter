@@ -18,16 +18,17 @@ public class PromotePackageLogger : IPromotePackageLogger
 
     public void LogResolvingPackageRequest(PackageRequest request)
     {
-        AnsiConsole.MarkupLineInterpolated($"[gray]Resolving {request}[/]");
+        AnsiConsole.MarkupLineInterpolated($"Resolving {request}");
     }
 
     public void LogPackageRequestResolution(PackageRequest request, IReadOnlyCollection<PackageIdentity> matchingPackages)
     {
-        var tree = new Tree(Markup.FromInterpolated($"[gray]Found {matchingPackages.Count} matching package(s):[/]"));
+        var tree = new Tree(Markup.FromInterpolated($"Found {matchingPackages.Count} matching {Decl(matchingPackages.Count, "package", "packages")}:"));
         foreach (var identity in matchingPackages.OrderBy(x => x.Id).ThenBy(x => x.Version))
         {
             tree.AddNode(Markup.FromInterpolated($"{identity.Version}"));
         }
+
         AnsiConsole.Write(tree);
     }
 
@@ -87,7 +88,7 @@ public class PromotePackageLogger : IPromotePackageLogger
 
     public void LogResolvingPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities)
     {
-        AnsiConsole.MarkupLineInterpolated($"[bold green]Resolving {identities.Count} package(s) to promote...[/]");
+        AnsiConsole.MarkupLineInterpolated($"[bold green]Resolving {identities.Count} {Decl(identities.Count, "package", "packages")} to promote...[/]");
     }
 
     public void LogResolvingDependency(PackageIdentity source, DependencyDescriptor dependency)
@@ -187,7 +188,7 @@ public class PromotePackageLogger : IPromotePackageLogger
 
     public void LogPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities)
     {
-        var tree = new Tree(Markup.FromInterpolated($"[bold green]Found {identities.Count} package(s) to promote:[/]"));
+        var tree = new Tree(Markup.FromInterpolated($"[bold green]Found {identities.Count} {Decl(identities.Count, "package", "packages")} to promote:[/]"));
         foreach (var identity in identities.OrderBy(x => x.Id).ThenBy(x => x.Version))
         {
             tree.AddNode(Markup.FromInterpolated($"{identity.Id} {identity.Version}"));
@@ -203,7 +204,7 @@ public class PromotePackageLogger : IPromotePackageLogger
 
     public void LogStartMirroringPackagesCount(int count)
     {
-        AnsiConsole.MarkupLine($"[bold green]Promoting {count} package(s)...[/]");
+        AnsiConsole.MarkupLine($"[bold green]Promoting {count} {Decl(count, "package", "packages")}...[/]");
     }
 
     public void LogMirrorPackage(PackageIdentity identity, int current, int total)
@@ -213,6 +214,11 @@ public class PromotePackageLogger : IPromotePackageLogger
 
     public void LogMirroredPackagesCount(int count)
     {
-        AnsiConsole.MarkupLine($"[bold green]{count} package(s) promoted.[/]");
+        AnsiConsole.MarkupLine($"[bold green]{count} {Decl(count, "package", "packages")} promoted.[/]");
+    }
+
+    private static string Decl(int count, string one, string many)
+    {
+        return count == 1 ? one : many;
     }
 }

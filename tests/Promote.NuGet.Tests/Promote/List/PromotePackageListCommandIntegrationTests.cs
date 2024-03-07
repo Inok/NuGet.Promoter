@@ -39,14 +39,14 @@ public class PromotePackageListCommandIntegrationTests
             {
                 "Resolving package requests...",
                 "Resolving System.Runtime (>= 4.1.0 && < 4.1.2)",
-                "Found 2 matching package(s):",
+                "Found 2 matching packages:",
                 "├── 4.1.0",
                 "└── 4.1.1",
                 "Resolving System.Runtime 4.3.1",
-                "Found 1 matching package(s):",
+                "Found 1 matching package:",
                 "└── 4.3.1",
                 "Resolving System.Globalization 4.3.0",
-                "Found 1 matching package(s):",
+                "Found 1 matching package:",
                 "└── 4.3.0",
             }
         );
@@ -71,7 +71,7 @@ public class PromotePackageListCommandIntegrationTests
         );
 
         result.StdOutput.Should().ContainInConsecutiveOrder(
-            "Found 13 package(s) to promote:",
+            "Found 13 packages to promote:",
             "├── Microsoft.NETCore.Platforms 1.0.1",
             "├── Microsoft.NETCore.Platforms 1.0.2",
             "├── Microsoft.NETCore.Platforms 1.1.0",
@@ -88,7 +88,7 @@ public class PromotePackageListCommandIntegrationTests
         );
 
         result.StdOutput.Should().ContainInOrder(
-            "Promoting 13 package(s)...",
+            "Promoting 13 packages...",
             "(1/13) Promote Microsoft.NETCore.Platforms 1.0.1",
             "(2/13) Promote Microsoft.NETCore.Platforms 1.0.2",
             "(3/13) Promote Microsoft.NETCore.Platforms 1.1.0",
@@ -102,7 +102,7 @@ public class PromotePackageListCommandIntegrationTests
             "(11/13) Promote System.Runtime 4.1.1",
             "(12/13) Promote System.Runtime 4.3.0",
             "(13/13) Promote System.Runtime 4.3.1",
-            "13 package(s) promoted."
+            "13 packages promoted."
         );
 
         result.StdError.Should().BeEmpty();
