@@ -15,17 +15,19 @@ public class PromoteFromConfigurationCommandIntegrationTests
     public async Task Promotes_a_set_of_packages_with_their_dependencies_to_destination_feed()
     {
         using var packagesFile = await TempFile.Create(
-                                     "packages:",
-                                     "  - id: System.Collections",
-                                     "    versions: 4.3.0",
-                                     "  - id: System.Globalization",
-                                     "    versions:",
-                                     "      - 4.0.11",
-                                     "      - 4.3.0",
-                                     "  - id: System.Runtime",
-                                     "    versions:",
-                                     "      - '[4.1.0,4.1.2)'",
-                                     "      - 4.3.1"
+                                     """
+                                     packages:
+                                       - id: System.Collections
+                                         versions: 4.3.0
+                                       - id: System.Globalization
+                                         versions:
+                                           - 4.0.11
+                                           - 4.3.0
+                                       - id: System.Runtime
+                                         versions:
+                                           - '[4.1.0,4.1.2)'
+                                           - 4.3.1
+                                     """
                                  );
 
         await using var destinationFeed = await LocalNugetFeed.Create();

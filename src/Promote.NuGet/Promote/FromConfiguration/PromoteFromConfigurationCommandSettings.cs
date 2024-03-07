@@ -7,14 +7,16 @@ namespace Promote.NuGet.Promote.FromConfiguration;
 internal sealed class PromoteFromConfigurationCommandSettings : PromoteSettings
 {
     [Description(
-        "Path to the configuraton file (in YAML format). Example:"
-      + "\npackages:"
-      + "\n  - id: System.Runtime"
-      + "\n    versions: 4.3.1"
-      + "\n  - id: System.Text.Json"
-      + "\n    versions:"
-      + "\n      - '[[6, 7)'"
-      + "\n      - '[[8, 9)'"
+        """
+        Path to the configuraton file (in YAML format). Example:
+        packages:
+          - id: System.Runtime
+            versions: 4.3.1
+          - id: System.Text.Json
+            versions:
+              - '[[6, 7)'
+              - '[[8, 9)'
+        """
     )]
     [CommandArgument(0, "<file>")]
     public string? File { get; init; }
