@@ -2,6 +2,7 @@
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 using Promote.NuGet.Commands.Core;
+using Promote.NuGet.Commands.Licensing;
 using Promote.NuGet.Feeds;
 
 namespace Promote.NuGet.Commands.Promote.Resolution;
@@ -81,7 +82,8 @@ public class PackagesToPromoteResolver
             return Result.Failure(packageExistInDestinationResult.Error);
         }
 
-        _logger.LogPackageLicense(identity, metadata);
+        var licenseInfo = PackageLicenseInfoConverter.FromPackageSearchMetadata(metadata);
+        _logger.LogPackageLicense(identity, licenseInfo);
 
         var packageExistInDestination = packageExistInDestinationResult.Value;
         if (packageExistInDestination)

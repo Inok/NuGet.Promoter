@@ -1,5 +1,5 @@
 ﻿using NuGet.Packaging.Core;
-using NuGet.Protocol.Core.Types;
+using Promote.NuGet.Commands.Licensing;
 
 namespace Promote.NuGet.Commands.Promote.Resolution;
 
@@ -9,7 +9,7 @@ public interface IPackagesToPromoteResolverLogger
 
     void LogProcessingPackage(PackageIdentity identity);
 
-    void LogPackageLicense(PackageIdentity identity, IPackageSearchMetadata licenseMetadata);
+    void LogPackageLicense(PackageIdentity identity, PackageLicenseInfo license);
 
     void LogPackagePresentInDestination(PackageIdentity identity);
 
