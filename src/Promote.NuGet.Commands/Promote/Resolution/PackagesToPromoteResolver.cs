@@ -81,6 +81,8 @@ public class PackagesToPromoteResolver
             return Result.Failure(packageExistInDestinationResult.Error);
         }
 
+        _logger.LogPackageLicense(identity, metadata);
+
         var packageExistInDestination = packageExistInDestinationResult.Value;
         if (packageExistInDestination)
         {

@@ -1,4 +1,5 @@
 ﻿using NuGet.Packaging.Core;
+using NuGet.Protocol.Core.Types;
 
 namespace Promote.NuGet.Commands.Promote.Resolution;
 
@@ -7,6 +8,8 @@ public interface IPackagesToPromoteResolverLogger
     void LogResolvingPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities);
 
     void LogProcessingPackage(PackageIdentity identity);
+
+    void LogPackageLicense(PackageIdentity identity, IPackageSearchMetadata licenseMetadata);
 
     void LogPackagePresentInDestination(PackageIdentity identity);
 
