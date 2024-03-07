@@ -18,7 +18,7 @@
     <PackageVersion Include="NuGet.Protocol" Version="6.9.1" />
     <PackageVersion Include="Nuke.Common" Version="8.0.0" />
     <PackageVersion Include="Spectre.Console" Version="0.45.0" />
-    <PackageVersion Include="Spectre.Console.Analyzer" Version="0.45.0" />
+    <PackageVersion Include="Spectre.Console.Analyzer" Version="0.47.0" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.45.0" />
     <PackageVersion Include="Testcontainers" Version="3.7.0" />
     <PackageVersion Include="YamlDotNet" Version="15.1.2" />
