@@ -162,7 +162,7 @@ public class PromoteFromConfigurationCommandIntegrationTests
             "  System.Runtime 4.3.1 is already in the destination.",
             "  Skipping dependencies of System.Runtime 4.3.1.",
             "Processing System.Runtime.CompilerServices.Unsafe 6.0.0",
-            "  Package license: MIT",
+            "  Package license: MIT (https://licenses.nuget.org/MIT)",
             "  System.Runtime.CompilerServices.Unsafe 6.0.0 is not in the",
             "  destination.",
             "  System.Runtime.CompilerServices.Unsafe 6.0.0 has no",
