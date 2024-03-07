@@ -16,7 +16,7 @@
     <PackageVersion Include="NUnit.Analyzers" Version="4.0.1" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageVersion Include="NuGet.Protocol" Version="6.9.1" />
-    <PackageVersion Include="Nuke.Common" Version="7.0.6" />
+    <PackageVersion Include="Nuke.Common" Version="8.0.0" />
     <PackageVersion Include="Spectre.Console" Version="0.45.0" />
     <PackageVersion Include="Spectre.Console.Analyzer" Version="0.45.0" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.45.0" />

@@ -1,4 +1,3 @@
-using System;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.GitVersion;
 
@@ -12,7 +11,7 @@ public partial class Build
 
         var gitVersionSettings = new GitVersionSettings()
                                  .SetProcessWorkingDirectory(RootDirectory)
-                                 .SetFramework("net6.0")
+                                 .SetFramework("net8.0")
                                  .EnableNoFetch()
                                  .EnableNoCache();
 
