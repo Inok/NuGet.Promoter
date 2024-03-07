@@ -61,7 +61,7 @@ partial class Build : NukeBuild
                                            {
                                                DotNetClean(s => s.SetProject(Solution)
                                                                  .SetConfiguration(Configuration)
-                                                                 .SetVerbosity(DotNetVerbosity.Minimal));
+                                                                 .SetVerbosity(DotNetVerbosity.minimal));
                                            });
 
     Target Restore => _ => _
