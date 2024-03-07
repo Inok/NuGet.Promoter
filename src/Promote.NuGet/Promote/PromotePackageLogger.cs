@@ -41,7 +41,7 @@ public class PromotePackageLogger : IPromotePackageLogger
         Markup text;
         if (license.Url != null && !string.Equals(license.Url.ToString(), license.License, StringComparison.OrdinalIgnoreCase))
         {
-            text = Markup.FromInterpolated($"[gray]Package license: [bold]{license.License}[/] ({license.License})[/]");
+            text = Markup.FromInterpolated($"[gray]Package license: [bold]{license.License}[/] ({license.Url})[/]");
         }
         else
         {
