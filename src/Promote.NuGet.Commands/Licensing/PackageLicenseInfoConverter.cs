@@ -10,22 +10,22 @@ public static class PackageLicenseInfoConverter
         var licenseMetadata = metadata.LicenseMetadata;
         if (licenseMetadata != null)
         {
-            if (licenseMetadata.Type == LicenseType.Expression && licenseMetadata.LicenseExpression.ToString() is { } expr && expr.Length > 0)
+            if (licenseMetadata.Type == LicenseType.Expression)
             {
-                return new PackageLicenseInfo.Expression(expr, licenseMetadata.LicenseUrl);
+                return new PackageLicenseInfo(licenseMetadata.License, licenseMetadata.LicenseUrl);
             }
 
             if (licenseMetadata is { Type: LicenseType.File })
             {
-                return new PackageLicenseInfo.File(licenseMetadata.License);
+                return new PackageLicenseInfo(licenseMetadata.License, null);
             }
         }
 
         if (metadata.LicenseUrl != null)
         {
-            return new PackageLicenseInfo.Url(metadata.LicenseUrl);
+            return new PackageLicenseInfo(metadata.LicenseUrl.ToString(), metadata.LicenseUrl);
         }
 
-        return new PackageLicenseInfo.None();
+        return new PackageLicenseInfo("<not set>", null);
     }
 }

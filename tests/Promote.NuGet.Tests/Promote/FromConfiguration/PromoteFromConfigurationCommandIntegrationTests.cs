@@ -30,6 +30,9 @@ public class PromoteFromConfigurationCommandIntegrationTests
                                        - id: System.Runtime.CompilerServices.Unsafe
                                          versions:
                                            - 6.0.0
+                                       - id: Microsoft.Data.SqlClient.SNI.runtime
+                                         versions:
+                                           - 5.2.0
                                      """
                                  );
 
@@ -71,11 +74,14 @@ public class PromoteFromConfigurationCommandIntegrationTests
                 "Resolving System.Runtime.CompilerServices.Unsafe 6.0.0",
                 "Found 1 matching package(s):",
                 "└── 6.0.0",
+                "Resolving Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
+                "Found 1 matching package(s):",
+                "└── 5.2.0",
             }
         );
 
         result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
-            "Resolving 7 package(s) to promote...",
+            "Resolving 8 package(s) to promote...",
             "Processing System.Collections 4.3.0",
             "  Package license:",
             "  http://go.microsoft.com/fwlink/?LinkId=329770",
@@ -161,6 +167,14 @@ public class PromoteFromConfigurationCommandIntegrationTests
             "  destination.",
             "  System.Runtime.CompilerServices.Unsafe 6.0.0 has no",
             "  dependencies.",
+            "Processing Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
+            "  Package license:",
+            "  https://www.nuget.org/packages/Microsoft.Data.SqlClient.SN",
+            "  I.runtime/5.2.0/license",
+            "  Microsoft.Data.SqlClient.SNI.runtime 5.2.0 is not in the",
+            "  destination.",
+            "  Microsoft.Data.SqlClient.SNI.runtime 5.2.0 has no",
+            "  dependencies.",
             "Processing Microsoft.NETCore.Platforms 1.1.0",
             "  Package license:",
             "  http://go.microsoft.com/fwlink/?LinkId=329770",
@@ -212,6 +226,7 @@ public class PromoteFromConfigurationCommandIntegrationTests
 
         result.StdOutput.Should().ContainInConsecutiveOrder(
             "Resolved package tree:",
+            "├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
             "├── System.Collections 4.3.0",
             "│   ├── Microsoft.NETCore.Platforms 1.1.0",
             "│   ├── Microsoft.NETCore.Targets 1.1.0",
@@ -239,7 +254,8 @@ public class PromoteFromConfigurationCommandIntegrationTests
         );
 
         result.StdOutput.Should().ContainInConsecutiveOrder(
-            "Found 13 package(s) to promote:",
+            "Found 14 package(s) to promote:",
+            "├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
             "├── Microsoft.NETCore.Platforms 1.0.1",
             "├── Microsoft.NETCore.Platforms 1.0.2",
             "├── Microsoft.NETCore.Platforms 1.1.0",
@@ -256,21 +272,22 @@ public class PromoteFromConfigurationCommandIntegrationTests
         );
 
         result.StdOutput.Should().ContainInOrder(
-            "Promoting 13 package(s)...",
-            "(1/13) Promote Microsoft.NETCore.Platforms 1.0.1",
-            "(2/13) Promote Microsoft.NETCore.Platforms 1.0.2",
-            "(3/13) Promote Microsoft.NETCore.Platforms 1.1.0",
-            "(4/13) Promote Microsoft.NETCore.Targets 1.0.1",
-            "(5/13) Promote Microsoft.NETCore.Targets 1.0.6",
-            "(6/13) Promote Microsoft.NETCore.Targets 1.1.0",
-            "(7/13) Promote System.Collections 4.3.0",
-            "(8/13) Promote System.Globalization 4.0.11",
-            "(9/13) Promote System.Globalization 4.3.0",
-            "(10/13) Promote System.Runtime 4.1.0",
-            "(11/13) Promote System.Runtime 4.1.1",
-            "(12/13) Promote System.Runtime 4.3.0",
-            "(13/13) Promote System.Runtime.CompilerServices.Unsafe 6.0.0",
-            "13 package(s) promoted."
+            "Promoting 14 package(s)...",
+            "(1/14) Promote Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
+            "(2/14) Promote Microsoft.NETCore.Platforms 1.0.1",
+            "(3/14) Promote Microsoft.NETCore.Platforms 1.0.2",
+            "(4/14) Promote Microsoft.NETCore.Platforms 1.1.0",
+            "(5/14) Promote Microsoft.NETCore.Targets 1.0.1",
+            "(6/14) Promote Microsoft.NETCore.Targets 1.0.6",
+            "(7/14) Promote Microsoft.NETCore.Targets 1.1.0",
+            "(8/14) Promote System.Collections 4.3.0",
+            "(9/14) Promote System.Globalization 4.0.11",
+            "(10/14) Promote System.Globalization 4.3.0",
+            "(11/14) Promote System.Runtime 4.1.0",
+            "(12/14) Promote System.Runtime 4.1.1",
+            "(13/14) Promote System.Runtime 4.3.0",
+            "(14/14) Promote System.Runtime.CompilerServices.Unsafe 6.0.0",
+            "14 package(s) promoted."
         );
 
         result.StdError.Should().BeEmpty();

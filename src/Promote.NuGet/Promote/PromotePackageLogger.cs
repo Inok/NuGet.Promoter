@@ -40,11 +40,8 @@ public class PromotePackageLogger : IPromotePackageLogger
     {
         var text = Markup.FromInterpolated(license switch
         {
-            PackageLicenseInfo.Expression expression => $"[gray]Package license: [bold][link={expression.Uri}]{expression.License}[/][/][/]",
-            PackageLicenseInfo.File file             => $"[gray]Package license: [bold]{file.FileName}[/][/]",
-            PackageLicenseInfo.Url url               => $"[gray]Package license: [bold][link]{url.Uri}[/][/][/]",
-            PackageLicenseInfo.None                  => $"[gray]Package license: not set[/]",
-            _                                        => throw new ArgumentOutOfRangeException(nameof(license), license, null)
+            { Url: not null } _ => $"[gray]Package license: [bold][link={license.Url}]{license.License}[/][/][/]",
+            _                   => $"[gray]Package license: [bold]{license.License}[/][/]",
         });
 
         var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
