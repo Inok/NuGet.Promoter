@@ -60,28 +60,28 @@ public class PromoteFromConfigurationCommandIntegrationTests
             {
                 "Resolving package requests...",
                 "Resolving System.Collections 4.3.0",
-                "Found 1 matching package(s):",
+                "Found 1 matching package:",
                 "└── 4.3.0",
                 "Resolving System.Globalization 4.0.11, 4.3.0",
-                "Found 2 matching package(s):",
+                "Found 2 matching packages:",
                 "├── 4.0.11",
                 "└── 4.3.0",
                 "Resolving System.Runtime (>= 4.1.0 && < 4.1.2), 4.3.1",
-                "Found 3 matching package(s):",
+                "Found 3 matching packages:",
                 "├── 4.1.0",
                 "├── 4.1.1",
                 "└── 4.3.1",
                 "Resolving System.Runtime.CompilerServices.Unsafe 6.0.0",
-                "Found 1 matching package(s):",
+                "Found 1 matching package:",
                 "└── 6.0.0",
                 "Resolving Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
-                "Found 1 matching package(s):",
+                "Found 1 matching package:",
                 "└── 5.2.0",
             }
         );
 
         result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
-            "Resolving 8 package(s) to promote...",
+            "Resolving 8 packages to promote...",
             "Processing System.Collections 4.3.0",
             "  Package license:",
             "  http://go.microsoft.com/fwlink/?LinkId=329770",
@@ -254,7 +254,7 @@ public class PromoteFromConfigurationCommandIntegrationTests
         );
 
         result.StdOutput.Should().ContainInConsecutiveOrder(
-            "Found 14 package(s) to promote:",
+            "Found 14 packages to promote:",
             "├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
             "├── Microsoft.NETCore.Platforms 1.0.1",
             "├── Microsoft.NETCore.Platforms 1.0.2",
@@ -272,7 +272,7 @@ public class PromoteFromConfigurationCommandIntegrationTests
         );
 
         result.StdOutput.Should().ContainInOrder(
-            "Promoting 14 package(s)...",
+            "Promoting 14 packages...",
             "(1/14) Promote Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
             "(2/14) Promote Microsoft.NETCore.Platforms 1.0.1",
             "(3/14) Promote Microsoft.NETCore.Platforms 1.0.2",
@@ -287,7 +287,7 @@ public class PromoteFromConfigurationCommandIntegrationTests
             "(12/14) Promote System.Runtime 4.1.1",
             "(13/14) Promote System.Runtime 4.3.0",
             "(14/14) Promote System.Runtime.CompilerServices.Unsafe 6.0.0",
-            "14 package(s) promoted."
+            "14 packages promoted."
         );
 
         result.StdError.Should().BeEmpty();

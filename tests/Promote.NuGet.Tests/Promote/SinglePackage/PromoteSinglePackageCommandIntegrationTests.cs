@@ -32,7 +32,7 @@ public class PromoteSinglePackageCommandIntegrationTests
             {
                 "Resolving package requests...",
                 "Resolving System.Runtime 4.3.0",
-                "Found 1 matching package(s):",
+                "Found 1 matching package:",
                 "└── 4.3.0",
             }
         );
@@ -45,18 +45,18 @@ public class PromoteSinglePackageCommandIntegrationTests
         );
 
         result.StdOutput.Should().ContainInConsecutiveOrder(
-            "Found 3 package(s) to promote:",
+            "Found 3 packages to promote:",
             "├── Microsoft.NETCore.Platforms 1.1.0",
             "├── Microsoft.NETCore.Targets 1.1.0",
             "└── System.Runtime 4.3.0"
         );
 
         result.StdOutput.Should().ContainInOrder(
-            "Promoting 3 package(s)...",
+            "Promoting 3 packages...",
             "(1/3) Promote Microsoft.NETCore.Platforms 1.1.0",
             "(2/3) Promote Microsoft.NETCore.Targets 1.1.0",
             "(3/3) Promote System.Runtime 4.3.0",
-            "3 package(s) promoted."
+            "3 packages promoted."
         );
 
         result.StdError.Should().BeEmpty();

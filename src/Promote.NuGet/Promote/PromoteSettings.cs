@@ -24,6 +24,14 @@ internal class PromoteSettings : CommandSettings
     [CommandOption("--destination-api-key")]
     public string? DestinationApiKey { get; init; }
 
+    [Description("Username with access to the destination repository.")]
+    [CommandOption("--destination-username")]
+    public string? DestinationUsername { get; init; }
+
+    [Description("Password to access the destination repository under the specified username.")]
+    [CommandOption("--destination-password")]
+    public string? DestinationPassword { get; init; }
+
     [Description("Do not use local cache.")]
     [CommandOption("--no-cache")]
     public bool NoCache { get; init; }
@@ -64,6 +72,10 @@ internal class PromoteSettings : CommandSettings
             return ValidationResult.Error("When --force-push is specified, --always-resolve-deps should also be set.");
         }
 
+        if (string.IsNullOrEmpty(DestinationUsername) != string.IsNullOrEmpty(DestinationPassword))
+        {
+            return ValidationResult.Error("If authentication is required, both --destination-username and --destination-password must be specified.");
+        }
 
         return ValidationResult.Success();
     }
