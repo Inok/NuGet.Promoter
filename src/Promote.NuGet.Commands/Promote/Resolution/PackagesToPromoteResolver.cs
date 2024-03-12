@@ -35,7 +35,7 @@ public class PackagesToPromoteResolver
         var packagesToResolveQueue = new DistinctQueue<PackageIdentity>(identities);
         var packageInfoAccessor = new CachedNuGetPackageInfoAccessor(_sourceRepository.Packages);
 
-        var resolvedPackages = new HashSet<PackageIdentity>();
+        var resolvedPackages = new Dictionary<PackageIdentity, PackageInfo>();
         var packagesAlreadyInTarget = new HashSet<PackageIdentity>();
         var resolvedDependencies = new HashSet<(PackageIdentity Dependant, PackageIdentity Dependency)>();
 
@@ -52,7 +52,7 @@ public class PackagesToPromoteResolver
             }
         }
 
-        var packageResolutionTree = PackageResolutionTree.CreateTree(resolvedPackages, identities, packagesAlreadyInTarget, resolvedDependencies);
+        var packageResolutionTree = PackageResolutionTree.CreateTree(resolvedPackages.Values, identities, packagesAlreadyInTarget, resolvedDependencies);
 
         _logger.LogResolvedPackageTree(packageResolutionTree);
 
@@ -72,12 +72,12 @@ public class PackagesToPromoteResolver
             return Result.Failure(metadataResult.Error);
         }
 
-        context.ResolvedPackages.Add(identity);
-
         var metadata = metadataResult.Value;
 
         var licenseInfo = PackageLicenseInfoConverter.FromPackageSearchMetadata(metadata);
         _logger.LogPackageLicense(identity, licenseInfo);
+
+        context.ResolvedPackages.Add(identity, new PackageInfo(identity, licenseInfo));
 
         var packageExistInDestinationResult = await _destinationRepository.Packages.DoesPackageExist(identity, cancellationToken);
         if (packageExistInDestinationResult.IsFailure)
@@ -189,7 +189,7 @@ public class PackagesToPromoteResolver
     private record ResolutionContext(
         DistinctQueue<PackageIdentity> PackagesToResolveQueue,
         CachedNuGetPackageInfoAccessor PackageInfoAccessor,
-        HashSet<PackageIdentity> ResolvedPackages,
+        IDictionary<PackageIdentity, PackageInfo> ResolvedPackages,
         HashSet<PackageIdentity> PackagesAlreadyInTarget,
         HashSet<(PackageIdentity Dependant, PackageIdentity Dependency)> ResolvedDependencies
     );

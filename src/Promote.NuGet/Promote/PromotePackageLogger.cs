@@ -39,16 +39,7 @@ public class PromotePackageLogger : IPromotePackageLogger
 
     public void LogPackageLicense(PackageIdentity identity, PackageLicenseInfo license)
     {
-        Markup text;
-        if (license.Url != null && !string.Equals(license.Url.ToString(), license.License, StringComparison.OrdinalIgnoreCase))
-        {
-            text = Markup.FromInterpolated($"[gray]Package license: [bold]{license.License}[/] ({license.Url})[/]");
-        }
-        else
-        {
-            text = Markup.FromInterpolated($"[gray]Package license: [bold]{license.License}[/][/]");
-        }
-
+        var text = new Markup($"[gray]Package license: {GetLicenseMarkup(license)}[/]");
         var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
     }
@@ -186,12 +177,13 @@ public class PromotePackageLogger : IPromotePackageLogger
         }
     }
 
-    public void LogPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities)
+    public void LogPackagesToPromote(IReadOnlyCollection<PackageInfo> packages)
     {
-        var tree = new Tree(Markup.FromInterpolated($"[bold green]Found {identities.Count} {Decl(identities.Count, "package", "packages")} to promote:[/]"));
-        foreach (var identity in identities.OrderBy(x => x.Id).ThenBy(x => x.Version))
+        var tree = new Tree(Markup.FromInterpolated($"[bold green]Found {packages.Count} {Decl(packages.Count, "package", "packages")} to promote:[/]"));
+        foreach (var identity in packages.OrderBy(x => x.Id))
         {
-            tree.AddNode(Markup.FromInterpolated($"{identity.Id} {identity.Version}"));
+            var node = tree.AddNode(Markup.FromInterpolated($"{identity.Id.Id} {identity.Id.Version}"));
+            node.AddNode($"License: {GetLicenseMarkup(identity.License)}");
         }
 
         AnsiConsole.Write(tree);
@@ -215,6 +207,18 @@ public class PromotePackageLogger : IPromotePackageLogger
     public void LogMirroredPackagesCount(int count)
     {
         AnsiConsole.MarkupLine($"[bold green]{count} {Decl(count, "package", "packages")} promoted.[/]");
+    }
+
+    private static string GetLicenseMarkup(PackageLicenseInfo license)
+    {
+        if (license.Url != null && !string.Equals(license.Url.ToString(), license.License, StringComparison.OrdinalIgnoreCase))
+        {
+            return $"{Markup.Escape(license.License)} ({Markup.Escape(license.Url.ToString())})";
+        }
+        else
+        {
+            return $"{Markup.Escape(license.License)}";
+        }
     }
 
     private static string Decl(int count, string one, string many)

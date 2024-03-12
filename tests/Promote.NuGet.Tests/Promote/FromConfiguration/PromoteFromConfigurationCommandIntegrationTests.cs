@@ -253,22 +253,50 @@ public class PromoteFromConfigurationCommandIntegrationTests
             "└── System.Runtime.CompilerServices.Unsafe 6.0.0"
         );
 
-        result.StdOutput.Should().ContainInConsecutiveOrder(
+        result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
             "Found 14 packages to promote:",
             "├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
+            "│   └── License:",
+            "│       https://www.nuget.org/packages/Microsoft.Data.SqlCli",
+            "│       ent.SNI.runtime/5.2.0/license",
             "├── Microsoft.NETCore.Platforms 1.0.1",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── Microsoft.NETCore.Platforms 1.0.2",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── Microsoft.NETCore.Platforms 1.1.0",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── Microsoft.NETCore.Targets 1.0.1",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── Microsoft.NETCore.Targets 1.0.6",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── Microsoft.NETCore.Targets 1.1.0",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── System.Collections 4.3.0",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── System.Globalization 4.0.11",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── System.Globalization 4.3.0",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── System.Runtime 4.1.0",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── System.Runtime 4.1.1",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── System.Runtime 4.3.0",
-            "└── System.Runtime.CompilerServices.Unsafe 6.0.0"
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
+            "└── System.Runtime.CompilerServices.Unsafe 6.0.0",
+            "    └── License: MIT (https://licenses.nuget.org/MIT)"
         );
 
         result.StdOutput.Should().ContainInOrder(

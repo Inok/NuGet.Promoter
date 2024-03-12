@@ -83,8 +83,8 @@ public class PromotePackageCommand
         var packageTree = packageTreeResult.Value;
 
         var packagesToPromote = packageTree.AllPackages
-                                           .Where(x => options.ForcePush || !packageTree.IsInTargetFeed(x))
-                                           .OrderBy(x => x)
+                                           .Where(x => options.ForcePush || !packageTree.IsInTargetFeed(x.Id))
+                                           .OrderBy(x => x.Id)
                                            .ToList();
 
         if (packagesToPromote.Count > 0)
@@ -96,6 +96,6 @@ public class PromotePackageCommand
             _promotePackageLogger.LogNoPackagesToPromote();
         }
 
-        return packagesToPromote;
+        return packagesToPromote.Select(x => x.Id).ToHashSet();
     }
 }

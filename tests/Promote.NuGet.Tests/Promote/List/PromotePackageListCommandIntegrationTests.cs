@@ -70,21 +70,47 @@ public class PromotePackageListCommandIntegrationTests
             "    └── Microsoft.NETCore.Targets 1.1.3"
         );
 
-        result.StdOutput.Should().ContainInConsecutiveOrder(
+        result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
             "Found 13 packages to promote:",
             "├── Microsoft.NETCore.Platforms 1.0.1",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── Microsoft.NETCore.Platforms 1.0.2",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── Microsoft.NETCore.Platforms 1.1.0",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── Microsoft.NETCore.Platforms 1.1.1",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── Microsoft.NETCore.Targets 1.0.1",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── Microsoft.NETCore.Targets 1.0.6",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── Microsoft.NETCore.Targets 1.1.0",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── Microsoft.NETCore.Targets 1.1.3",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── System.Globalization 4.3.0",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── System.Runtime 4.1.0",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── System.Runtime 4.1.1",
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
             "├── System.Runtime 4.3.0",
-            "└── System.Runtime 4.3.1"
+            "│   └── License:",
+            "│       http://go.microsoft.com/fwlink/?LinkId=329770",
+            "└── System.Runtime 4.3.1",
+            "    └── License:",
+            "        http://go.microsoft.com/fwlink/?LinkId=329770"
         );
 
         result.StdOutput.Should().ContainInOrder(
