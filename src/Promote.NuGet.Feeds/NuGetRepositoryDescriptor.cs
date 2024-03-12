@@ -4,9 +4,9 @@ public class NuGetRepositoryDescriptor
 {
     public string Source { get; }
 
-    public string? Password { get; set; }
-
     public string? Username { get; set; }
+
+    public string? Password { get; set; }
 
     public string? ApiKey { get; }
 
