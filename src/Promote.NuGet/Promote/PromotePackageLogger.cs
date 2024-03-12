@@ -124,7 +124,7 @@ public class PromotePackageLogger : IPromotePackageLogger
         var expanded = new HashSet<PackageIdentity>();
 
         var tree = new Tree("[bold green]Resolved package tree:[/]");
-        foreach (var rootPackage in packageTree.Roots.OrderBy(x => x.Id))
+        foreach (var rootPackage in packageTree.Roots.OrderBy(x => x))
         {
             AddNodeAndChildren(tree, packageTree, rootPackage, expanded, rootLevel: true);
         }
