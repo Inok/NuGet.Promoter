@@ -371,6 +371,311 @@ public class PromoteFromConfigurationCommandIntegrationTests
         }
     }
 
+    [Test, CancelAfter(60_000)]
+    public async Task Checks_license_compliance_with_whitelisted_licenses()
+    {
+        using var packagesFile = await TempFile.Create(
+                                     """
+                                     license-compliance-check:
+                                       enabled: true
+                                       accept-expressions:
+                                         - MIT
+                                       accept-urls:
+                                         - http://go.microsoft.com/fwlink/?LinkId=329770
+                                     packages:
+                                       - id: System.Runtime
+                                         versions: 4.3.1
+                                       - id: Microsoft.Data.SqlClient.SNI.runtime
+                                         versions:
+                                           - 5.2.0
+                                       - id: System.Runtime.CompilerServices.Unsafe
+                                         versions:
+                                           - 6.0.0
+                                     """
+                                 );
+
+        await using var destinationFeed = await LocalNugetFeed.Create();
+
+        // Act
+        var result = await PromoteNugetProcessRunner.RunForResultAsync(
+                         "promote",
+                         "from-config",
+                         packagesFile.Path,
+                         "--destination", destinationFeed.FeedUrl,
+                         "--destination-api-key", destinationFeed.ApiKey
+                     );
+
+        // Assert
+        var actualOutput = string.Join(Environment.NewLine, result.StdOutput.Select(x => x.TrimEnd()));
+        actualOutput.Should().Be(
+            """
+            Resolving package requests...
+            Resolving System.Runtime 4.3.1
+            Found 1 matching package:
+            └── 4.3.1
+            Resolving Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+            Found 1 matching package:
+            └── 5.2.0
+            Resolving System.Runtime.CompilerServices.Unsafe 6.0.0
+            Found 1 matching package:
+            └── 6.0.0
+            Resolving 3 packages to promote...
+            Processing System.Runtime 4.3.1
+              Package license: MICROSOFT .NET LIBRARY
+              (http://go.microsoft.com/fwlink/?LinkId=329770)
+              System.Runtime 4.3.1 is not in the destination.
+              Resolving dependency Microsoft.NETCore.Platforms (>=
+              1.1.1)
+                Resolved as Microsoft.NETCore.Platforms 1.1.1
+                Microsoft.NETCore.Platforms 1.1.1 is queued for
+                processing.
+              Resolving dependency Microsoft.NETCore.Targets (>= 1.1.3)
+                Resolved as Microsoft.NETCore.Targets 1.1.3
+                Microsoft.NETCore.Targets 1.1.3 is queued for
+                processing.
+            Processing Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+              Package license:
+              https://www.nuget.org/packages/Microsoft.Data.SqlClient.SN
+              I.runtime/5.2.0/license
+              Microsoft.Data.SqlClient.SNI.runtime 5.2.0 is not in the
+              destination.
+              Microsoft.Data.SqlClient.SNI.runtime 5.2.0 has no
+              dependencies.
+            Processing System.Runtime.CompilerServices.Unsafe 6.0.0
+              Package license: MIT (https://licenses.nuget.org/MIT)
+              System.Runtime.CompilerServices.Unsafe 6.0.0 is not in the
+              destination.
+              System.Runtime.CompilerServices.Unsafe 6.0.0 has no
+              dependencies.
+            Processing Microsoft.NETCore.Platforms 1.1.1
+              Package license: MICROSOFT .NET LIBRARY
+              (http://go.microsoft.com/fwlink/?LinkId=329770)
+              Microsoft.NETCore.Platforms 1.1.1 is not in the
+              destination.
+              Microsoft.NETCore.Platforms 1.1.1 has no dependencies.
+            Processing Microsoft.NETCore.Targets 1.1.3
+              Package license: MICROSOFT .NET LIBRARY
+              (http://go.microsoft.com/fwlink/?LinkId=329770)
+              Microsoft.NETCore.Targets 1.1.3 is not in the destination.
+              Microsoft.NETCore.Targets 1.1.3 has no dependencies.
+            Resolved package tree:
+            ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+            ├── System.Runtime 4.3.1
+            │   ├── Microsoft.NETCore.Platforms 1.1.1
+            │   └── Microsoft.NETCore.Targets 1.1.3
+            └── System.Runtime.CompilerServices.Unsafe 6.0.0
+            Found 5 packages to promote:
+            ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+            │   └── License:
+            │       https://www.nuget.org/packages/Microsoft.Data.SqlCli
+            │       ent.SNI.runtime/5.2.0/license
+            ├── Microsoft.NETCore.Platforms 1.1.1
+            │   └── License: MICROSOFT .NET LIBRARY
+            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Microsoft.NETCore.Targets 1.1.3
+            │   └── License: MICROSOFT .NET LIBRARY
+            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── System.Runtime 4.3.1
+            │   └── License: MICROSOFT .NET LIBRARY
+            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            └── System.Runtime.CompilerServices.Unsafe 6.0.0
+                └── License: MIT (https://licenses.nuget.org/MIT)
+            License summary:
+            ├── 3x: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── 1x:
+            │   https://www.nuget.org/packages/Microsoft.Data.SqlClient.
+            │   SNI.runtime/5.2.0/license
+            └── 1x: MIT (https://licenses.nuget.org/MIT)
+            Checking license compliance...
+            Checking Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+                License (file): LICENSE.txt
+                [x] NOT IMPLEMENTED
+            Checking Microsoft.NETCore.Platforms 1.1.1
+                License (url):
+                http://go.microsoft.com/fwlink/?LinkId=329770
+                [v] The license url is in whitelist.
+            Checking Microsoft.NETCore.Targets 1.1.3
+                License (url):
+                http://go.microsoft.com/fwlink/?LinkId=329770
+                [v] The license url is in whitelist.
+            Checking System.Runtime 4.3.1
+                License (url):
+                http://go.microsoft.com/fwlink/?LinkId=329770
+                [v] The license url is in whitelist.
+            Checking System.Runtime.CompilerServices.Unsafe 6.0.0
+                License (expression): MIT
+                [v] The license expression is in whitelist.
+            1 license violation found:
+            └── Microsoft.Data.SqlClient.SNI.runtime.5.2.0
+                ├── License (file): LICENSE.txt
+                └── Reason: NOT IMPLEMENTED
+            License violations found.
+            """
+        );
+
+        result.StdError.Should().BeEmpty();
+        result.ExitCode.Should().Be(0);
+    }
+
+    [Test, CancelAfter(60_000)]
+    public async Task Checks_license_compliance_when_no_licenses_are_accepted()
+    {
+        using var packagesFile = await TempFile.Create(
+                                     """
+                                     license-compliance-check:
+                                       enabled: true
+                                     packages:
+                                       - id: System.Runtime
+                                         versions: 4.3.1
+                                       - id: Microsoft.Data.SqlClient.SNI.runtime
+                                         versions:
+                                           - 5.2.0
+                                       - id: System.Runtime.CompilerServices.Unsafe
+                                         versions:
+                                           - 6.0.0
+                                     """
+                                 );
+
+        await using var destinationFeed = await LocalNugetFeed.Create();
+
+        // Act
+        var result = await PromoteNugetProcessRunner.RunForResultAsync(
+                         "promote",
+                         "from-config",
+                         packagesFile.Path,
+                         "--destination", destinationFeed.FeedUrl,
+                         "--destination-api-key", destinationFeed.ApiKey
+                     );
+
+        // Assert
+        var actualOutput = string.Join(Environment.NewLine, result.StdOutput.Select(x => x.TrimEnd()));
+        actualOutput.Should().Be(
+            """
+            Resolving package requests...
+            Resolving System.Runtime 4.3.1
+            Found 1 matching package:
+            └── 4.3.1
+            Resolving Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+            Found 1 matching package:
+            └── 5.2.0
+            Resolving System.Runtime.CompilerServices.Unsafe 6.0.0
+            Found 1 matching package:
+            └── 6.0.0
+            Resolving 3 packages to promote...
+            Processing System.Runtime 4.3.1
+              Package license: MICROSOFT .NET LIBRARY
+              (http://go.microsoft.com/fwlink/?LinkId=329770)
+              System.Runtime 4.3.1 is not in the destination.
+              Resolving dependency Microsoft.NETCore.Platforms (>=
+              1.1.1)
+                Resolved as Microsoft.NETCore.Platforms 1.1.1
+                Microsoft.NETCore.Platforms 1.1.1 is queued for
+                processing.
+              Resolving dependency Microsoft.NETCore.Targets (>= 1.1.3)
+                Resolved as Microsoft.NETCore.Targets 1.1.3
+                Microsoft.NETCore.Targets 1.1.3 is queued for
+                processing.
+            Processing Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+              Package license:
+              https://www.nuget.org/packages/Microsoft.Data.SqlClient.SN
+              I.runtime/5.2.0/license
+              Microsoft.Data.SqlClient.SNI.runtime 5.2.0 is not in the
+              destination.
+              Microsoft.Data.SqlClient.SNI.runtime 5.2.0 has no
+              dependencies.
+            Processing System.Runtime.CompilerServices.Unsafe 6.0.0
+              Package license: MIT (https://licenses.nuget.org/MIT)
+              System.Runtime.CompilerServices.Unsafe 6.0.0 is not in the
+              destination.
+              System.Runtime.CompilerServices.Unsafe 6.0.0 has no
+              dependencies.
+            Processing Microsoft.NETCore.Platforms 1.1.1
+              Package license: MICROSOFT .NET LIBRARY
+              (http://go.microsoft.com/fwlink/?LinkId=329770)
+              Microsoft.NETCore.Platforms 1.1.1 is not in the
+              destination.
+              Microsoft.NETCore.Platforms 1.1.1 has no dependencies.
+            Processing Microsoft.NETCore.Targets 1.1.3
+              Package license: MICROSOFT .NET LIBRARY
+              (http://go.microsoft.com/fwlink/?LinkId=329770)
+              Microsoft.NETCore.Targets 1.1.3 is not in the destination.
+              Microsoft.NETCore.Targets 1.1.3 has no dependencies.
+            Resolved package tree:
+            ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+            ├── System.Runtime 4.3.1
+            │   ├── Microsoft.NETCore.Platforms 1.1.1
+            │   └── Microsoft.NETCore.Targets 1.1.3
+            └── System.Runtime.CompilerServices.Unsafe 6.0.0
+            Found 5 packages to promote:
+            ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+            │   └── License:
+            │       https://www.nuget.org/packages/Microsoft.Data.SqlCli
+            │       ent.SNI.runtime/5.2.0/license
+            ├── Microsoft.NETCore.Platforms 1.1.1
+            │   └── License: MICROSOFT .NET LIBRARY
+            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Microsoft.NETCore.Targets 1.1.3
+            │   └── License: MICROSOFT .NET LIBRARY
+            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── System.Runtime 4.3.1
+            │   └── License: MICROSOFT .NET LIBRARY
+            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            └── System.Runtime.CompilerServices.Unsafe 6.0.0
+                └── License: MIT (https://licenses.nuget.org/MIT)
+            License summary:
+            ├── 3x: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── 1x:
+            │   https://www.nuget.org/packages/Microsoft.Data.SqlClient.
+            │   SNI.runtime/5.2.0/license
+            └── 1x: MIT (https://licenses.nuget.org/MIT)
+            Checking license compliance...
+            Checking Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+                License (file): LICENSE.txt
+                [x] NOT IMPLEMENTED
+            Checking Microsoft.NETCore.Platforms 1.1.1
+                License (url):
+                http://go.microsoft.com/fwlink/?LinkId=329770
+                [x] The license url is not whitelisted.
+            Checking Microsoft.NETCore.Targets 1.1.3
+                License (url):
+                http://go.microsoft.com/fwlink/?LinkId=329770
+                [x] The license url is not whitelisted.
+            Checking System.Runtime 4.3.1
+                License (url):
+                http://go.microsoft.com/fwlink/?LinkId=329770
+                [x] The license url is not whitelisted.
+            Checking System.Runtime.CompilerServices.Unsafe 6.0.0
+                License (expression): MIT
+                [x] The license expression is not whitelisted.
+            5 license violations found:
+            ├── Microsoft.Data.SqlClient.SNI.runtime.5.2.0
+            │   ├── License (file): LICENSE.txt
+            │   └── Reason: NOT IMPLEMENTED
+            ├── Microsoft.NETCore.Platforms.1.1.1
+            │   ├── License (url):
+            │   │   http://go.microsoft.com/fwlink/?LinkId=329770
+            │   └── Reason: The license url is not whitelisted.
+            ├── Microsoft.NETCore.Targets.1.1.3
+            │   ├── License (url):
+            │   │   http://go.microsoft.com/fwlink/?LinkId=329770
+            │   └── Reason: The license url is not whitelisted.
+            ├── System.Runtime.4.3.1
+            │   ├── License (url):
+            │   │   http://go.microsoft.com/fwlink/?LinkId=329770
+            │   └── Reason: The license url is not whitelisted.
+            └── System.Runtime.CompilerServices.Unsafe.6.0.0
+                ├── License (expression): MIT
+                └── Reason: The license expression is not whitelisted.
+            License violations found.
+            """
+        );
+
+        result.StdError.Should().BeEmpty();
+        result.ExitCode.Should().Be(0);
+    }
+
     private static async Task PromotePackageToFeed(INuGetRepository destinationRepo, PackageIdentity packageId)
     {
         using var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestNuGetLogger.Instance);
