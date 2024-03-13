@@ -1,5 +1,8 @@
+using System.IO;
+using System.Text;
 using CSharpFunctionalExtensions;
 using NuGet.Packaging;
+using NuGet.Packaging.Core;
 using NuGet.Packaging.Licenses;
 using Promote.NuGet.Commands.Promote.Resolution;
 using Promote.NuGet.Feeds;
@@ -48,7 +51,7 @@ public class LicenseComplianceValidator
 
             if (nuspecReader.GetLicenseMetadata() is { } licenseMetadata)
             {
-                CheckLicenseMetadata(package, settings, licenseMetadata, violations);
+                await CheckLicenseMetadata(package, settings, licenseMetadata, resource.PackageReader, violations, cancellationToken);
             }
             else if (nuspecReader.GetLicenseUrl() is { } licenseUrl)
             {
@@ -91,10 +94,12 @@ public class LicenseComplianceValidator
         violations.Add(violation);
     }
 
-    private void CheckLicenseMetadata(PackageInfo package,
-                                      LicenseComplianceSettings settings,
-                                      LicenseMetadata licenseMetadata,
-                                      List<LicenseComplianceViolation> violations)
+    private async Task CheckLicenseMetadata(PackageInfo package,
+                                            LicenseComplianceSettings settings,
+                                            LicenseMetadata licenseMetadata,
+                                            PackageReaderBase packageReader,
+                                            List<LicenseComplianceViolation> violations,
+                                            CancellationToken cancellationToken)
     {
         var licenseType = licenseMetadata.Type switch
         {
@@ -107,27 +112,135 @@ public class LicenseComplianceValidator
 
         if (licenseMetadata.Type == LicenseType.Expression)
         {
-            var isExpressionWhitelisted = settings.AcceptExpressions.Contains(licenseMetadata.License);
-            if (isExpressionWhitelisted)
+            var result = CheckExpressionMatches(package.Id, licenseMetadata.License, settings.AcceptExpressions);
+            if (result.IsSuccess)
             {
-                _logger.LogLicenseCompliance("The license expression is in whitelist.");
-                return;
+                _logger.LogLicenseCompliance(result.Value);
+            }
+            else
+            {
+                _logger.LogLicenseViolation(result.Error);
+                violations.Add(result.Error);
             }
 
-            var violation = new LicenseComplianceViolation(package.Id, licenseType, licenseMetadata.License, "The license expression is not whitelisted.");
-            _logger.LogLicenseViolation(violation);
-            violations.Add(violation);
             return;
         }
 
         if (licenseMetadata.Type == LicenseType.File)
         {
-            var violation = new LicenseComplianceViolation(package.Id, licenseType, licenseMetadata.License, "NOT IMPLEMENTED");
-            _logger.LogLicenseViolation(violation);
-            violations.Add(violation);
+            var result = await CheckFileMatches(package.Id, licenseMetadata.License, settings.AcceptFiles, packageReader, cancellationToken);
+            if (result.IsSuccess)
+            {
+                _logger.LogLicenseCompliance(result.Value);
+            }
+            else
+            {
+                _logger.LogLicenseViolation(result.Error);
+                violations.Add(result.Error);
+            }
+
             return;
         }
 
         throw new InvalidOperationException("Unreachable.");
+    }
+
+    private Result<string, LicenseComplianceViolation> CheckExpressionMatches(
+        PackageIdentity packageId,
+        string license,
+        IReadOnlyCollection<string> acceptedExpressions)
+    {
+        var isExpressionWhitelisted = acceptedExpressions.Contains(license);
+        if (isExpressionWhitelisted)
+        {
+            return "The license expression is in whitelist.";
+        }
+
+        return new LicenseComplianceViolation(packageId, PackageLicenseType.Expression, license, "The license expression is not whitelisted.");
+    }
+
+    private async Task<Result<string, LicenseComplianceViolation>> CheckFileMatches(
+        PackageIdentity packageId,
+        string license,
+        IReadOnlyCollection<string> acceptedFiles,
+        PackageReaderBase packageReader,
+        CancellationToken cancellationToken)
+    {
+        var filesInPackage = await packageReader.GetFilesAsync(cancellationToken);
+        if (!filesInPackage.Contains(license))
+        {
+            return new LicenseComplianceViolation(packageId, PackageLicenseType.File, license, "There is no such file in the package.");
+        }
+
+        string actualLicenseText;
+        try
+        {
+            await using var stream = await packageReader.GetStreamAsync(license, cancellationToken);
+            using var reader = new StreamReader(stream);
+            actualLicenseText = await reader.ReadToEndAsync();
+        }
+        catch (Exception ex)
+        {
+            return new LicenseComplianceViolation(packageId, PackageLicenseType.File, license, $"Failed to open the license file: {ex.Message}");
+        }
+
+        var normalizedActualLicense = NormalizeLicenseText(actualLicenseText);
+
+        foreach (var acceptFile in acceptedFiles)
+        {
+            string acceptedText;
+            try
+            {
+                acceptedText = await File.ReadAllTextAsync(acceptFile, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogAcceptedLicenseFileReadFailure(acceptFile, ex);
+                continue;
+            }
+
+            var normalizedAcceptedText = NormalizeLicenseText(acceptedText);
+
+            if (normalizedAcceptedText.Equals(normalizedActualLicense))
+            {
+                return $"Matching accepted license file found: {Path.GetFileName(acceptFile)}.";
+            }
+        }
+
+        return new LicenseComplianceViolation(packageId, PackageLicenseType.File, license, "No matching license files found in the whitelist.");
+    }
+
+    private string NormalizeLicenseText(string license)
+    {
+        var normalized = new StringBuilder(license);
+
+        normalized.Replace("\r\n", " ");
+        normalized.Replace("\r", " ");
+        normalized.Replace("\n", " ");
+
+        for (var i = 0; i < normalized.Length; i++)
+        {
+            var ch = normalized[i];
+            if (char.IsWhiteSpace(ch))
+            {
+                normalized[i] = ' ';
+                continue;
+            }
+
+            if (char.IsUpper(ch))
+            {
+                normalized[i] = char.ToLowerInvariant(ch);
+            }
+        }
+
+        int lengthBefore;
+        do
+        {
+            lengthBefore = normalized.Length;
+            normalized.Replace("  ", " ");
+        }
+        while (lengthBefore != normalized.Length);
+
+        return normalized.ToString();
     }
 }

@@ -21,4 +21,6 @@ public interface ILicenseComplianceValidatorLogger
     void LogLicenseCompliance(string reason);
 
     void LogLicenseViolation(LicenseComplianceViolation violation);
+
+    void LogAcceptedLicenseFileReadFailure(string acceptedFilePath, Exception exception);
 }

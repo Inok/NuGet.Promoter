@@ -299,6 +299,14 @@ public class PromotePackageLogger : IPromotePackageLogger
         AnsiConsole.Write(padder);
     }
 
+    public void LogAcceptedLicenseFileReadFailure(string acceptedFilePath, Exception exception)
+    {
+        var text = Markup.FromInterpolated($"[red]Failed to read accepted file {acceptedFilePath}: {exception.Message}[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
+
+    }
+
     private static string Decl(int count, string one, string many)
     {
         return count == 1 ? one : many;
