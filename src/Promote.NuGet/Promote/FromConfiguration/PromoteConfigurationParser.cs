@@ -26,7 +26,7 @@ public static class PromoteConfigurationParser
     public static PromoteConfiguration Parse(string input)
     {
         var deserializer = new DeserializerBuilder()
-                           .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                           .WithNamingConvention(HyphenatedNamingConvention.Instance)
                            .WithTypeConverter(VersionRangeConverter.Instance)
                            .Build();
 
