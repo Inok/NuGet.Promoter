@@ -189,6 +189,22 @@ public class PromotePackageLogger : IPromotePackageLogger
         AnsiConsole.Write(tree);
     }
 
+    public void LogLicenseSummary(IReadOnlyCollection<PackageInfo> packages)
+    {
+        var licenseItems = packages.GroupBy(x => x.License)
+                                   .Select(x => (License: x.Key, Count: x.Count()))
+                                   .OrderByDescending(x => x.Count)
+                                   .ThenBy(x => x.License.License);
+
+        var tree = new Tree(Markup.FromInterpolated($"[green]License summary:[/]"));
+        foreach (var item in licenseItems)
+        {
+            tree.AddNode(Markup.FromInterpolated($"{item.Count}x: {item.License.PrettyPrint()}"));
+        }
+
+        AnsiConsole.Write(tree);
+    }
+
     public void LogDryRun()
     {
         AnsiConsole.MarkupLineInterpolated($"[bold green]Packages won't be promoted in dry run mode.[/]");
@@ -209,35 +225,25 @@ public class PromotePackageLogger : IPromotePackageLogger
         AnsiConsole.MarkupLineInterpolated($"[bold green]{count} {Decl(count, "package", "packages")} promoted.[/]");
     }
 
-    public void LogLicenseSummary(IReadOnlyCollection<PackageInfo> packages)
+    public void LogCheckingLicenseCompliance()
     {
-        var licenseItems = packages.GroupBy(x => x.License)
-                                   .Select(x => (License: x.Key, Count: x.Count()))
-                                   .OrderByDescending(x => x.Count)
-                                   .ThenBy(x => x.License.License);
-
-        var tree = new Tree(Markup.FromInterpolated($"[bold green]License summary:[/]"));
-        foreach (var item in licenseItems)
-        {
-            tree.AddNode(Markup.FromInterpolated($"{item.Count}x: {item.License.PrettyPrint()}"));
-        }
-
-        AnsiConsole.Write(tree);
+        AnsiConsole.MarkupLineInterpolated($"[bold green]Checking license compliance...[/]");
     }
 
     public void LogComplianceChecksDisabled()
     {
-        AnsiConsole.MarkupLineInterpolated($"License compliance checks are disabled.");
+        AnsiConsole.MarkupLineInterpolated($"[yellow]License compliance checks are disabled.[/]");
     }
 
     public void LogLicenseViolationsSummary(IReadOnlyCollection<LicenseComplianceViolation> violations)
     {
         var tree = new Tree(Markup.FromInterpolated($"[red]{violations.Count} license {Decl(violations.Count, "violation", "violations")} found:[/]"));
 
-        foreach (var violation in violations.OrderBy(x => x.Id))
+        foreach (var violation in violations.OrderBy(x => x.PackageId))
         {
-            var node = tree.AddNode(Markup.FromInterpolated($"{violation.Id}"));
-            node.AddNode(Markup.FromInterpolated($"Package license: {violation.License}"));
+            var node = tree.AddNode(Markup.FromInterpolated($"[red]{violation.PackageId}[/]"));
+            node.AddNode(Markup.FromInterpolated($"[red]License ({violation.LicenseType.ToString().ToLowerInvariant()}): {violation.License}[/]"));
+            node.AddNode(Markup.FromInterpolated($"[red]Reason: {violation.Explanation}[/]"));
         }
 
         AnsiConsole.Write(tree);
@@ -246,6 +252,51 @@ public class PromotePackageLogger : IPromotePackageLogger
     public void LogNoLicenseViolations()
     {
         AnsiConsole.MarkupLineInterpolated($"[green]No license violations found.[/]");
+    }
+
+    public void LogCheckingLicenseComplianceForPackage(PackageIdentity identity)
+    {
+        AnsiConsole.MarkupLineInterpolated($"Checking {identity.Id} {identity.Version}");
+    }
+
+    public void LogFailedToDownloadPackage(PackageIdentity identity)
+    {
+        var text = Markup.FromInterpolated($"[red]Failed to download package {identity.Id} {identity.Version}[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
+    }
+
+    public void LogPackageLicense(PackageLicenseType licenseType, string license, IReadOnlyList<string>? warningsAndErrors)
+    {
+        var text = Markup.FromInterpolated($"[gray]License ({licenseType.ToString().ToLowerInvariant()}): {license}[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
+
+        if (warningsAndErrors?.Count > 0)
+        {
+            var tree = new Tree(Markup.FromInterpolated($"[yellow]License warnings and errors:[/]"));
+            foreach (var item in warningsAndErrors)
+            {
+                tree.AddNode(Markup.FromInterpolated($"{item}"));
+            }
+
+            var treePadder = new Padder(tree).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+            AnsiConsole.Write(treePadder);
+        }
+    }
+
+    public void LogLicenseCompliance(string reason)
+    {
+        var text = Markup.FromInterpolated($"[gray][[v]] {reason}[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
+    }
+
+    public void LogLicenseViolation(LicenseComplianceViolation violation)
+    {
+        var text = Markup.FromInterpolated($"[red][[x]] {violation.Explanation}[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
     }
 
     private static string Decl(int count, string one, string many)

@@ -101,6 +101,7 @@ public class PromotePackageCommand
         if (packagesToPromote.Count > 0)
         {
             _promotePackageLogger.LogPackagesToPromote(packagesToPromote);
+            _promotePackageLogger.LogLicenseSummary(packagesToPromote);
         }
         else
         {
