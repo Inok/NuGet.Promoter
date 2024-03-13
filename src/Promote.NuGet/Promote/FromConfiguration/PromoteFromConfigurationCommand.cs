@@ -61,6 +61,20 @@ internal sealed class PromoteFromConfigurationCommand : CancellableAsyncCommand<
             return Result.Failure<IReadOnlyCollection<PackageRequest>>(parseResult.Error);
         }
 
+        var configurationDirectory = Path.GetDirectoryName(file);
+        Normalize(parseResult.Value, configurationDirectory);
+
         return parseResult.Value.Packages.Select(x => new PackageRequest(x.Id, x.Versions)).ToList();
+    }
+
+    private static void Normalize(PromoteConfiguration configuration, string? relativePathResolutionRoot)
+    {
+        if (configuration.LicenseComplianceCheck?.AcceptFiles is { } files && relativePathResolutionRoot != null)
+        {
+            for (var i = 0; i < files.Length; i++)
+            {
+                files[i] = Path.GetFullPath(files[i], relativePathResolutionRoot);
+            }
+        }
     }
 }
