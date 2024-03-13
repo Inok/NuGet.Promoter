@@ -2,6 +2,7 @@
 using NuGet.Common;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using Promote.NuGet.Commands.Licensing;
 using Promote.NuGet.Commands.Promote;
 using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
@@ -26,16 +27,17 @@ internal sealed class PromoteSinglePackageCommand : CancellableAsyncCommand<Prom
         var sourceDescriptor = new NuGetRepositoryDescriptor(promoteSettings.Source!, null, null, promoteSettings.SourceApiKey);
         var destinationDescriptor = new NuGetRepositoryDescriptor(promoteSettings.Destination!, promoteSettings.DestinationUsername, promoteSettings.DestinationPassword, promoteSettings.DestinationApiKey);
 
-        var sourceRepository = new NuGetRepository(sourceDescriptor, cacheContext, nuGetLogger);
-        var destinationRepository = new NuGetRepository(destinationDescriptor, cacheContext, nuGetLogger);
+        using var sourceRepository = new NuGetRepository(sourceDescriptor, cacheContext, nuGetLogger);
+        using var destinationRepository = new NuGetRepository(destinationDescriptor, cacheContext, nuGetLogger);
 
         var packageRequest = CreatePackageRequest(promoteSettings);
 
         var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, new PromotePackageLogger());
 
+        var arguments = new PromotePackageCommandArguments(new[] { packageRequest }, LicenseComplianceSettings.Disabled);
         var options = new PromotePackageCommandOptions(promoteSettings.DryRun, promoteSettings.AlwaysResolveDeps, promoteSettings.ForcePush);
 
-        var promotionResult = await promoter.Promote(new[] { packageRequest }, options, cancellationToken);
+        var promotionResult = await promoter.Promote(arguments, options, cancellationToken);
         if (promotionResult.IsFailure)
         {
             AnsiConsole.WriteLine(promotionResult.Error);

@@ -9,6 +9,8 @@ public interface IPromotePackageLogger : IPackageRequestResolverLogger, IPackage
 {
     void LogPackagesToPromote(IReadOnlyCollection<PackageInfo> packages);
 
+    void LogLicenseSummary(IReadOnlyCollection<PackageInfo> packages);
+
     void LogNoPackagesToPromote();
 
     void LogDryRun();

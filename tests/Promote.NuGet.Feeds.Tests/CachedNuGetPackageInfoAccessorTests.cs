@@ -13,7 +13,7 @@ public class CachedNuGetPackageInfoAccessorTests
         var expectedVersions = new[] { new NuGetVersion(1, 0, 0), new NuGetVersion(1, 1, 0) };
         var packageInfoAccessor = CreateRepository(packageId, expectedVersions);
 
-        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor);
+        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor, disposeInner: false);
 
         var result = await sut.GetAllVersions("package.1", CancellationToken.None);
 
@@ -30,7 +30,7 @@ public class CachedNuGetPackageInfoAccessorTests
         var expectedVersions = new[] { new NuGetVersion(1, 0, 0), new NuGetVersion(1, 1, 0) };
         var packageInfoAccessor = CreateRepository(packageId, expectedVersions);
 
-        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor);
+        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor, disposeInner: false);
 
         for (var i = 0; i < 5; i++)
         {
@@ -59,7 +59,7 @@ public class CachedNuGetPackageInfoAccessorTests
 
         var packageInfoAccessor = CreateRepository(versions);
 
-        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor);
+        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor, disposeInner: false);
 
         // Get versions from repository
 
@@ -97,7 +97,7 @@ public class CachedNuGetPackageInfoAccessorTests
         var packageVersions = new[] { new NuGetVersion(1, 0, 0), new NuGetVersion(1, 1, 0) };
         var packageInfoAccessor = CreateRepository(packageId, packageVersions);
 
-        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor);
+        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor, disposeInner: false);
 
         var result = await sut.GetAllVersions("package.1", CancellationToken.None);
         result.IsSuccess.Should().BeTrue();
@@ -122,7 +122,7 @@ public class CachedNuGetPackageInfoAccessorTests
         var failure = Result.Failure<IReadOnlyCollection<NuGetVersion>>("Ooops");
         var packageInfoAccessor = CreateRepository(packageId, failure);
 
-        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor);
+        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor, disposeInner: false);
 
         var result = await sut.GetAllVersions("package.1", CancellationToken.None);
 
@@ -139,7 +139,7 @@ public class CachedNuGetPackageInfoAccessorTests
         var failure = Result.Failure<IReadOnlyCollection<NuGetVersion>>("Ooops");
         var packageInfoAccessor = CreateRepository(packageId, failure);
 
-        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor);
+        var sut = new CachedNuGetPackageInfoAccessor(packageInfoAccessor, disposeInner: false);
 
         var firstResult = await sut.GetAllVersions("package.1", CancellationToken.None);
         firstResult.IsFailure.Should().BeTrue();

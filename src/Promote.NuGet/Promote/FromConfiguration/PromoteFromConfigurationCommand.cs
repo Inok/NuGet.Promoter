@@ -3,6 +3,7 @@ using CSharpFunctionalExtensions;
 using JetBrains.Annotations;
 using NuGet.Common;
 using NuGet.Protocol.Core.Types;
+using Promote.NuGet.Commands.Licensing;
 using Promote.NuGet.Commands.Promote;
 using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
@@ -27,8 +28,8 @@ internal sealed class PromoteFromConfigurationCommand : CancellableAsyncCommand<
         var sourceDescriptor = new NuGetRepositoryDescriptor(promoteSettings.Source!, null, null, promoteSettings.SourceApiKey);
         var destinationDescriptor = new NuGetRepositoryDescriptor(promoteSettings.Destination!, promoteSettings.DestinationUsername, promoteSettings.DestinationPassword, promoteSettings.DestinationApiKey);
 
-        var sourceRepository = new NuGetRepository(sourceDescriptor, cacheContext, nuGetLogger);
-        var destinationRepository = new NuGetRepository(destinationDescriptor, cacheContext, nuGetLogger);
+        using var sourceRepository = new NuGetRepository(sourceDescriptor, cacheContext, nuGetLogger);
+        using var destinationRepository = new NuGetRepository(destinationDescriptor, cacheContext, nuGetLogger);
 
         var packageRequestsResult = await ReadConfiguration(promoteSettings.File!, cancellationToken);
         if (packageRequestsResult.IsFailure)
@@ -51,16 +52,43 @@ internal sealed class PromoteFromConfigurationCommand : CancellableAsyncCommand<
         return 0;
     }
 
-    private static async Task<Result<IReadOnlyCollection<PackageRequest>>> ReadConfiguration(string file, CancellationToken cancellationToken)
+    private static async Task<Result<PromotePackageCommandArguments>> ReadConfiguration(string file, CancellationToken cancellationToken)
     {
         var input = await File.ReadAllTextAsync(file, cancellationToken);
 
-        var parseResult = PackagesConfigurationParser.TryParse(input);
+        var parseResult = PromoteConfigurationParser.TryParse(input);
         if (parseResult.IsFailure)
         {
-            return Result.Failure<IReadOnlyCollection<PackageRequest>>(parseResult.Error);
+            return Result.Failure<PromotePackageCommandArguments>(parseResult.Error);
         }
 
-        return parseResult.Value.Packages.Select(x => new PackageRequest(x.Id, x.Versions)).ToList();
+        var configurationDirectory = Path.GetDirectoryName(file);
+        Normalize(parseResult.Value, configurationDirectory);
+
+        var requests = parseResult.Value.Packages.Select(x => new PackageRequest(x.Id, x.Versions)).ToList();
+
+        var complianceOptions = parseResult.Value.LicenseComplianceCheck;
+        var licenseComplianceSettings = complianceOptions != null
+                                            ? new LicenseComplianceSettings
+                                              {
+                                                  Enabled = complianceOptions.Enabled,
+                                                  AcceptExpressions = complianceOptions.AcceptExpressions ?? [],
+                                                  AcceptUrls = complianceOptions.AcceptUrls ?? [],
+                                                  AcceptFiles = complianceOptions.AcceptFiles ?? [],
+                                              }
+                                            : LicenseComplianceSettings.Disabled;
+
+        return new PromotePackageCommandArguments(requests, licenseComplianceSettings);
+    }
+
+    private static void Normalize(PromoteConfiguration configuration, string? relativePathResolutionRoot)
+    {
+        if (configuration.LicenseComplianceCheck?.AcceptFiles is { } files && relativePathResolutionRoot != null)
+        {
+            for (var i = 0; i < files.Length; i++)
+            {
+                files[i] = Path.GetFullPath(files[i], relativePathResolutionRoot);
+            }
+        }
     }
 }

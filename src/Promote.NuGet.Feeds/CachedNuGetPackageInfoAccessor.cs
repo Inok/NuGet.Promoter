@@ -9,11 +9,13 @@ namespace Promote.NuGet.Feeds;
 public class CachedNuGetPackageInfoAccessor : INuGetPackageInfoAccessor
 {
     private readonly INuGetPackageInfoAccessor _inner;
+    private readonly bool _disposeInner;
     private readonly Dictionary<PackageIdentity, IReadOnlyCollection<NuGetVersion>> _packageVersionsCache;
 
-    public CachedNuGetPackageInfoAccessor(INuGetPackageInfoAccessor inner)
+    public CachedNuGetPackageInfoAccessor(INuGetPackageInfoAccessor inner, bool disposeInner)
     {
         _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+        _disposeInner = disposeInner;
         _packageVersionsCache = new Dictionary<PackageIdentity, IReadOnlyCollection<NuGetVersion>>();
     }
 
@@ -58,5 +60,18 @@ public class CachedNuGetPackageInfoAccessor : INuGetPackageInfoAccessor
     public Task<Result<bool>> DoesPackageExist(PackageIdentity identity, CancellationToken cancellationToken = default)
     {
         return _inner.DoesPackageExist(identity, cancellationToken);
+    }
+
+    public Task<DownloadResourceResult> GetPackageResource(PackageIdentity identity, CancellationToken cancellationToken = default)
+    {
+        return _inner.GetPackageResource(identity, cancellationToken);
+    }
+
+    public void Dispose()
+    {
+        if (_disposeInner)
+        {
+            _inner.Dispose();
+        }
     }
 }

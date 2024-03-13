@@ -31,7 +31,7 @@ public class PromotePackageListCommandIntegrationTests
                      );
 
         var destinationFeedDescriptor = new NuGetRepositoryDescriptor(destinationFeed.FeedUrl, destinationFeed.ApiKey);
-        var destinationRepo = new NuGetRepository(destinationFeedDescriptor, NullSourceCacheContext.Instance, TestNuGetLogger.Instance);
+        using var destinationRepo = new NuGetRepository(destinationFeedDescriptor, NullSourceCacheContext.Instance, TestNuGetLogger.Instance);
 
         // Assert
         result.StdOutput.Should().StartWith(
