@@ -3,6 +3,7 @@ using CSharpFunctionalExtensions;
 using JetBrains.Annotations;
 using NuGet.Common;
 using NuGet.Protocol.Core.Types;
+using Promote.NuGet.Commands.Licensing;
 using Promote.NuGet.Commands.Promote;
 using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
@@ -65,7 +66,19 @@ internal sealed class PromoteFromConfigurationCommand : CancellableAsyncCommand<
         Normalize(parseResult.Value, configurationDirectory);
 
         var requests = parseResult.Value.Packages.Select(x => new PackageRequest(x.Id, x.Versions)).ToList();
-        return new PromotePackageCommandArguments(requests);
+
+        var complianceOptions = parseResult.Value.LicenseComplianceCheck;
+        var licenseComplianceSettings = complianceOptions != null
+                                            ? new LicenseComplianceSettings
+                                              {
+                                                  Enabled = complianceOptions.Enabled,
+                                                  AcceptExpressions = complianceOptions.AcceptExpressions ?? [],
+                                                  AcceptUrls = complianceOptions.AcceptUrls ?? [],
+                                                  AcceptFiles = complianceOptions.AcceptFiles ?? [],
+                                              }
+                                            : LicenseComplianceSettings.Disabled;
+
+        return new PromotePackageCommandArguments(requests, licenseComplianceSettings);
     }
 
     private static void Normalize(PromoteConfiguration configuration, string? relativePathResolutionRoot)

@@ -65,7 +65,7 @@ public class PromotePackageCommand
             return Result.Success();
         }
 
-        var complianceResult = _licenseComplianceValidator.CheckCompliance(packagesToPromote);
+        var complianceResult = _licenseComplianceValidator.CheckCompliance(packagesToPromote, arguments.LicenseComplianceSettings);
         if (complianceResult.IsFailure)
         {
             return Result.Failure(complianceResult.Error);

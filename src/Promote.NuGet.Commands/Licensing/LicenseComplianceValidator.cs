@@ -15,9 +15,14 @@ public class LicenseComplianceValidator
         _logger = logger;
     }
 
-    public Result CheckCompliance(IReadOnlyCollection<PackageInfo> packages)
+    public Result CheckCompliance(IReadOnlyCollection<PackageInfo> packages, LicenseComplianceSettings settings)
     {
         _logger.LogLicenseSummary(packages);
+
+        if (settings.Enabled)
+        {
+            return Result.Failure("NOT IMPLEMENTED!");
+        }
 
         return Result.Success();
     }

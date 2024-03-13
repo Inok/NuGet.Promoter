@@ -3,6 +3,7 @@ using CSharpFunctionalExtensions;
 using JetBrains.Annotations;
 using NuGet.Common;
 using NuGet.Protocol.Core.Types;
+using Promote.NuGet.Commands.Licensing;
 using Promote.NuGet.Commands.Promote;
 using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
@@ -39,7 +40,7 @@ internal sealed class PromotePackageListCommand : CancellableAsyncCommand<Promot
 
         var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, new PromotePackageLogger());
 
-        var arguments = new PromotePackageCommandArguments(identitiesResult.Value);
+        var arguments = new PromotePackageCommandArguments(identitiesResult.Value, LicenseComplianceSettings.Disabled);
         var options = new PromotePackageCommandOptions(promoteSettings.DryRun, promoteSettings.AlwaysResolveDeps, promoteSettings.ForcePush);
 
         var promotionResult = await promoter.Promote(arguments, options, cancellationToken);

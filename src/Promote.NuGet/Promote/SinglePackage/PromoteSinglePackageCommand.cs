@@ -2,6 +2,7 @@
 using NuGet.Common;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using Promote.NuGet.Commands.Licensing;
 using Promote.NuGet.Commands.Promote;
 using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Feeds;
@@ -33,7 +34,7 @@ internal sealed class PromoteSinglePackageCommand : CancellableAsyncCommand<Prom
 
         var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, new PromotePackageLogger());
 
-        var arguments = new PromotePackageCommandArguments(new[] { packageRequest });
+        var arguments = new PromotePackageCommandArguments(new[] { packageRequest }, LicenseComplianceSettings.Disabled);
         var options = new PromotePackageCommandOptions(promoteSettings.DryRun, promoteSettings.AlwaysResolveDeps, promoteSettings.ForcePush);
 
         var promotionResult = await promoter.Promote(arguments, options, cancellationToken);
