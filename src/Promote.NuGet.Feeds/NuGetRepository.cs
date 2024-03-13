@@ -25,4 +25,9 @@ public class NuGetRepository : INuGetRepository
         var sourceRepository = Repository.Factory.GetCoreV3(packageSource);
         Packages = new NuGetPackageInfoAccessor(descriptor, sourceRepository, cacheContext, logger);
     }
+
+    public void Dispose()
+    {
+        Packages.Dispose();
+    }
 }

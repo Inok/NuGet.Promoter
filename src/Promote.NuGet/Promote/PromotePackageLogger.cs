@@ -230,6 +230,24 @@ public class PromotePackageLogger : IPromotePackageLogger
         AnsiConsole.MarkupLineInterpolated($"License compliance checks are disabled.");
     }
 
+    public void LogLicenseViolationsSummary(IReadOnlyCollection<LicenseComplianceViolation> violations)
+    {
+        var tree = new Tree(Markup.FromInterpolated($"[red]{violations.Count} license {Decl(violations.Count, "violation", "violations")} found:[/]"));
+
+        foreach (var violation in violations.OrderBy(x => x.Id))
+        {
+            var node = tree.AddNode(Markup.FromInterpolated($"{violation.Id}"));
+            node.AddNode(Markup.FromInterpolated($"Package license: {violation.License}"));
+        }
+
+        AnsiConsole.Write(tree);
+    }
+
+    public void LogNoLicenseViolations()
+    {
+        AnsiConsole.MarkupLineInterpolated($"[green]No license violations found.[/]");
+    }
+
     private static string Decl(int count, string one, string many)
     {
         return count == 1 ? one : many;

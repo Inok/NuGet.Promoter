@@ -15,7 +15,10 @@ public class LicenseComplianceValidator
         _logger = logger;
     }
 
-    public Result CheckCompliance(IReadOnlyCollection<PackageInfo> packages, LicenseComplianceSettings settings)
+    public async Task<Result> CheckCompliance(
+        IReadOnlyCollection<PackageInfo> packages,
+        LicenseComplianceSettings settings,
+        CancellationToken cancellationToken)
     {
         _logger.LogLicenseSummary(packages);
 
@@ -25,6 +28,43 @@ public class LicenseComplianceValidator
             return Result.Success();
         }
 
-        return Result.Failure("NOT IMPLEMENTED!");
+        var violations = new List<LicenseComplianceViolation>();
+
+        foreach (var package in packages)
+        {
+            using var resource = await _repository.Packages.GetPackageResource(package.Id, cancellationToken);
+
+            if (resource.PackageReader == null)
+            {
+                violations.Add(new LicenseComplianceViolation(package.Id, new PackageLicenseInfo("<unknown>", null)));
+                continue;
+            }
+
+            var nuspecReader = resource.PackageReader.NuspecReader;
+
+            if (nuspecReader.GetLicenseMetadata() is { } licenseMetadata)
+            {
+                violations.Add(new LicenseComplianceViolation(package.Id, new PackageLicenseInfo($"NOT IMPLEMENTED: {licenseMetadata.License}", null)));
+                continue;
+            }
+
+            if (nuspecReader.GetLicenseUrl() is { } licenseUrl)
+            {
+                var uri = Uri.TryCreate(licenseUrl, UriKind.Absolute, out var url);
+                violations.Add(new LicenseComplianceViolation(package.Id, new PackageLicenseInfo("NOT IMPLEMENTED", uri ? url : null)));
+                continue;
+            }
+
+            violations.Add(new LicenseComplianceViolation(package.Id, new PackageLicenseInfo("<unknown>", null)));
+        }
+
+        if (violations.Count == 0)
+        {
+            _logger.LogNoLicenseViolations();
+            return Result.Success();
+        }
+
+        _logger.LogLicenseViolationsSummary(violations);
+        return Result.Failure("License violations found.");
     }
 }

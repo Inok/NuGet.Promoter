@@ -1,6 +1,6 @@
 ﻿namespace Promote.NuGet.Feeds;
 
-public interface INuGetRepository
+public interface INuGetRepository : IDisposable
 {
     INuGetPackageInfoAccessor Packages { get; }
 }

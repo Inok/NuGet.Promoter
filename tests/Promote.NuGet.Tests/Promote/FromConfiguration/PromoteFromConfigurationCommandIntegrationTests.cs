@@ -39,11 +39,13 @@ public class PromoteFromConfigurationCommandIntegrationTests
         await using var destinationFeed = await LocalNugetFeed.Create();
 
         var destinationFeedDescriptor = new NuGetRepositoryDescriptor(destinationFeed.FeedUrl, destinationFeed.ApiKey);
-        var destinationRepo = new NuGetRepository(destinationFeedDescriptor, new SourceCacheContext { NoCache = true }, TestNuGetLogger.Instance);
-
-        await PromotePackageToFeed(destinationRepo, new PackageIdentity("Microsoft.NETCore.Platforms", new NuGetVersion(1, 1, 1)));
-        await PromotePackageToFeed(destinationRepo, new PackageIdentity("Microsoft.NETCore.Targets", new NuGetVersion(1, 1, 3)));
-        await PromotePackageToFeed(destinationRepo, new PackageIdentity("System.Runtime", new NuGetVersion(4, 3, 1)));
+        using (var cacheContext = new SourceCacheContext { NoCache = true })
+        {
+            using var destinationRepo = new NuGetRepository(destinationFeedDescriptor, cacheContext, TestNuGetLogger.Instance);
+            await PromotePackageToFeed(destinationRepo, new PackageIdentity("Microsoft.NETCore.Platforms", new NuGetVersion(1, 1, 1)));
+            await PromotePackageToFeed(destinationRepo, new PackageIdentity("Microsoft.NETCore.Targets", new NuGetVersion(1, 1, 3)));
+            await PromotePackageToFeed(destinationRepo, new PackageIdentity("System.Runtime", new NuGetVersion(4, 3, 1)));
+        }
 
         // Act
         var result = await PromoteNugetProcessRunner.RunForResultAsync(
@@ -331,44 +333,47 @@ public class PromoteFromConfigurationCommandIntegrationTests
         result.ExitCode.Should().Be(0);
 
         // Recreate destination repo to reset cache
-        destinationRepo = new NuGetRepository(destinationFeedDescriptor, new SourceCacheContext { NoCache = true }, TestNuGetLogger.Instance);
+        using (var cacheContext = new SourceCacheContext { NoCache = true })
+        {
+            using var destinationRepo = new NuGetRepository(destinationFeedDescriptor, cacheContext, TestNuGetLogger.Instance);
 
-        await AssertContainsVersions(
-            destinationRepo,
-            "System.Runtime",
-            new NuGetVersion(4, 1, 0), new NuGetVersion(4, 1, 1), new NuGetVersion(4, 3, 0), new NuGetVersion(4, 3, 1)
-        );
-        await AssertContainsVersions(
-            destinationRepo,
-            "System.Globalization",
-            new NuGetVersion(4, 0, 11), new NuGetVersion(4, 3, 0)
-        );
-        await AssertContainsVersions(
-            destinationRepo,
-            "System.Collections",
-            new NuGetVersion(4, 3, 0)
-        );
-        await AssertContainsVersions(
-            destinationRepo,
-            "Microsoft.NETCore.Platforms",
-            new NuGetVersion(1, 0, 1), new NuGetVersion(1, 0, 2), new NuGetVersion(1, 1, 0), new NuGetVersion(1, 1, 1));
-        await AssertContainsVersions(
-            destinationRepo,
-            "Microsoft.NETCore.Targets",
-            new NuGetVersion(1, 0, 1), new NuGetVersion(1, 0, 6), new NuGetVersion(1, 1, 0), new NuGetVersion(1, 1, 3));
-        await AssertContainsVersions(
-            destinationRepo,
-            "System.Runtime.CompilerServices.Unsafe",
-            new NuGetVersion(6, 0, 0));
-        await AssertContainsVersions(
-            destinationRepo,
-            "Microsoft.Data.SqlClient.SNI.runtime",
-            new NuGetVersion(5, 2, 0));
+            await AssertContainsVersions(
+                destinationRepo,
+                "System.Runtime",
+                new NuGetVersion(4, 1, 0), new NuGetVersion(4, 1, 1), new NuGetVersion(4, 3, 0), new NuGetVersion(4, 3, 1)
+            );
+            await AssertContainsVersions(
+                destinationRepo,
+                "System.Globalization",
+                new NuGetVersion(4, 0, 11), new NuGetVersion(4, 3, 0)
+            );
+            await AssertContainsVersions(
+                destinationRepo,
+                "System.Collections",
+                new NuGetVersion(4, 3, 0)
+            );
+            await AssertContainsVersions(
+                destinationRepo,
+                "Microsoft.NETCore.Platforms",
+                new NuGetVersion(1, 0, 1), new NuGetVersion(1, 0, 2), new NuGetVersion(1, 1, 0), new NuGetVersion(1, 1, 1));
+            await AssertContainsVersions(
+                destinationRepo,
+                "Microsoft.NETCore.Targets",
+                new NuGetVersion(1, 0, 1), new NuGetVersion(1, 0, 6), new NuGetVersion(1, 1, 0), new NuGetVersion(1, 1, 3));
+            await AssertContainsVersions(
+                destinationRepo,
+                "System.Runtime.CompilerServices.Unsafe",
+                new NuGetVersion(6, 0, 0));
+            await AssertContainsVersions(
+                destinationRepo,
+                "Microsoft.Data.SqlClient.SNI.runtime",
+                new NuGetVersion(5, 2, 0));
+        }
     }
 
     private static async Task PromotePackageToFeed(INuGetRepository destinationRepo, PackageIdentity packageId)
     {
-        var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestNuGetLogger.Instance);
+        using var sourceRepo = new NuGetRepository(_nugetOrgRepositoryDescriptor, NullSourceCacheContext.Instance, TestNuGetLogger.Instance);
 
         var tempNupkg = TempFile.Create();
         await using (var stream = tempNupkg.OpenStream())

@@ -6,7 +6,7 @@ using NuGet.Versioning;
 
 namespace Promote.NuGet.Feeds;
 
-public interface INuGetPackageInfoAccessor
+public interface INuGetPackageInfoAccessor : IDisposable
 {
     Task<Result<IReadOnlyCollection<NuGetVersion>>> GetAllVersions(string packageId, CancellationToken cancellationToken = default);
 
@@ -17,4 +17,6 @@ public interface INuGetPackageInfoAccessor
     Task<Result> PushPackage(string filePath, bool skipDuplicate, CancellationToken cancellationToken = default);
 
     Task<Result<bool>> DoesPackageExist(PackageIdentity identity, CancellationToken cancellationToken = default);
+
+    Task<DownloadResourceResult> GetPackageResource(PackageIdentity identity, CancellationToken cancellationToken = default);
 }

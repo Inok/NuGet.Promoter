@@ -2,6 +2,7 @@
 using CSharpFunctionalExtensions;
 using NuGet.Common;
 using NuGet.Packaging.Core;
+using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 
@@ -12,6 +13,9 @@ internal class NuGetPackageInfoAccessor : INuGetPackageInfoAccessor
     private readonly NuGetRepositoryDescriptor _repositoryDescriptor;
     private readonly SourceRepository _sourceRepository;
     private readonly SourceCacheContext _cacheContext;
+    private readonly PackageDownloadContext _downloadContext;
+    private readonly string _globalPackagesFolder;
+    private readonly string _directDownloadDirectory;
     private readonly ILogger _logger;
 
     public NuGetPackageInfoAccessor(NuGetRepositoryDescriptor repositoryDescriptor,
@@ -22,6 +26,9 @@ internal class NuGetPackageInfoAccessor : INuGetPackageInfoAccessor
         _repositoryDescriptor = repositoryDescriptor;
         _sourceRepository = sourceRepository;
         _cacheContext = cacheContext;
+        _directDownloadDirectory = Path.Join(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        _globalPackagesFolder = Path.Join(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        _downloadContext = new PackageDownloadContext(_cacheContext, _directDownloadDirectory, directDownload: false);
         _logger = logger;
     }
 
@@ -104,5 +111,27 @@ internal class NuGetPackageInfoAccessor : INuGetPackageInfoAccessor
         var findResource = await _sourceRepository.GetResourceAsync<FindPackageByIdResource>(cancellationToken);
 
         return await findResource.DoesPackageExistAsync(identity.Id, identity.Version, _cacheContext, _logger, cancellationToken);
+    }
+
+    public async Task<DownloadResourceResult> GetPackageResource(PackageIdentity identity, CancellationToken cancellationToken = default)
+    {
+        var downloadResource = await _sourceRepository.GetResourceAsync<DownloadResource>(cancellationToken);
+
+        var result = await downloadResource.GetDownloadResourceResultAsync(identity, _downloadContext, _globalPackagesFolder, _logger, cancellationToken);
+
+        return result;
+    }
+
+    public void Dispose()
+    {
+        if (Directory.Exists(_globalPackagesFolder))
+        {
+            Directory.Delete(_globalPackagesFolder, recursive: true);
+        }
+
+        if (Directory.Exists(_directDownloadDirectory))
+        {
+            Directory.Delete(_directDownloadDirectory, recursive: true);
+        }
     }
 }

@@ -24,7 +24,6 @@ public class PromoteSinglePackageCommandIntegrationTests
                      );
 
         var destinationFeedDescriptor = new NuGetRepositoryDescriptor(destinationFeed.FeedUrl, destinationFeed.ApiKey);
-        var destinationRepo = new NuGetRepository(destinationFeedDescriptor, new SourceCacheContext { NoCache = true }, TestNuGetLogger.Instance);
 
         // Assert
         result.StdOutput.Should().StartWith(
@@ -74,9 +73,14 @@ public class PromoteSinglePackageCommandIntegrationTests
         result.StdError.Should().BeEmpty();
         result.ExitCode.Should().Be(0);
 
-        await AssertContainsVersions(destinationRepo, "System.Runtime", new[] { new NuGetVersion(4, 3, 0) });
-        await AssertContainsVersions(destinationRepo, "Microsoft.NETCore.Platforms", new[] { new NuGetVersion(1, 1, 0) });
-        await AssertContainsVersions(destinationRepo, "Microsoft.NETCore.Targets", new[] { new NuGetVersion(1, 1, 0) });
+        using (var cacheContext = new SourceCacheContext { NoCache = true })
+        {
+            using var destinationRepo = new NuGetRepository(destinationFeedDescriptor, cacheContext, TestNuGetLogger.Instance);
+
+            await AssertContainsVersions(destinationRepo, "System.Runtime", new[] { new NuGetVersion(4, 3, 0) });
+            await AssertContainsVersions(destinationRepo, "Microsoft.NETCore.Platforms", new[] { new NuGetVersion(1, 1, 0) });
+            await AssertContainsVersions(destinationRepo, "Microsoft.NETCore.Targets", new[] { new NuGetVersion(1, 1, 0) });
+        }
     }
 
     private static async Task AssertContainsVersions(INuGetRepository repo, string packageId, params NuGetVersion[] expectedVersions)

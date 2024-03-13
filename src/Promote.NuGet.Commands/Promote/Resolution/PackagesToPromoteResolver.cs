@@ -33,7 +33,7 @@ public class PackagesToPromoteResolver
         _logger.LogResolvingPackagesToPromote(identities);
 
         var packagesToResolveQueue = new DistinctQueue<PackageIdentity>(identities);
-        var packageInfoAccessor = new CachedNuGetPackageInfoAccessor(_sourceRepository.Packages);
+        using var packageInfoAccessor = new CachedNuGetPackageInfoAccessor(_sourceRepository.Packages, disposeInner: false);
 
         var resolvedPackages = new Dictionary<PackageIdentity, PackageInfo>();
         var packagesAlreadyInTarget = new HashSet<PackageIdentity>();

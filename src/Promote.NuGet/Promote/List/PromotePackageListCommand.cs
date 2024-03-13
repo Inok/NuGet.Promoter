@@ -28,8 +28,8 @@ internal sealed class PromotePackageListCommand : CancellableAsyncCommand<Promot
         var sourceDescriptor = new NuGetRepositoryDescriptor(promoteSettings.Source!, null, null, promoteSettings.SourceApiKey);
         var destinationDescriptor = new NuGetRepositoryDescriptor(promoteSettings.Destination!, promoteSettings.DestinationUsername, promoteSettings.DestinationPassword, promoteSettings.DestinationApiKey);
 
-        var sourceRepository = new NuGetRepository(sourceDescriptor, cacheContext, nuGetLogger);
-        var destinationRepository = new NuGetRepository(destinationDescriptor, cacheContext, nuGetLogger);
+        using var sourceRepository = new NuGetRepository(sourceDescriptor, cacheContext, nuGetLogger);
+        using var destinationRepository = new NuGetRepository(destinationDescriptor, cacheContext, nuGetLogger);
 
         var identitiesResult = await ParsePackages(promoteSettings.File!, cancellationToken);
         if (identitiesResult.IsFailure)
