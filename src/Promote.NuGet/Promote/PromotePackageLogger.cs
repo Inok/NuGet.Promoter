@@ -34,7 +34,7 @@ public class PromotePackageLogger : IPromotePackageLogger
 
     public void LogProcessingPackage(PackageIdentity identity)
     {
-        AnsiConsole.MarkupLine($"[bold]Processing {identity.Id} {identity.Version}[/]");
+        AnsiConsole.MarkupLineInterpolated($"[bold]Processing {identity.Id} {identity.Version}[/]");
     }
 
     public void LogPackageLicense(PackageIdentity identity, PackageLicenseInfo license)
@@ -191,22 +191,22 @@ public class PromotePackageLogger : IPromotePackageLogger
 
     public void LogDryRun()
     {
-        AnsiConsole.MarkupLine("[bold green]Packages won't be promoted in dry run mode.[/]");
+        AnsiConsole.MarkupLineInterpolated($"[bold green]Packages won't be promoted in dry run mode.[/]");
     }
 
     public void LogStartMirroringPackagesCount(int count)
     {
-        AnsiConsole.MarkupLine($"[bold green]Promoting {count} {Decl(count, "package", "packages")}...[/]");
+        AnsiConsole.MarkupLineInterpolated($"[bold green]Promoting {count} {Decl(count, "package", "packages")}...[/]");
     }
 
     public void LogMirrorPackage(PackageIdentity identity, int current, int total)
     {
-        AnsiConsole.MarkupLine($"[bold green]({current}/{total}) Promote {identity.Id} {identity.Version}[/]");
+        AnsiConsole.MarkupLineInterpolated($"[bold green]({current}/{total}) Promote {identity.Id} {identity.Version}[/]");
     }
 
     public void LogMirroredPackagesCount(int count)
     {
-        AnsiConsole.MarkupLine($"[bold green]{count} {Decl(count, "package", "packages")} promoted.[/]");
+        AnsiConsole.MarkupLineInterpolated($"[bold green]{count} {Decl(count, "package", "packages")} promoted.[/]");
     }
 
     public void LogLicenseSummary(IReadOnlyCollection<PackageInfo> packages)
@@ -223,6 +223,11 @@ public class PromotePackageLogger : IPromotePackageLogger
         }
 
         AnsiConsole.Write(tree);
+    }
+
+    public void LogComplianceChecksDisabled()
+    {
+        AnsiConsole.MarkupLineInterpolated($"License compliance checks are disabled.");
     }
 
     private static string Decl(int count, string one, string many)

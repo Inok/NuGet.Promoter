@@ -19,11 +19,12 @@ public class LicenseComplianceValidator
     {
         _logger.LogLicenseSummary(packages);
 
-        if (settings.Enabled)
+        if (!settings.Enabled)
         {
-            return Result.Failure("NOT IMPLEMENTED!");
+            _logger.LogComplianceChecksDisabled();
+            return Result.Success();
         }
 
-        return Result.Success();
+        return Result.Failure("NOT IMPLEMENTED!");
     }
 }
