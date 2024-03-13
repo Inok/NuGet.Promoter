@@ -1,5 +1,6 @@
 using CSharpFunctionalExtensions;
 using NuGet.Packaging;
+using NuGet.Packaging.Licenses;
 using Promote.NuGet.Commands.Promote.Resolution;
 using Promote.NuGet.Feeds;
 
@@ -104,8 +105,29 @@ public class LicenseComplianceValidator
 
         _logger.LogPackageLicense(licenseType, licenseMetadata.License, licenseMetadata.WarningsAndErrors);
 
-        var violation = new LicenseComplianceViolation(package.Id, licenseType, licenseMetadata.License, "NOT IMPLEMENTED");
-        _logger.LogLicenseViolation(violation);
-        violations.Add(violation);
+        if (licenseMetadata.Type == LicenseType.Expression)
+        {
+            var isExpressionWhitelisted = settings.AcceptExpressions.Contains(licenseMetadata.License);
+            if (isExpressionWhitelisted)
+            {
+                _logger.LogLicenseCompliance("The license expression is in whitelist.");
+                return;
+            }
+
+            var violation = new LicenseComplianceViolation(package.Id, licenseType, licenseMetadata.License, "The license expression is not whitelisted.");
+            _logger.LogLicenseViolation(violation);
+            violations.Add(violation);
+            return;
+        }
+
+        if (licenseMetadata.Type == LicenseType.File)
+        {
+            var violation = new LicenseComplianceViolation(package.Id, licenseType, licenseMetadata.License, "NOT IMPLEMENTED");
+            _logger.LogLicenseViolation(violation);
+            violations.Add(violation);
+            return;
+        }
+
+        throw new InvalidOperationException("Unreachable.");
     }
 }
