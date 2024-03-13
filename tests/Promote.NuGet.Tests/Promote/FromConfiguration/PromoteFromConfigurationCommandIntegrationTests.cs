@@ -723,7 +723,7 @@ public class PromoteFromConfigurationCommandIntegrationTests
         );
 
         result.StdError.Should().BeEmpty();
-        result.ExitCode.Should().Be(-1);
+        result.ExitCode.Should().BeOneOf(-1, 255);
     }
 
     private static async Task PromotePackageToFeed(INuGetRepository destinationRepo, PackageIdentity packageId)
