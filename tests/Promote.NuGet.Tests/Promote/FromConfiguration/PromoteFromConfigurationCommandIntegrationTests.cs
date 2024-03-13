@@ -299,6 +299,15 @@ public class PromoteFromConfigurationCommandIntegrationTests
             "    └── License: MIT (https://licenses.nuget.org/MIT)"
         );
 
+        result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
+            "License summary:",
+            "├── 12x: http://go.microsoft.com/fwlink/?LinkId=329770",
+            "├── 1x:",
+            "│   https://www.nuget.org/packages/Microsoft.Data.SqlClient.",
+            "│   SNI.runtime/5.2.0/license",
+            "└── 1x: MIT (https://licenses.nuget.org/MIT)"
+        );
+
         result.StdOutput.Should().ContainInOrder(
             "Promoting 14 packages...",
             "(1/14) Promote Microsoft.Data.SqlClient.SNI.runtime 5.2.0",

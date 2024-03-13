@@ -39,7 +39,7 @@ public class PromotePackageLogger : IPromotePackageLogger
 
     public void LogPackageLicense(PackageIdentity identity, PackageLicenseInfo license)
     {
-        var text = new Markup($"[gray]Package license: {GetLicenseMarkup(license)}[/]");
+        var text = Markup.FromInterpolated($"[gray]Package license: {license.PrettyPrint()}[/]");
         var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
     }
@@ -183,7 +183,7 @@ public class PromotePackageLogger : IPromotePackageLogger
         foreach (var identity in packages.OrderBy(x => x.Id))
         {
             var node = tree.AddNode(Markup.FromInterpolated($"{identity.Id.Id} {identity.Id.Version}"));
-            node.AddNode($"License: {GetLicenseMarkup(identity.License)}");
+            node.AddNode(Markup.FromInterpolated($"License: {identity.License.PrettyPrint()}"));
         }
 
         AnsiConsole.Write(tree);
@@ -209,16 +209,20 @@ public class PromotePackageLogger : IPromotePackageLogger
         AnsiConsole.MarkupLine($"[bold green]{count} {Decl(count, "package", "packages")} promoted.[/]");
     }
 
-    private static string GetLicenseMarkup(PackageLicenseInfo license)
+    public void LogLicenseSummary(IReadOnlyCollection<PackageInfo> packages)
     {
-        if (license.Url != null && !string.Equals(license.Url.ToString(), license.License, StringComparison.OrdinalIgnoreCase))
+        var licenseItems = packages.GroupBy(x => x.License)
+                                   .Select(x => (License: x.Key, Count: x.Count()))
+                                   .OrderByDescending(x => x.Count)
+                                   .ThenBy(x => x.License.License);
+
+        var tree = new Tree(Markup.FromInterpolated($"[bold green]License summary:[/]"));
+        foreach (var item in licenseItems)
         {
-            return $"{Markup.Escape(license.License)} ({Markup.Escape(license.Url.ToString())})";
+            tree.AddNode(Markup.FromInterpolated($"{item.Count}x: {item.License.PrettyPrint()}"));
         }
-        else
-        {
-            return $"{Markup.Escape(license.License)}";
-        }
+
+        AnsiConsole.Write(tree);
     }
 
     private static string Decl(int count, string one, string many)
