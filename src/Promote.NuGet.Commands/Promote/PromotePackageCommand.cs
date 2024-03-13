@@ -32,13 +32,14 @@ public class PromotePackageCommand
         _licenseComplianceValidator = new LicenseComplianceValidator(sourceRepository, promotePackageLogger);
     }
 
-    public async Task<Result> Promote(IReadOnlyCollection<PackageRequest> requests,
+    public async Task<Result> Promote(PromotePackageCommandArguments arguments,
                                       PromotePackageCommandOptions options,
                                       CancellationToken cancellationToken = default)
     {
-        if (requests == null) throw new ArgumentNullException(nameof(requests));
+        if (arguments == null) throw new ArgumentNullException(nameof(arguments));
         if (options == null) throw new ArgumentNullException(nameof(options));
 
+        var requests = arguments.Requests;
         var resolvePackagesResult = await _sourcePackageRequestResolver.ResolvePackageRequests(requests, cancellationToken);
         if (resolvePackagesResult.IsFailure)
         {

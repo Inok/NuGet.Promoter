@@ -51,20 +51,21 @@ internal sealed class PromoteFromConfigurationCommand : CancellableAsyncCommand<
         return 0;
     }
 
-    private static async Task<Result<IReadOnlyCollection<PackageRequest>>> ReadConfiguration(string file, CancellationToken cancellationToken)
+    private static async Task<Result<PromotePackageCommandArguments>> ReadConfiguration(string file, CancellationToken cancellationToken)
     {
         var input = await File.ReadAllTextAsync(file, cancellationToken);
 
         var parseResult = PromoteConfigurationParser.TryParse(input);
         if (parseResult.IsFailure)
         {
-            return Result.Failure<IReadOnlyCollection<PackageRequest>>(parseResult.Error);
+            return Result.Failure<PromotePackageCommandArguments>(parseResult.Error);
         }
 
         var configurationDirectory = Path.GetDirectoryName(file);
         Normalize(parseResult.Value, configurationDirectory);
 
-        return parseResult.Value.Packages.Select(x => new PackageRequest(x.Id, x.Versions)).ToList();
+        var requests = parseResult.Value.Packages.Select(x => new PackageRequest(x.Id, x.Versions)).ToList();
+        return new PromotePackageCommandArguments(requests);
     }
 
     private static void Normalize(PromoteConfiguration configuration, string? relativePathResolutionRoot)

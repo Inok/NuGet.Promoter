@@ -33,9 +33,10 @@ internal sealed class PromoteSinglePackageCommand : CancellableAsyncCommand<Prom
 
         var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, new PromotePackageLogger());
 
+        var arguments = new PromotePackageCommandArguments(new[] { packageRequest });
         var options = new PromotePackageCommandOptions(promoteSettings.DryRun, promoteSettings.AlwaysResolveDeps, promoteSettings.ForcePush);
 
-        var promotionResult = await promoter.Promote(new[] { packageRequest }, options, cancellationToken);
+        var promotionResult = await promoter.Promote(arguments, options, cancellationToken);
         if (promotionResult.IsFailure)
         {
             AnsiConsole.WriteLine(promotionResult.Error);
