@@ -54,6 +54,8 @@ internal sealed class PromoteFromConfigurationCommand : CancellableAsyncCommand<
 
     private static async Task<Result<PromotePackageCommandArguments>> ReadConfiguration(string file, CancellationToken cancellationToken)
     {
+        file = Path.GetFullPath(file);
+
         var input = await File.ReadAllTextAsync(file, cancellationToken);
 
         var parseResult = PromoteConfigurationParser.TryParse(input);
