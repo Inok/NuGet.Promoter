@@ -9,9 +9,9 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace Promote.NuGet.Promote.FromConfiguration;
 
-public static class PackagesConfigurationParser
+public static class PromoteConfigurationParser
 {
-    public static Result<PackagesConfiguration> TryParse(string input)
+    public static Result<PromoteConfiguration> TryParse(string input)
     {
         try
         {
@@ -19,18 +19,18 @@ public static class PackagesConfigurationParser
         }
         catch (Exception ex)
         {
-            return Result.Failure<PackagesConfiguration>($"Failed to parse configuration: {ex}");
+            return Result.Failure<PromoteConfiguration>($"Failed to parse configuration: {ex}");
         }
     }
 
-    public static PackagesConfiguration Parse(string input)
+    public static PromoteConfiguration Parse(string input)
     {
         var deserializer = new DeserializerBuilder()
                            .WithNamingConvention(UnderscoredNamingConvention.Instance)
                            .WithTypeConverter(VersionRangeConverter.Instance)
                            .Build();
 
-        var configuration = deserializer.Deserialize<PackagesConfiguration>(input);
+        var configuration = deserializer.Deserialize<PromoteConfiguration>(input);
 
         var validator = new PackagesConfigurationValidator();
         validator.ValidateAndThrow(configuration);

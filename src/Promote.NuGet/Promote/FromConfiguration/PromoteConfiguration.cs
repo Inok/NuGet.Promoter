@@ -2,12 +2,12 @@
 
 namespace Promote.NuGet.Promote.FromConfiguration;
 
-public class PackagesConfiguration
+public class PromoteConfiguration
 {
     public PackageConfiguration[] Packages { get; init; } = default!;
 }
 
-public class PackagesConfigurationValidator : AbstractValidator<PackagesConfiguration>
+public class PackagesConfigurationValidator : AbstractValidator<PromoteConfiguration>
 {
     public PackagesConfigurationValidator()
     {

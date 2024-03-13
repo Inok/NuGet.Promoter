@@ -55,7 +55,7 @@ internal sealed class PromoteFromConfigurationCommand : CancellableAsyncCommand<
     {
         var input = await File.ReadAllTextAsync(file, cancellationToken);
 
-        var parseResult = PackagesConfigurationParser.TryParse(input);
+        var parseResult = PromoteConfigurationParser.TryParse(input);
         if (parseResult.IsFailure)
         {
             return Result.Failure<IReadOnlyCollection<PackageRequest>>(parseResult.Error);

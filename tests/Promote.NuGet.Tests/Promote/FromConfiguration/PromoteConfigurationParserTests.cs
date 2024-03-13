@@ -6,24 +6,26 @@ using Promote.NuGet.Promote.FromConfiguration;
 namespace Promote.NuGet.Tests.Promote.FromConfiguration;
 
 [TestFixture]
-public class PackagesConfigurationParserTests
+public class PromoteConfigurationParserTests
 {
     [Test]
     public void Parse_configuration()
     {
-        var input =
-            "packages:\n"
-          + "  - id: System.Globalization\n"
-          + "    versions: 4.3.0\n"
-          + "  - id: System.Runtime\n"
-          + "    versions:\n"
-          + "      - '[4.1.0,4.1.2)'\n"
-          + "      - 4.3.1\n";
+        const string input =
+            """
+            packages:
+              - id: System.Globalization
+                versions: 4.3.0
+              - id: System.Runtime
+                versions:
+                  - '[4.1.0,4.1.2)'
+                  - 4.3.1
+            """;
 
-        var configuration = PackagesConfigurationParser.Parse(input);
+        var configuration = PromoteConfigurationParser.Parse(input);
 
         configuration.Should().BeEquivalentTo(
-            new PackagesConfiguration
+            new PromoteConfiguration
             {
                 Packages = new[]
                            {
@@ -60,7 +62,7 @@ public class PackagesConfigurationParserTests
           + "      - '[4.1.0,4.1.2)'\n"
           + "      - 4.3.1\n";
 
-        var action = () => PackagesConfigurationParser.Parse(input);
+        var action = () => PromoteConfigurationParser.Parse(input);
 
         // TODO: better message and assert
         action.Should().Throw<ValidationException>().Which.Message.Should()
