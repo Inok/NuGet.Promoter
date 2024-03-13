@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
+using Promote.NuGet.Commands.Licensing;
 using Promote.NuGet.Commands.Mirroring;
 using Promote.NuGet.Commands.Promote.Resolution;
 using Promote.NuGet.Commands.Requests;
@@ -12,6 +13,7 @@ public class PromotePackageCommand
 {
     private readonly PackageRequestResolver _sourcePackageRequestResolver;
     private readonly PackagesToPromoteResolver _packagesToPromoteResolver;
+    private readonly LicenseComplianceValidator _licenseComplianceValidator;
     private readonly PackageMirroringExecutor _packageMirroringExecutor;
     private readonly IPromotePackageLogger _promotePackageLogger;
 
@@ -27,6 +29,7 @@ public class PromotePackageCommand
         _sourcePackageRequestResolver = new PackageRequestResolver(sourceRepository, promotePackageLogger);
         _packagesToPromoteResolver = new PackagesToPromoteResolver(sourceRepository, destinationRepository, promotePackageLogger);
         _packageMirroringExecutor = new PackageMirroringExecutor(sourceRepository, destinationRepository, promotePackageLogger);
+        _licenseComplianceValidator = new LicenseComplianceValidator(sourceRepository, promotePackageLogger);
     }
 
     public async Task<Result> Promote(IReadOnlyCollection<PackageRequest> requests,
@@ -61,30 +64,37 @@ public class PromotePackageCommand
             return Result.Success();
         }
 
+        var complianceResult = _licenseComplianceValidator.CheckCompliance(packagesToPromote);
+        if (complianceResult.IsFailure)
+        {
+            return Result.Failure(complianceResult.Error);
+        }
+
         if (options.DryRun)
         {
             _promotePackageLogger.LogDryRun();
             return Result.Success();
         }
 
-        return await _packageMirroringExecutor.MirrorPackages(packagesToPromote, cancellationToken);
+        var idsToPromote = packagesToPromote.Select(x => x.Id).ToList();
+        return await _packageMirroringExecutor.MirrorPackages(idsToPromote, cancellationToken);
     }
 
-    private async Task<Result<IReadOnlyCollection<PackageIdentity>>> ResolvePackagesToPromote(IReadOnlySet<PackageIdentity> identities,
-                                                                                              PromotePackageCommandOptions options,
-                                                                                              CancellationToken cancellationToken)
+    private async Task<Result<IReadOnlyCollection<PackageInfo>>> ResolvePackagesToPromote(IReadOnlySet<PackageIdentity> identities,
+                                                                                          PromotePackageCommandOptions options,
+                                                                                          CancellationToken cancellationToken)
     {
         var packageTreeResult = await _packagesToPromoteResolver.ResolvePackageTree(identities, options, cancellationToken);
         if (packageTreeResult.IsFailure)
         {
-            return Result.Failure<IReadOnlyCollection<PackageIdentity>>(packageTreeResult.Error);
+            return Result.Failure<IReadOnlyCollection<PackageInfo>>(packageTreeResult.Error);
         }
 
         var packageTree = packageTreeResult.Value;
 
         var packagesToPromote = packageTree.AllPackages
-                                           .Where(x => options.ForcePush || !packageTree.IsInTargetFeed(x))
-                                           .OrderBy(x => x)
+                                           .Where(x => options.ForcePush || !packageTree.IsInTargetFeed(x.Id))
+                                           .OrderBy(x => x.Id)
                                            .ToList();
 
         if (packagesToPromote.Count > 0)

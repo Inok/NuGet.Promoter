@@ -39,16 +39,7 @@ public class PromotePackageLogger : IPromotePackageLogger
 
     public void LogPackageLicense(PackageIdentity identity, PackageLicenseInfo license)
     {
-        Markup text;
-        if (license.Url != null && !string.Equals(license.Url.ToString(), license.License, StringComparison.OrdinalIgnoreCase))
-        {
-            text = Markup.FromInterpolated($"[gray]Package license: [bold]{license.License}[/] ({license.Url})[/]");
-        }
-        else
-        {
-            text = Markup.FromInterpolated($"[gray]Package license: [bold]{license.License}[/][/]");
-        }
-
+        var text = Markup.FromInterpolated($"[gray]Package license: {license.PrettyPrint()}[/]");
         var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
     }
@@ -124,7 +115,7 @@ public class PromotePackageLogger : IPromotePackageLogger
         var expanded = new HashSet<PackageIdentity>();
 
         var tree = new Tree("[bold green]Resolved package tree:[/]");
-        foreach (var rootPackage in packageTree.Roots.OrderBy(x => x.Id))
+        foreach (var rootPackage in packageTree.Roots.OrderBy(x => x))
         {
             AddNodeAndChildren(tree, packageTree, rootPackage, expanded, rootLevel: true);
         }
@@ -186,12 +177,13 @@ public class PromotePackageLogger : IPromotePackageLogger
         }
     }
 
-    public void LogPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities)
+    public void LogPackagesToPromote(IReadOnlyCollection<PackageInfo> packages)
     {
-        var tree = new Tree(Markup.FromInterpolated($"[bold green]Found {identities.Count} {Decl(identities.Count, "package", "packages")} to promote:[/]"));
-        foreach (var identity in identities.OrderBy(x => x.Id).ThenBy(x => x.Version))
+        var tree = new Tree(Markup.FromInterpolated($"[bold green]Found {packages.Count} {Decl(packages.Count, "package", "packages")} to promote:[/]"));
+        foreach (var identity in packages.OrderBy(x => x.Id))
         {
-            tree.AddNode(Markup.FromInterpolated($"{identity.Id} {identity.Version}"));
+            var node = tree.AddNode(Markup.FromInterpolated($"{identity.Id.Id} {identity.Id.Version}"));
+            node.AddNode(Markup.FromInterpolated($"License: {identity.License.PrettyPrint()}"));
         }
 
         AnsiConsole.Write(tree);
@@ -215,6 +207,22 @@ public class PromotePackageLogger : IPromotePackageLogger
     public void LogMirroredPackagesCount(int count)
     {
         AnsiConsole.MarkupLine($"[bold green]{count} {Decl(count, "package", "packages")} promoted.[/]");
+    }
+
+    public void LogLicenseSummary(IReadOnlyCollection<PackageInfo> packages)
+    {
+        var licenseItems = packages.GroupBy(x => x.License)
+                                   .Select(x => (License: x.Key, Count: x.Count()))
+                                   .OrderByDescending(x => x.Count)
+                                   .ThenBy(x => x.License.License);
+
+        var tree = new Tree(Markup.FromInterpolated($"[bold green]License summary:[/]"));
+        foreach (var item in licenseItems)
+        {
+            tree.AddNode(Markup.FromInterpolated($"{item.Count}x: {item.License.PrettyPrint()}"));
+        }
+
+        AnsiConsole.Write(tree);
     }
 
     private static string Decl(int count, string one, string many)
