@@ -19,7 +19,7 @@ public class NuGetRepository : INuGetRepository
 
         if (!string.IsNullOrEmpty(descriptor.Username))
         {
-            packageSource.Credentials = new PackageSourceCredential(descriptor.Source, descriptor.Username, descriptor.Password, true, null);
+            packageSource.Credentials = new PackageSourceCredential(descriptor.Source, descriptor.Username, descriptor.Password!, true, null);
         }
 
         var sourceRepository = Repository.Factory.GetCoreV3(packageSource);

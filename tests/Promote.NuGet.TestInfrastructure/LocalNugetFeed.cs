@@ -30,7 +30,8 @@ public sealed class LocalNugetFeed : IAsyncDisposable
         const ushort bagetterPort = 8080;
 
         var container = new ContainerBuilder()
-                        .WithImage("bagetter/bagetter:1.0.4")
+                        .WithImage("bagetter/bagetter:1.4.2")
+                        .WithLogger(TestcontainersLogger.Instance)
                         .WithEnvironment("ApiKey", apiKey)
                         .WithPortBinding(bagetterPort, true)
                         .WithWaitStrategy(Wait.ForUnixContainer()

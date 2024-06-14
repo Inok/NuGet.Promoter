@@ -16,6 +16,8 @@ public static class Program
 
         app.Configure(configurator =>
                       {
+                          configurator.UseAssemblyInformationalVersion();
+
                           configurator.AddBranch(
                               "promote",
                               x =>
@@ -33,19 +35,21 @@ public static class Program
                                    .WithDescription("Promotes packages as configured in the specified file.");
                               });
 
-                          configurator.SetExceptionHandler(ex =>
-                                                           {
-                                                               if (ex is OperationCanceledException or TaskCanceledException)
-                                                               {
-                                                                   AnsiConsole.MarkupLineInterpolated($"[yellow]The operation was canceled[/]");
-                                                               }
-                                                               else
-                                                               {
-                                                                   AnsiConsole.WriteException(ex);
-                                                               }
+                          configurator.SetExceptionHandler(
+                              (ex, _) =>
+                              {
+                                  if (ex is OperationCanceledException or TaskCanceledException)
+                                  {
+                                      AnsiConsole.MarkupLineInterpolated($"[yellow]The operation was canceled[/]");
+                                  }
+                                  else
+                                  {
+                                      AnsiConsole.WriteException(ex);
+                                  }
 
-                                                               return -1;
-                                                           });
+                                  return -1;
+                              }
+                          );
                       });
 
         return await app.RunAsync(args);
