@@ -583,6 +583,9 @@ public class PromoteFromConfigurationCommandIntegrationTests
                                        - id: System.Runtime.CompilerServices.Unsafe
                                          versions:
                                            - 6.0.0
+                                       - id: LibGit2Sharp.NativeBinaries
+                                         versions:
+                                           - 2.0.322
                                      """
                                  );
 
@@ -611,7 +614,10 @@ public class PromoteFromConfigurationCommandIntegrationTests
             Resolving System.Runtime.CompilerServices.Unsafe 6.0.0
             Found 1 matching package:
             └── 6.0.0
-            Resolving 3 packages to promote...
+            Resolving LibGit2Sharp.NativeBinaries 2.0.322
+            Found 1 matching package:
+            └── 2.0.322
+            Resolving 4 packages to promote...
             Processing System.Runtime 4.3.1
               Package license: MICROSOFT .NET LIBRARY
               (http://go.microsoft.com/fwlink/?LinkId=329770)
@@ -639,6 +645,13 @@ public class PromoteFromConfigurationCommandIntegrationTests
               destination.
               System.Runtime.CompilerServices.Unsafe 6.0.0 has no
               dependencies.
+            Processing LibGit2Sharp.NativeBinaries 2.0.322
+              Package license:
+              https://www.nuget.org/packages/LibGit2Sharp.NativeBinaries
+              /2.0.322/license
+              LibGit2Sharp.NativeBinaries 2.0.322 is not in the
+              destination.
+              LibGit2Sharp.NativeBinaries 2.0.322 has no dependencies.
             Processing Microsoft.NETCore.Platforms 1.1.1
               Package license: MICROSOFT .NET LIBRARY
               (http://go.microsoft.com/fwlink/?LinkId=329770)
@@ -651,12 +664,17 @@ public class PromoteFromConfigurationCommandIntegrationTests
               Microsoft.NETCore.Targets 1.1.3 is not in the destination.
               Microsoft.NETCore.Targets 1.1.3 has no dependencies.
             Resolved package tree:
+            ├── LibGit2Sharp.NativeBinaries 2.0.322
             ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
             ├── System.Runtime 4.3.1
             │   ├── Microsoft.NETCore.Platforms 1.1.1
             │   └── Microsoft.NETCore.Targets 1.1.3
             └── System.Runtime.CompilerServices.Unsafe 6.0.0
-            Found 5 packages to promote:
+            Found 6 packages to promote:
+            ├── LibGit2Sharp.NativeBinaries 2.0.322
+            │   └── License:
+            │       https://www.nuget.org/packages/LibGit2Sharp.NativeBi
+            │       naries/2.0.322/license
             ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
             │   └── License:
             │       https://www.nuget.org/packages/Microsoft.Data.SqlCli
@@ -676,10 +694,16 @@ public class PromoteFromConfigurationCommandIntegrationTests
             ├── 3x: MICROSOFT .NET LIBRARY
             │   (http://go.microsoft.com/fwlink/?LinkId=329770)
             ├── 1x:
+            │   https://www.nuget.org/packages/LibGit2Sharp.NativeBinari
+            │   es/2.0.322/license
+            ├── 1x:
             │   https://www.nuget.org/packages/Microsoft.Data.SqlClient.
             │   SNI.runtime/5.2.0/license
             └── 1x: MIT (https://licenses.nuget.org/MIT)
             Checking license compliance...
+            Checking LibGit2Sharp.NativeBinaries 2.0.322
+                License (file): libgit2\libgit2.license.txt
+                [x] No matching license files found in the whitelist.
             Checking Microsoft.Data.SqlClient.SNI.runtime 5.2.0
                 License (file): LICENSE.txt
                 [x] No matching license files found in the whitelist.
@@ -698,7 +722,11 @@ public class PromoteFromConfigurationCommandIntegrationTests
             Checking System.Runtime.CompilerServices.Unsafe 6.0.0
                 License (expression): MIT
                 [x] The license expression is not whitelisted.
-            5 license violations found:
+            6 license violations found:
+            ├── LibGit2Sharp.NativeBinaries.2.0.322
+            │   ├── License (file): libgit2\libgit2.license.txt
+            │   └── Reason: No matching license files found in the
+            │       whitelist.
             ├── Microsoft.Data.SqlClient.SNI.runtime.5.2.0
             │   ├── License (file): LICENSE.txt
             │   └── Reason: No matching license files found in the

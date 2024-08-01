@@ -166,22 +166,20 @@ public class LicenseComplianceValidator
         PackageReaderBase packageReader,
         CancellationToken cancellationToken)
     {
-        var filesInPackage = await packageReader.GetFilesAsync(cancellationToken);
-        if (!filesInPackage.Contains(license))
-        {
-            return new LicenseComplianceViolation(packageId, PackageLicenseType.File, license, "There is no such file in the package.");
-        }
-
-        string actualLicenseText;
+        string? actualLicenseText;
         try
         {
-            await using var stream = await packageReader.GetStreamAsync(license, cancellationToken);
-            using var reader = new StreamReader(stream);
-            actualLicenseText = await reader.ReadToEndAsync();
+            actualLicenseText = await TryGetFileContent(packageReader, license, cancellationToken)
+                             ?? await TryGetFileContent(packageReader, license.Replace('\\', '/'), cancellationToken);
         }
         catch (Exception ex)
         {
             return new LicenseComplianceViolation(packageId, PackageLicenseType.File, license, $"Failed to open the license file: {ex.Message}");
+        }
+
+        if (actualLicenseText == null)
+        {
+            return new LicenseComplianceViolation(packageId, PackageLicenseType.File, license, "There is no such file in the package.");
         }
 
         var normalizedActualLicense = NormalizeLicenseText(actualLicenseText);
@@ -210,7 +208,21 @@ public class LicenseComplianceValidator
         return new LicenseComplianceViolation(packageId, PackageLicenseType.File, license, "No matching license files found in the whitelist.");
     }
 
-    private string NormalizeLicenseText(string license)
+    private static async Task<string?> TryGetFileContent(PackageReaderBase packageReader, string path, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var stream = await packageReader.GetStreamAsync(path, cancellationToken);
+            using var reader = new StreamReader(stream);
+            return await reader.ReadToEndAsync(cancellationToken);
+        }
+        catch (FileNotFoundException)
+        {
+            return null;
+        }
+    }
+
+    private static string NormalizeLicenseText(string license)
     {
         var normalized = new StringBuilder(license);
 
