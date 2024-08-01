@@ -166,18 +166,16 @@ public class LicenseComplianceValidator
         PackageReaderBase packageReader,
         CancellationToken cancellationToken)
     {
-        var filesInPackage = await packageReader.GetFilesAsync(cancellationToken);
-        if (!filesInPackage.Contains(license))
-        {
-            return new LicenseComplianceViolation(packageId, PackageLicenseType.File, license, "There is no such file in the package.");
-        }
-
         string actualLicenseText;
         try
         {
             await using var stream = await packageReader.GetStreamAsync(license, cancellationToken);
             using var reader = new StreamReader(stream);
-            actualLicenseText = await reader.ReadToEndAsync();
+            actualLicenseText = await reader.ReadToEndAsync(cancellationToken);
+        }
+        catch (FileNotFoundException)
+        {
+            return new LicenseComplianceViolation(packageId, PackageLicenseType.File, license, "There is no such file in the package.");
         }
         catch (Exception ex)
         {
