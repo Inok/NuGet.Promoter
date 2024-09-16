@@ -38,7 +38,7 @@ public static class PromoteNugetProcessRunner
             processStartInfo.ArgumentList.Add(argument);
         }
 
-        TestContext.WriteLine($"Running {processStartInfo.FileName} {string.Join(" ", processStartInfo.ArgumentList)}");
+        TestContext.Out.WriteLine($"Running {processStartInfo.FileName} {string.Join(" ", processStartInfo.ArgumentList)}");
 
         Process? process = null;
         try

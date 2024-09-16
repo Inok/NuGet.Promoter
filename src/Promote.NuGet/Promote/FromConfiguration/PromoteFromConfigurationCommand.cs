@@ -77,6 +77,7 @@ internal sealed class PromoteFromConfigurationCommand : CancellableAsyncCommand<
                                                   AcceptExpressions = complianceOptions.AcceptExpressions ?? [],
                                                   AcceptUrls = complianceOptions.AcceptUrls ?? [],
                                                   AcceptFiles = complianceOptions.AcceptFiles ?? [],
+                                                  AcceptNoLicense = complianceOptions.AcceptNoLicense ?? [],
                                               }
                                             : LicenseComplianceSettings.Disabled;
 

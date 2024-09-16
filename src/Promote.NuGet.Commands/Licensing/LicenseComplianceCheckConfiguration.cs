@@ -1,14 +1,18 @@
+using NuGet.Packaging.Core;
+
 namespace Promote.NuGet.Commands.Licensing;
 
 public class LicenseComplianceSettings
 {
     public bool Enabled { get; init; }
 
-    public IReadOnlyCollection<string> AcceptExpressions { get; init; } = default!;
+    public required IReadOnlyCollection<string> AcceptExpressions { get; init; }
 
-    public IReadOnlyCollection<string> AcceptUrls { get; init; } = default!;
+    public required IReadOnlyCollection<string> AcceptUrls { get; init; }
 
-    public IReadOnlyCollection<string> AcceptFiles { get; init; } = default!;
+    public required IReadOnlyCollection<string> AcceptFiles { get; init; }
+
+    public required IReadOnlyCollection<string> AcceptNoLicense { get; init; }
 
     public static LicenseComplianceSettings Disabled { get; } = new()
                                                                 {
@@ -16,5 +20,6 @@ public class LicenseComplianceSettings
                                                                     AcceptExpressions = [],
                                                                     AcceptUrls = [],
                                                                     AcceptFiles = [],
+                                                                    AcceptNoLicense = [],
                                                                 };
 }

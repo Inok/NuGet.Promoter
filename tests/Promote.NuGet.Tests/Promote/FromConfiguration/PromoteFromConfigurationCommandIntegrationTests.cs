@@ -434,6 +434,8 @@ public class PromoteFromConfigurationCommandIntegrationTests
                                          - http://go.microsoft.com/fwlink/?LinkId=329770
                                        accept-files:
                                          - '{msLibLicense.Path}'
+                                       accept-no-license:
+                                         - Newtonsoft.Json.3.5.8
                                      packages:
                                        - id: System.Runtime
                                          versions: 4.3.1
@@ -443,6 +445,9 @@ public class PromoteFromConfigurationCommandIntegrationTests
                                        - id: System.Runtime.CompilerServices.Unsafe
                                          versions:
                                            - 6.0.0
+                                       - id: Newtonsoft.Json
+                                         versions:
+                                           - 3.5.8
                                      """
                                  );
 
@@ -471,7 +476,10 @@ public class PromoteFromConfigurationCommandIntegrationTests
             Resolving System.Runtime.CompilerServices.Unsafe 6.0.0
             Found 1 matching package:
             └── 6.0.0
-            Resolving 3 packages to promote...
+            Resolving Newtonsoft.Json 3.5.8
+            Found 1 matching package:
+            └── 3.5.8
+            Resolving 4 packages to promote...
             Processing System.Runtime 4.3.1
               Package license: MICROSOFT .NET LIBRARY
               (http://go.microsoft.com/fwlink/?LinkId=329770)
@@ -499,6 +507,10 @@ public class PromoteFromConfigurationCommandIntegrationTests
               destination.
               System.Runtime.CompilerServices.Unsafe 6.0.0 has no
               dependencies.
+            Processing Newtonsoft.Json 3.5.8
+              Package license: <not set>
+              Newtonsoft.Json 3.5.8 is not in the destination.
+              Newtonsoft.Json 3.5.8 has no dependencies.
             Processing Microsoft.NETCore.Platforms 1.1.1
               Package license: MICROSOFT .NET LIBRARY
               (http://go.microsoft.com/fwlink/?LinkId=329770)
@@ -512,11 +524,12 @@ public class PromoteFromConfigurationCommandIntegrationTests
               Microsoft.NETCore.Targets 1.1.3 has no dependencies.
             Resolved package tree:
             ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+            ├── Newtonsoft.Json 3.5.8
             ├── System.Runtime 4.3.1
             │   ├── Microsoft.NETCore.Platforms 1.1.1
             │   └── Microsoft.NETCore.Targets 1.1.3
             └── System.Runtime.CompilerServices.Unsafe 6.0.0
-            Found 5 packages to promote:
+            Found 6 packages to promote:
             ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
             │   └── License:
             │       https://www.nuget.org/packages/Microsoft.Data.SqlCli
@@ -527,6 +540,8 @@ public class PromoteFromConfigurationCommandIntegrationTests
             ├── Microsoft.NETCore.Targets 1.1.3
             │   └── License: MICROSOFT .NET LIBRARY
             │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Newtonsoft.Json 3.5.8
+            │   └── License: <not set>
             ├── System.Runtime 4.3.1
             │   └── License: MICROSOFT .NET LIBRARY
             │       (http://go.microsoft.com/fwlink/?LinkId=329770)
@@ -535,6 +550,7 @@ public class PromoteFromConfigurationCommandIntegrationTests
             License summary:
             ├── 3x: MICROSOFT .NET LIBRARY
             │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── 1x: <not set>
             ├── 1x:
             │   https://www.nuget.org/packages/Microsoft.Data.SqlClient.
             │   SNI.runtime/5.2.0/license
@@ -551,6 +567,9 @@ public class PromoteFromConfigurationCommandIntegrationTests
                 License (url):
                 http://go.microsoft.com/fwlink/?LinkId=329770
                 [v] The license url is in whitelist.
+            Checking Newtonsoft.Json 3.5.8
+                License (none): <not set>
+                [v] The package is allowed to have no license.
             Checking System.Runtime 4.3.1
                 License (url):
                 http://go.microsoft.com/fwlink/?LinkId=329770
@@ -559,7 +578,7 @@ public class PromoteFromConfigurationCommandIntegrationTests
                 License (expression): MIT
                 [v] The license expression is in whitelist.
             No license violations found.
-            Promoting 5 packages...
+            Promoting 6 packages...
             """
         );
 
@@ -586,6 +605,9 @@ public class PromoteFromConfigurationCommandIntegrationTests
                                        - id: LibGit2Sharp.NativeBinaries
                                          versions:
                                            - 2.0.322
+                                       - id: Newtonsoft.Json
+                                         versions:
+                                           - 3.5.8
                                      """
                                  );
 
@@ -617,7 +639,10 @@ public class PromoteFromConfigurationCommandIntegrationTests
             Resolving LibGit2Sharp.NativeBinaries 2.0.322
             Found 1 matching package:
             └── 2.0.322
-            Resolving 4 packages to promote...
+            Resolving Newtonsoft.Json 3.5.8
+            Found 1 matching package:
+            └── 3.5.8
+            Resolving 5 packages to promote...
             Processing System.Runtime 4.3.1
               Package license: MICROSOFT .NET LIBRARY
               (http://go.microsoft.com/fwlink/?LinkId=329770)
@@ -652,6 +677,10 @@ public class PromoteFromConfigurationCommandIntegrationTests
               LibGit2Sharp.NativeBinaries 2.0.322 is not in the
               destination.
               LibGit2Sharp.NativeBinaries 2.0.322 has no dependencies.
+            Processing Newtonsoft.Json 3.5.8
+              Package license: <not set>
+              Newtonsoft.Json 3.5.8 is not in the destination.
+              Newtonsoft.Json 3.5.8 has no dependencies.
             Processing Microsoft.NETCore.Platforms 1.1.1
               Package license: MICROSOFT .NET LIBRARY
               (http://go.microsoft.com/fwlink/?LinkId=329770)
@@ -666,11 +695,12 @@ public class PromoteFromConfigurationCommandIntegrationTests
             Resolved package tree:
             ├── LibGit2Sharp.NativeBinaries 2.0.322
             ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+            ├── Newtonsoft.Json 3.5.8
             ├── System.Runtime 4.3.1
             │   ├── Microsoft.NETCore.Platforms 1.1.1
             │   └── Microsoft.NETCore.Targets 1.1.3
             └── System.Runtime.CompilerServices.Unsafe 6.0.0
-            Found 6 packages to promote:
+            Found 7 packages to promote:
             ├── LibGit2Sharp.NativeBinaries 2.0.322
             │   └── License:
             │       https://www.nuget.org/packages/LibGit2Sharp.NativeBi
@@ -685,6 +715,8 @@ public class PromoteFromConfigurationCommandIntegrationTests
             ├── Microsoft.NETCore.Targets 1.1.3
             │   └── License: MICROSOFT .NET LIBRARY
             │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Newtonsoft.Json 3.5.8
+            │   └── License: <not set>
             ├── System.Runtime 4.3.1
             │   └── License: MICROSOFT .NET LIBRARY
             │       (http://go.microsoft.com/fwlink/?LinkId=329770)
@@ -693,6 +725,7 @@ public class PromoteFromConfigurationCommandIntegrationTests
             License summary:
             ├── 3x: MICROSOFT .NET LIBRARY
             │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── 1x: <not set>
             ├── 1x:
             │   https://www.nuget.org/packages/LibGit2Sharp.NativeBinari
             │   es/2.0.322/license
@@ -715,6 +748,9 @@ public class PromoteFromConfigurationCommandIntegrationTests
                 License (url):
                 http://go.microsoft.com/fwlink/?LinkId=329770
                 [x] The license url is not whitelisted.
+            Checking Newtonsoft.Json 3.5.8
+                License (none): <not set>
+                [x] License is not configured for the package.
             Checking System.Runtime 4.3.1
                 License (url):
                 http://go.microsoft.com/fwlink/?LinkId=329770
@@ -722,7 +758,7 @@ public class PromoteFromConfigurationCommandIntegrationTests
             Checking System.Runtime.CompilerServices.Unsafe 6.0.0
                 License (expression): MIT
                 [x] The license expression is not whitelisted.
-            6 license violations found:
+            7 license violations found:
             ├── LibGit2Sharp.NativeBinaries.2.0.322
             │   ├── License (file): libgit2\libgit2.license.txt
             │   └── Reason: No matching license files found in the
@@ -739,6 +775,9 @@ public class PromoteFromConfigurationCommandIntegrationTests
             │   ├── License (url):
             │   │   http://go.microsoft.com/fwlink/?LinkId=329770
             │   └── Reason: The license url is not whitelisted.
+            ├── Newtonsoft.Json.3.5.8
+            │   ├── License (none): <not set>
+            │   └── Reason: License is not configured for the package.
             ├── System.Runtime.4.3.1
             │   ├── License (url):
             │   │   http://go.microsoft.com/fwlink/?LinkId=329770

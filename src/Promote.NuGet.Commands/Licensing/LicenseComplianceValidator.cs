@@ -57,11 +57,9 @@ public class LicenseComplianceValidator
             {
                 CheckLicenseUrl(package, settings, licenseUrl, violations);
             }
-            else
+            else // license is not set for the package
             {
-                var violation = new LicenseComplianceViolation(package.Id, PackageLicenseType.None, "<not set>", "License in not configured for the package.");
-                _logger.LogLicenseViolation(violation);
-                violations.Add(violation);
+                CheckNoLicense(package, settings, violations);
             }
         }
 
@@ -73,6 +71,24 @@ public class LicenseComplianceValidator
 
         _logger.LogLicenseViolationsSummary(violations);
         return Result.Failure("License violations found.");
+    }
+
+    private void CheckNoLicense(PackageInfo package,
+                                LicenseComplianceSettings settings,
+                                List<LicenseComplianceViolation> violations)
+    {
+        _logger.LogPackageLicense(PackageLicenseType.None, "<not set>");
+
+        var isMissingLicenseAccepted = settings.AcceptNoLicense.Any(x => string.Equals(x, package.Id.ToString(), StringComparison.OrdinalIgnoreCase));
+        if (isMissingLicenseAccepted)
+        {
+            _logger.LogLicenseCompliance("The package is allowed to have no license.");
+            return;
+        }
+
+        var violation = new LicenseComplianceViolation(package.Id, PackageLicenseType.None, "<not set>", "License is not configured for the package.");
+        _logger.LogLicenseViolation(violation);
+        violations.Add(violation);
     }
 
     private void CheckLicenseUrl(PackageInfo package,
