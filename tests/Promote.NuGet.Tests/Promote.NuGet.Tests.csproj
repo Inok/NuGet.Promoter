@@ -3,10 +3,4 @@
         <ProjectReference Include="..\..\src\Promote.NuGet\Promote.NuGet.csproj" />
         <ProjectReference Include="..\Promote.NuGet.TestInfrastructure\Promote.NuGet.TestInfrastructure.csproj" />
     </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Resources\" />
-    </ItemGroup>
-    <ItemGroup>
-      <None Remove="Resources\Microsoft.Data.SqlClient.SNI-License.txt" />
-    </ItemGroup>
 </Project>
