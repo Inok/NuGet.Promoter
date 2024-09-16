@@ -12,7 +12,7 @@ public sealed class TestNuGetLogger : LoggerBase
 
     public override void Log(ILogMessage message)
     {
-        TestContext.WriteLine($"[{TimeOnly.FromDateTime(DateTime.UtcNow):O} nuget] {message.FormatWithCode()}");
+        TestContext.Out.WriteLine($"[{TimeOnly.FromDateTime(DateTime.UtcNow):O} nuget] {message.FormatWithCode()}");
     }
 
     public override Task LogAsync(ILogMessage message)

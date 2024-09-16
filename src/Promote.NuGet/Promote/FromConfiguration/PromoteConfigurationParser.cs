@@ -47,8 +47,8 @@ public static class PromoteConfigurationParser
             return type == typeof(IPackageVersionPolicy[]);
         }
 
-        public object ReadYaml(IParser parser, Type type)
-         {
+        public object? ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
+        {
             if (parser.TryConsume<Scalar>(out var scalar))
             {
                 return new [] { ParseScalarAsVersionRange(scalar) };
@@ -90,7 +90,7 @@ public static class PromoteConfigurationParser
             throw new YamlException($"Expected a valid version or version range, but got '{scalar.Value}'.");
         }
 
-        public void WriteYaml(IEmitter emitter, object? value, Type type)
+        public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
         {
             throw new NotImplementedException();
         }

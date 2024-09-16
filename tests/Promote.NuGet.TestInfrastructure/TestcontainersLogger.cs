@@ -17,7 +17,7 @@ public class TestcontainersLogger : ILogger, IDisposable
             return;
         }
 
-        TestContext.WriteLine($"[{TimeOnly.FromDateTime(DateTime.UtcNow):O} testcontainers] {formatter.Invoke(state, exception)}");
+        TestContext.Out.WriteLine($"[{TimeOnly.FromDateTime(DateTime.UtcNow):O} testcontainers] {formatter.Invoke(state, exception)}");
     }
 
     public bool IsEnabled(LogLevel logLevel)
