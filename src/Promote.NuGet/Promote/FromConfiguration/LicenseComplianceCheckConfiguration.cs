@@ -11,6 +11,8 @@ public class LicenseComplianceCheckConfiguration
     public string[]? AcceptUrls { get; init; }
 
     public string[]? AcceptFiles { get; init; }
+
+    public string[]? AcceptNoLicense { get; init; }
 }
 
 public class LicenseComplianceCheckConfigurationValidator : AbstractValidator<LicenseComplianceCheckConfiguration>
@@ -20,6 +22,7 @@ public class LicenseComplianceCheckConfigurationValidator : AbstractValidator<Li
         RuleFor(x => x.AcceptExpressions).ForEach(x => x.NotEmpty());
         RuleFor(x => x.AcceptUrls).ForEach(x => x.NotEmpty());
         RuleFor(x => x.AcceptFiles).ForEach(x => x.NotEmpty());
+        RuleFor(x => x.AcceptNoLicense).ForEach(x => x.NotEmpty());
     }
 }
 

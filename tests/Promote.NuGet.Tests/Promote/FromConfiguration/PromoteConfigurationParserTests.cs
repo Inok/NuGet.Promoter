@@ -66,6 +66,8 @@ public class PromoteConfigurationParserTests
                 - https://github.com/dotnet/corefx/blob/master/LICENSE.TXT
               accept-files:
                 - ./third-party-licenses/MIT.txt
+              accept-no-license:
+                - Newtonsoft.Json.3.5.8
 
             packages:
               - id: System.Globalization
@@ -87,6 +89,7 @@ public class PromoteConfigurationParserTests
                                                  "https://github.com/dotnet/corefx/blob/master/LICENSE.TXT"
                                              ],
                                              AcceptFiles = ["./third-party-licenses/MIT.txt"],
+                                             AcceptNoLicense = ["Newtonsoft.Json.3.5.8"]
                                          },
                 Packages =
                 [
@@ -142,6 +145,9 @@ public class PromoteConfigurationParserTests
               accept-files:
                 - ./third-party-licenses/MIT.txt
                 - ''
+              accept-no-license:
+                - Newtonsoft.Json.3.5.8
+                - ''
 
             packages:
               - id: System.Globalization
@@ -158,6 +164,7 @@ public class PromoteConfigurationParserTests
                     -- LicenseComplianceCheck.AcceptExpressions[1]: 'Accept Expressions' must not be empty. Severity: Error
                     -- LicenseComplianceCheck.AcceptUrls[1]: 'Accept Urls' must not be empty. Severity: Error
                     -- LicenseComplianceCheck.AcceptFiles[1]: 'Accept Files' must not be empty. Severity: Error
+                    -- LicenseComplianceCheck.AcceptNoLicense[1]: 'Accept No License' must not be empty. Severity: Error
                    """);
     }
 }
