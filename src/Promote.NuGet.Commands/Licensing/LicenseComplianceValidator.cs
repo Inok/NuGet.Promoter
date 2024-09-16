@@ -82,7 +82,7 @@ public class LicenseComplianceValidator
         var isMissingLicenseAccepted = settings.AcceptNoLicense.Any(x => string.Equals(x, package.Id.ToString(), StringComparison.OrdinalIgnoreCase));
         if (isMissingLicenseAccepted)
         {
-            _logger.LogLicenseCompliance("The package is accepted to have no license.");
+            _logger.LogLicenseCompliance("The package is allowed to have no license.");
             return;
         }
 

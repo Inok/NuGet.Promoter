@@ -569,7 +569,7 @@ public class PromoteFromConfigurationCommandIntegrationTests
                 [v] The license url is in whitelist.
             Checking Newtonsoft.Json 3.5.8
                 License (none): <not set>
-                [v] The package is accepted to have no license.
+                [v] The package is allowed to have no license.
             Checking System.Runtime 4.3.1
                 License (url):
                 http://go.microsoft.com/fwlink/?LinkId=329770
