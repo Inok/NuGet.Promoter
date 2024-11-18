@@ -1,5 +1,8 @@
 ﻿using CSharpFunctionalExtensions;
+using NuGet.Common;
 using NuGet.Packaging.Core;
+using NuGet.Protocol;
+using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using Promote.NuGet.Commands.Requests;
 using Promote.NuGet.Commands.Requests.Resolution;
@@ -75,6 +78,20 @@ public class ResolvePackageVersionPolicyVisitorTests
     {
         var packageInfoAccessor = Substitute.For<INuGetPackageInfoAccessor>();
         packageInfoAccessor.GetAllVersions(packageId, Arg.Any<CancellationToken>()).Returns(versions);
+
+        if (versions.IsSuccess)
+        {
+            foreach (var version in versions.Value)
+            {
+                var identity = new PackageIdentity(packageId, version);
+
+                var metadata = Substitute.For<IPackageSearchMetadata>();
+                metadata.Identity.Returns(identity);
+                metadata.IsListed.Returns(true);
+
+                packageInfoAccessor.GetPackageMetadata(identity, Arg.Any<CancellationToken>()).Returns(Result.Success(metadata));
+            }
+        }
 
         var nugetRepository = Substitute.For<INuGetRepository>();
         nugetRepository.Packages.Returns(packageInfoAccessor);

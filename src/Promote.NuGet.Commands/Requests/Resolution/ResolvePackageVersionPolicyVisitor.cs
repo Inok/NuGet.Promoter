@@ -54,7 +54,20 @@ internal sealed class ResolvePackageVersionPolicyVisitor : IPackageVersionPolicy
                 continue;
             }
 
-            matchingPackages.Add(new PackageIdentity(_packageId, version));
+            var packageIdentity = new PackageIdentity(_packageId, version);
+
+            var packageMetadata = await _repository.Packages.GetPackageMetadata(packageIdentity, cancellationToken);
+            if (packageMetadata.IsFailure)
+            {
+                return packageMetadata.ConvertFailure<IReadOnlySet<PackageIdentity>>();
+            }
+
+            if (!packageMetadata.Value.IsListed)
+            {
+                continue;
+            }
+
+            matchingPackages.Add(packageIdentity);
         }
 
         return matchingPackages;
@@ -70,14 +83,24 @@ internal sealed class ResolvePackageVersionPolicyVisitor : IPackageVersionPolicy
             return allVersions.ConvertFailure<IReadOnlySet<PackageIdentity>>();
         }
 
-        var maxVersion = allVersions.Value.Where(v => !v.IsPrerelease).Max();
-        if (maxVersion == null)
+        foreach (var version in allVersions.Value.Where(v => !v.IsPrerelease).OrderByDescending(x => x))
         {
-            return Result.Failure<IReadOnlySet<PackageIdentity>>($"Package {_packageId} has no released versions");
+            var identity = new PackageIdentity(_packageId, version);
+
+            var packageMetadata = await _repository.Packages.GetPackageMetadata(identity, cancellationToken);
+            if (packageMetadata.IsFailure)
+            {
+                return packageMetadata.ConvertFailure<IReadOnlySet<PackageIdentity>>();
+            }
+
+            if (!packageMetadata.Value.IsListed)
+            {
+                continue;
+            }
+
+            return new HashSet<PackageIdentity>(capacity: 1) { identity };
         }
 
-        var identity = new PackageIdentity(_packageId, maxVersion);
-
-        return new HashSet<PackageIdentity>(capacity: 1) { identity };
+        return Result.Failure<IReadOnlySet<PackageIdentity>>($"Package {_packageId} has no released versions");
     }
 }
