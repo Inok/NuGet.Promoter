@@ -77,6 +77,11 @@ public static class PromoteConfigurationParser
                 throw new YamlException($"Expected a version or version range, but got a key '{scalar.Value}'.");
             }
 
+            if (scalar.Value == "latest")
+            {
+                return new LatestPackageVersionPolicy();
+            }
+
             if (NuGetVersion.TryParse(scalar.Value, out var version))
             {
                 return new ExactPackageVersionPolicy(version);

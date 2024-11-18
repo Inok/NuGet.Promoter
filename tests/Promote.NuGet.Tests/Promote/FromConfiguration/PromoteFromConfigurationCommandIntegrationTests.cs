@@ -34,6 +34,9 @@ public class PromoteFromConfigurationCommandIntegrationTests
                                        - id: Microsoft.Data.SqlClient.SNI.runtime
                                          versions:
                                            - 5.2.0
+                                       - id: SpecFlow.Allure
+                                         versions:
+                                           - '[4.0.0, 4.0.1)' # 4.0.0 is unlisted
                                      """
                                  );
 
@@ -80,6 +83,8 @@ public class PromoteFromConfigurationCommandIntegrationTests
                 "Resolving Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
                 "Found 1 matching package:",
                 "└── 5.2.0",
+                "Resolving SpecFlow.Allure (>= 4.0.0 && < 4.0.1)",
+                "Found 0 matching packages.",
             }
         );
 

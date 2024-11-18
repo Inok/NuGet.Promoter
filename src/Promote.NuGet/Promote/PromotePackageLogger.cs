@@ -23,6 +23,12 @@ public class PromotePackageLogger : IPromotePackageLogger
 
     public void LogPackageRequestResolution(PackageRequest request, IReadOnlyCollection<PackageIdentity> matchingPackages)
     {
+        if (matchingPackages.Count == 0)
+        {
+            AnsiConsole.MarkupLineInterpolated($"Found 0 matching packages.");
+            return;
+        }
+
         var tree = new Tree(Markup.FromInterpolated($"Found {matchingPackages.Count} matching {Decl(matchingPackages.Count, "package", "packages")}:"));
         foreach (var identity in matchingPackages.OrderBy(x => x.Id).ThenBy(x => x.Version))
         {
