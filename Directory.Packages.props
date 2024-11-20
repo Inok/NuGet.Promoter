@@ -24,6 +24,6 @@
         <PackageVersion Include="YamlDotNet" Version="16.2.0"/>
     </ItemGroup>
     <ItemGroup>
-        <GlobalPackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0"/>
+        <GlobalPackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0"/>
     </ItemGroup>
 </Project>
