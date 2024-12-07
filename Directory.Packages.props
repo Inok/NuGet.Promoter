@@ -21,7 +21,7 @@
         <PackageVersion Include="Spectre.Console.Analyzer" Version="1.0.0"/>
         <PackageVersion Include="Spectre.Console.Cli" Version="0.49.1"/>
         <PackageVersion Include="Testcontainers" Version="4.0.0"/>
-        <PackageVersion Include="YamlDotNet" Version="16.2.0"/>
+        <PackageVersion Include="YamlDotNet" Version="16.2.1"/>
     </ItemGroup>
     <ItemGroup>
         <GlobalPackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0"/>
