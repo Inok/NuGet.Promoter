@@ -13,12 +13,3 @@ updates:
     schedule:
       interval: "weekly"
       day: "wednesday"
-    groups:
-      major:
-        update-types:
-        - "major"
-      minor-and-patch:
-        update-types:
-        - "minor"
-        - "patch"
-
