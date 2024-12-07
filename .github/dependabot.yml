@@ -12,4 +12,13 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "wednesday"
+      day: "Wednesday"
+    groups:
+      major:
+        update-types:
+        - "major"
+      minor-and-patch:
+        update-types:
+        - "minor"
+        - "patch"
+
