@@ -11,7 +11,7 @@ updates:
   - package-ecosystem: "dotnet-sdk"
     directory: "/"
     schedule:
-      interval: "Weekly"
+      interval: "weekly"
       day: "wednesday"
     groups:
       major:
