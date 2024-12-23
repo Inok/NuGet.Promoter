@@ -4,7 +4,7 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageVersion Include="coverlet.collector" Version="6.0.2"/>
-        <PackageVersion Include="CSharpFunctionalExtensions" Version="3.2.0"/>
+        <PackageVersion Include="CSharpFunctionalExtensions" Version="3.3.0"/>
         <PackageVersion Include="FluentAssertions" Version="7.0.0"/>
         <PackageVersion Include="FluentValidation" Version="11.11.0"/>
         <PackageVersion Include="Humanizer.Core" Version="2.14.1"/>
