@@ -1,15 +1,15 @@
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
-using NuGet.Packaging.Licenses;
 using Promote.NuGet.Commands.Promote.Resolution;
 using Promote.NuGet.Feeds;
 
 namespace Promote.NuGet.Commands.Licensing;
 
-public class LicenseComplianceValidator
+public partial class LicenseComplianceValidator
 {
     private readonly INuGetRepository _repository;
     private readonly ILicenseComplianceValidatorLogger _logger;
@@ -240,16 +240,14 @@ public class LicenseComplianceValidator
 
     private static string NormalizeLicenseText(string license)
     {
-        var normalized = new StringBuilder(license);
+        license = CopyrightRegex().Replace(license, "<copyright-year>");
 
-        normalized.Replace("\r\n", " ");
-        normalized.Replace("\r", " ");
-        normalized.Replace("\n", " ");
+        var normalized = new StringBuilder(license);
 
         for (var i = 0; i < normalized.Length; i++)
         {
             var ch = normalized[i];
-            if (char.IsWhiteSpace(ch))
+            if (char.IsWhiteSpace(ch) || ch == '\r' || ch == '\n')
             {
                 normalized[i] = ' ';
                 continue;
@@ -271,4 +269,7 @@ public class LicenseComplianceValidator
 
         return normalized.ToString();
     }
+
+    [GeneratedRegex(@"(?<=Copyright\s*(?:\(c\)|©)?\s*)\d{4}(?:\s*-\s*\d{4})?", RegexOptions.IgnoreCase)]
+    private static partial Regex CopyrightRegex();
 }

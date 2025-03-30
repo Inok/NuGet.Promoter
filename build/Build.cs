@@ -36,7 +36,7 @@ partial class Build : NukeBuild
         InitGitVersion();
 
         Serilog.Log.Information("Host: {0}, {1} ({2})", Host, Environment.MachineName, Environment.OSVersion);
-        Serilog.Log.Information("Building MySport.Core in '{0}' configuration.", Configuration);
+        Serilog.Log.Information("Building Promote.NuGet in '{0}' configuration.", Configuration);
         Serilog.Log.Information("Branch name: {0}", GitVersion.BranchName);
         Serilog.Log.Information("Semantic version: {0}", GitVersion.FullSemVer);
         Serilog.Log.Information("Informational version: {0}", GitVersion.InformationalVersion);
