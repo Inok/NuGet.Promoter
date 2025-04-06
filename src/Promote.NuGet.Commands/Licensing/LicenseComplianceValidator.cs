@@ -1,9 +1,7 @@
 using System.IO;
-using System.Text;
 using CSharpFunctionalExtensions;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
-using NuGet.Packaging.Licenses;
 using Promote.NuGet.Commands.Promote.Resolution;
 using Promote.NuGet.Feeds;
 
@@ -198,7 +196,7 @@ public class LicenseComplianceValidator
             return new LicenseComplianceViolation(packageId, PackageLicenseType.File, license, "There is no such file in the package.");
         }
 
-        var normalizedActualLicense = NormalizeLicenseText(actualLicenseText);
+        var normalizedActualLicense = LicenseTextNormalizer.NormalizeLicense(actualLicenseText);
 
         foreach (var acceptFile in acceptedFiles)
         {
@@ -213,7 +211,7 @@ public class LicenseComplianceValidator
                 continue;
             }
 
-            var normalizedAcceptedText = NormalizeLicenseText(acceptedText);
+            var normalizedAcceptedText = LicenseTextNormalizer.NormalizeLicense(acceptedText);
 
             if (normalizedAcceptedText.Equals(normalizedActualLicense))
             {
@@ -236,39 +234,5 @@ public class LicenseComplianceValidator
         {
             return null;
         }
-    }
-
-    private static string NormalizeLicenseText(string license)
-    {
-        var normalized = new StringBuilder(license);
-
-        normalized.Replace("\r\n", " ");
-        normalized.Replace("\r", " ");
-        normalized.Replace("\n", " ");
-
-        for (var i = 0; i < normalized.Length; i++)
-        {
-            var ch = normalized[i];
-            if (char.IsWhiteSpace(ch))
-            {
-                normalized[i] = ' ';
-                continue;
-            }
-
-            if (char.IsUpper(ch))
-            {
-                normalized[i] = char.ToLowerInvariant(ch);
-            }
-        }
-
-        int lengthBefore;
-        do
-        {
-            lengthBefore = normalized.Length;
-            normalized.Replace("  ", " ");
-        }
-        while (lengthBefore != normalized.Length);
-
-        return normalized.ToString();
     }
 }
