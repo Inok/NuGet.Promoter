@@ -1,5 +1,3 @@
-using NuGet.Packaging.Core;
-
 namespace Promote.NuGet.Commands.Licensing;
 
 public class LicenseComplianceSettings

@@ -1,6 +1,4 @@
 using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
@@ -9,7 +7,7 @@ using Promote.NuGet.Feeds;
 
 namespace Promote.NuGet.Commands.Licensing;
 
-public partial class LicenseComplianceValidator
+public class LicenseComplianceValidator
 {
     private readonly INuGetRepository _repository;
     private readonly ILicenseComplianceValidatorLogger _logger;
@@ -198,7 +196,7 @@ public partial class LicenseComplianceValidator
             return new LicenseComplianceViolation(packageId, PackageLicenseType.File, license, "There is no such file in the package.");
         }
 
-        var normalizedActualLicense = NormalizeLicenseText(actualLicenseText);
+        var normalizedActualLicense = LicenseTextNormalizer.NormalizeLicense(actualLicenseText);
 
         foreach (var acceptFile in acceptedFiles)
         {
@@ -213,7 +211,7 @@ public partial class LicenseComplianceValidator
                 continue;
             }
 
-            var normalizedAcceptedText = NormalizeLicenseText(acceptedText);
+            var normalizedAcceptedText = LicenseTextNormalizer.NormalizeLicense(acceptedText);
 
             if (normalizedAcceptedText.Equals(normalizedActualLicense))
             {
@@ -237,39 +235,4 @@ public partial class LicenseComplianceValidator
             return null;
         }
     }
-
-    private static string NormalizeLicenseText(string license)
-    {
-        license = CopyrightRegex().Replace(license, "<copyright-year>");
-
-        var normalized = new StringBuilder(license);
-
-        for (var i = 0; i < normalized.Length; i++)
-        {
-            var ch = normalized[i];
-            if (char.IsWhiteSpace(ch) || ch == '\r' || ch == '\n')
-            {
-                normalized[i] = ' ';
-                continue;
-            }
-
-            if (char.IsUpper(ch))
-            {
-                normalized[i] = char.ToLowerInvariant(ch);
-            }
-        }
-
-        int lengthBefore;
-        do
-        {
-            lengthBefore = normalized.Length;
-            normalized.Replace("  ", " ");
-        }
-        while (lengthBefore != normalized.Length);
-
-        return normalized.ToString();
-    }
-
-    [GeneratedRegex(@"(?<=Copyright\s*(?:\(c\)|©)?\s*)\d{4}(?:\s*-\s*\d{4})?", RegexOptions.IgnoreCase)]
-    private static partial Regex CopyrightRegex();
 }
