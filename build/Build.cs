@@ -4,7 +4,6 @@ using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
-using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build : NukeBuild
@@ -105,24 +104,20 @@ partial class Build : NukeBuild
                                           var projects = TestsDirectory.GlobFiles(new[] { "**/*.Tests.csproj" });
                                           Assert.NotEmpty(projects);
 
-                                          DotNetTest(s => s
-                                                          .SetConfiguration(Configuration)
-                                                          .EnableNoBuild()
-                                                          .EnableNoRestore()
-                                                          .SetDataCollector("XPlat Code Coverage")
-                                                          .CombineWith(projects,
-                                                                       (cs, v) =>
-                                                                       {
-                                                                           var logFileName = $"test-result-{Guid.NewGuid():N}";
-                                                                           return cs.SetProjectFile(v)
-                                                                                    .SetResultsDirectory(TestResultsDirectory / v.NameWithoutExtension)
-                                                                                    .SetLoggers(
-                                                                                        $"html;LogFileName={logFileName}.html",
-                                                                                        $"trx;LogFileName={logFileName}.trx"
-                                                                                    );
-                                                                       }),
-                                                     degreeOfParallelism: Environment.ProcessorCount,
-                                                     completeOnFailure: true
+                                          DotNetRun(s => s
+                                                         .SetConfiguration(Configuration)
+                                                         .EnableNoBuild()
+                                                         .EnableNoRestore()
+                                                         .CombineWith(
+                                                             projects,
+                                                             (cs, v) => cs
+                                                                        .SetProjectFile(v)
+                                                                        .AddApplicationArguments("--results-directory", TestResultsDirectory / v.NameWithoutExtension)
+                                                                        .AddApplicationArguments("--report-trx", "--report-trx-filename", $"test-result-{Guid.NewGuid():N}.trx")
+                                                                        .AddApplicationArguments("--coverage", "--coverage-output", "coverage.cobertura.xml", "--coverage-output-format", "cobertura")
+                                                                        .AddApplicationArguments("--no-ansi")),
+                                                    degreeOfParallelism: Environment.ProcessorCount,
+                                                    completeOnFailure: true
                                           );
                                       });
 

@@ -5,6 +5,7 @@ mode: ContinuousDeployment
 branches:
   main:
     regex: ^main$
-    tag: main
+    label: main
     increment: Patch
-    prevent-increment-of-merged-branch-version: true
+    prevent-increment:
+      of-merged-branch: true

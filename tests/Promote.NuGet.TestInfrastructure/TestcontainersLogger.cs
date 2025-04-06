@@ -25,7 +25,7 @@ public class TestcontainersLogger : ILogger, IDisposable
         return logLevel >= LogLevel.Debug;
     }
 
-    public IDisposable BeginScope<TState>(TState state)
+    public IDisposable BeginScope<TState>(TState state) where TState : notnull
     {
         return this;
     }
