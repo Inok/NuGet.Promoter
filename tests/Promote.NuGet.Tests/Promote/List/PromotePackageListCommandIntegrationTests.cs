@@ -35,20 +35,15 @@ public class PromotePackageListCommandIntegrationTests
 
         // Assert
         result.StdOutput.Should().StartWith(
-            new[]
-            {
+            [
                 "Resolving package requests...",
                 "Resolving System.Runtime (>= 4.1.0 && < 4.1.2)",
-                "Found 2 matching packages:",
-                "├── 4.1.0",
-                "└── 4.1.1",
-                "Resolving System.Runtime 4.3.1",
-                "Found 1 matching package:",
-                "└── 4.3.1",
-                "Resolving System.Globalization 4.3.0",
-                "Found 1 matching package:",
-                "└── 4.3.0",
-            }
+                "Found 2 matching versions: 4.1.0, 4.1.1",
+                "Resolving System.Runtime (= 4.3.1)",
+                "Found 1 matching version: 4.3.1",
+                "Resolving System.Globalization (= 4.3.0)",
+                "Found 1 matching version: 4.3.0"
+            ]
         );
 
         result.StdOutput.Should().ContainInConsecutiveOrder(

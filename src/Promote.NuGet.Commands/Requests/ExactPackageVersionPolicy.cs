@@ -2,14 +2,9 @@
 
 namespace Promote.NuGet.Commands.Requests;
 
-public class ExactPackageVersionPolicy : IPackageVersionPolicy
+public sealed class ExactPackageVersionPolicy(NuGetVersion version) : IPackageVersionPolicy
 {
-    public NuGetVersion Version { get; }
-
-    public ExactPackageVersionPolicy(NuGetVersion version)
-    {
-        Version = version ?? throw new ArgumentNullException(nameof(version));
-    }
+    public NuGetVersion Version { get; } = version ?? throw new ArgumentNullException(nameof(version));
 
     public Task<T> Accept<T>(IPackageVersionPolicyVisitor<T> visitor, CancellationToken cancellationToken)
     {
@@ -18,6 +13,6 @@ public class ExactPackageVersionPolicy : IPackageVersionPolicy
 
     public override string ToString()
     {
-        return Version.ToNormalizedString();
+        return new VersionRange(Version, true, Version, true).PrettyPrint();
     }
 }

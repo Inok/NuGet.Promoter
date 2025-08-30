@@ -2,14 +2,9 @@
 
 namespace Promote.NuGet.Commands.Requests;
 
-public class VersionRangePackageVersionPolicy : IPackageVersionPolicy
+public sealed class VersionRangePackageVersionPolicy(VersionRange versionRange) : IPackageVersionPolicy
 {
-    public VersionRange VersionRange { get; }
-
-    public VersionRangePackageVersionPolicy(VersionRange versionRange)
-    {
-        VersionRange = versionRange ?? throw new ArgumentNullException(nameof(versionRange));
-    }
+    public VersionRange VersionRange { get; } = versionRange ?? throw new ArgumentNullException(nameof(versionRange));
 
     public Task<T> Accept<T>(IPackageVersionPolicyVisitor<T> visitor, CancellationToken cancellationToken)
     {

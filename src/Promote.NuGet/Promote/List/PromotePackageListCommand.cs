@@ -38,7 +38,8 @@ internal sealed class PromotePackageListCommand : CancellableAsyncCommand<Promot
             return -1;
         }
 
-        var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, new PromotePackageLogger());
+        var promotePackageLogger = new PromotePackageLogger(verbose: promoteSettings.Verbose);
+        var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, promotePackageLogger);
 
         var arguments = new PromotePackageCommandArguments(identitiesResult.Value, LicenseComplianceSettings.Disabled);
         var options = new PromotePackageCommandOptions(promoteSettings.DryRun, promoteSettings.AlwaysResolveDeps, promoteSettings.ForcePush);

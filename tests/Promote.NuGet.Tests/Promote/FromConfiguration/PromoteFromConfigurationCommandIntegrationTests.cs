@@ -62,30 +62,21 @@ public class PromoteFromConfigurationCommandIntegrationTests
 
         // Assert
         result.StdOutput.Should().StartWith(
-            new[]
-            {
+            [
                 "Resolving package requests...",
-                "Resolving System.Collections 4.3.0",
-                "Found 1 matching package:",
-                "└── 4.3.0",
-                "Resolving System.Globalization 4.0.11, 4.3.0",
-                "Found 2 matching packages:",
-                "├── 4.0.11",
-                "└── 4.3.0",
-                "Resolving System.Runtime (>= 4.1.0 && < 4.1.2), 4.3.1",
-                "Found 3 matching packages:",
-                "├── 4.1.0",
-                "├── 4.1.1",
-                "└── 4.3.1",
-                "Resolving System.Runtime.CompilerServices.Unsafe 6.0.0",
-                "Found 1 matching package:",
-                "└── 6.0.0",
-                "Resolving Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
-                "Found 1 matching package:",
-                "└── 5.2.0",
+                "Resolving System.Collections (= 4.3.0)",
+                "Found 1 matching version: 4.3.0",
+                "Resolving System.Globalization (= 4.0.11), (= 4.3.0)",
+                "Found 2 matching versions: 4.0.11, 4.3.0",
+                "Resolving System.Runtime (>= 4.1.0 && < 4.1.2), (= 4.3.1)",
+                "Found 3 matching versions: 4.1.0, 4.1.1, 4.3.1",
+                "Resolving System.Runtime.CompilerServices.Unsafe (= 6.0.0)",
+                "Found 1 matching version: 6.0.0",
+                "Resolving Microsoft.Data.SqlClient.SNI.runtime (= 5.2.0)",
+                "Found 1 matching version: 5.2.0",
                 "Resolving SpecFlow.Allure (>= 4.0.0 && < 4.0.1)",
-                "Found 0 matching packages.",
-            }
+                "Found 0 matching versions."
+            ]
         );
 
         result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
@@ -472,18 +463,14 @@ public class PromoteFromConfigurationCommandIntegrationTests
         actualOutput.Should().StartWith(
             $"""
             Resolving package requests...
-            Resolving System.Runtime 4.3.1
-            Found 1 matching package:
-            └── 4.3.1
-            Resolving Microsoft.Data.SqlClient.SNI.runtime 5.2.0
-            Found 1 matching package:
-            └── 5.2.0
-            Resolving System.Runtime.CompilerServices.Unsafe 6.0.0
-            Found 1 matching package:
-            └── 6.0.0
-            Resolving Newtonsoft.Json 3.5.8
-            Found 1 matching package:
-            └── 3.5.8
+            Resolving System.Runtime (= 4.3.1)
+            Found 1 matching version: 4.3.1
+            Resolving Microsoft.Data.SqlClient.SNI.runtime (= 5.2.0)
+            Found 1 matching version: 5.2.0
+            Resolving System.Runtime.CompilerServices.Unsafe (= 6.0.0)
+            Found 1 matching version: 6.0.0
+            Resolving Newtonsoft.Json (= 3.5.8)
+            Found 1 matching version: 3.5.8
             Resolving 4 packages to promote...
             Processing System.Runtime 4.3.1
               Package license: MICROSOFT .NET LIBRARY
@@ -632,21 +619,16 @@ public class PromoteFromConfigurationCommandIntegrationTests
         actualOutput.Should().Be(
             """
             Resolving package requests...
-            Resolving System.Runtime 4.3.1
-            Found 1 matching package:
-            └── 4.3.1
-            Resolving Microsoft.Data.SqlClient.SNI.runtime 5.2.0
-            Found 1 matching package:
-            └── 5.2.0
-            Resolving System.Runtime.CompilerServices.Unsafe 6.0.0
-            Found 1 matching package:
-            └── 6.0.0
-            Resolving LibGit2Sharp.NativeBinaries 2.0.322
-            Found 1 matching package:
-            └── 2.0.322
-            Resolving Newtonsoft.Json 3.5.8
-            Found 1 matching package:
-            └── 3.5.8
+            Resolving System.Runtime (= 4.3.1)
+            Found 1 matching version: 4.3.1
+            Resolving Microsoft.Data.SqlClient.SNI.runtime (= 5.2.0)
+            Found 1 matching version: 5.2.0
+            Resolving System.Runtime.CompilerServices.Unsafe (= 6.0.0)
+            Found 1 matching version: 6.0.0
+            Resolving LibGit2Sharp.NativeBinaries (= 2.0.322)
+            Found 1 matching version: 2.0.322
+            Resolving Newtonsoft.Json (= 3.5.8)
+            Found 1 matching version: 3.5.8
             Resolving 5 packages to promote...
             Processing System.Runtime 4.3.1
               Package license: MICROSOFT .NET LIBRARY

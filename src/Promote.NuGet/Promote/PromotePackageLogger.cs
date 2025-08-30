@@ -7,7 +7,7 @@ using Spectre.Console;
 
 namespace Promote.NuGet.Promote;
 
-public class PromotePackageLogger : IPromotePackageLogger
+public sealed class PromotePackageLogger(bool verbose) : IPromotePackageLogger
 {
     private const int SingleLeftPaddingSize = 2;
 
@@ -25,17 +25,25 @@ public class PromotePackageLogger : IPromotePackageLogger
     {
         if (matchingPackages.Count == 0)
         {
-            AnsiConsole.MarkupLineInterpolated($"Found 0 matching packages.");
+            AnsiConsole.MarkupLineInterpolated($"Found 0 matching versions.");
             return;
         }
 
-        var tree = new Tree(Markup.FromInterpolated($"Found {matchingPackages.Count} matching {Decl(matchingPackages.Count, "package", "packages")}:"));
-        foreach (var identity in matchingPackages.OrderBy(x => x.Id).ThenBy(x => x.Version))
+        if (!verbose)
         {
-            tree.AddNode(Markup.FromInterpolated($"{identity.Version}"));
+            var versions = matchingPackages.Select(x => x.Version).Order();
+            var versionsText = string.Join(", ", versions);
+            AnsiConsole.MarkupLineInterpolated($"Found {matchingPackages.Count} matching {Decl(matchingPackages.Count, "version", "versions")}: {versionsText}");
         }
-
-        AnsiConsole.Write(tree);
+        else
+        {
+            var tree = new Tree(Markup.FromInterpolated($"Found {matchingPackages.Count} matching {Decl(matchingPackages.Count, "version", "versions")}:"));
+            foreach (var identity in matchingPackages.OrderBy(x => x.Version))
+            {
+                tree.AddNode(Markup.FromInterpolated($"{identity.Version}"));
+            }
+            AnsiConsole.Write(tree);
+        }
     }
 
     public void LogProcessingPackage(PackageIdentity identity)

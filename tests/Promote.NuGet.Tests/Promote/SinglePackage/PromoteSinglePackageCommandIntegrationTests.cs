@@ -30,9 +30,8 @@ public class PromoteSinglePackageCommandIntegrationTests
             new[]
             {
                 "Resolving package requests...",
-                "Resolving System.Runtime 4.3.0",
-                "Found 1 matching package:",
-                "└── 4.3.0",
+                "Resolving System.Runtime (= 4.3.0)",
+                "Found 1 matching version: 4.3.0",
             }
         );
 
