@@ -17,11 +17,7 @@ public interface IPackagesToPromoteResolverLogger
 
     void LogResolvingDependency(PackageIdentity source, DependencyDescriptor dependency);
 
-    void LogResolvedDependency(PackageIdentity identity);
-
-    void LogNewPackageQueuedForProcessing(PackageIdentity identity);
-
-    void LogPackageIsAlreadyProcessedOrQueued(PackageIdentity identity);
+    void LogResolvedDependency(PackageIdentity identity, bool enqueuedForProcessing);
 
     void LogNoDependencies(PackageIdentity identity);
 

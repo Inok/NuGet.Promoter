@@ -62,173 +62,76 @@ public class PromoteFromConfigurationCommandIntegrationTests
 
         // Assert
         result.StdOutput.Should().StartWith(
-            new[]
-            {
+            [
                 "Resolving package requests...",
-                "Resolving System.Collections 4.3.0",
-                "Found 1 matching package:",
-                "└── 4.3.0",
-                "Resolving System.Globalization 4.0.11, 4.3.0",
-                "Found 2 matching packages:",
-                "├── 4.0.11",
-                "└── 4.3.0",
-                "Resolving System.Runtime (>= 4.1.0 && < 4.1.2), 4.3.1",
-                "Found 3 matching packages:",
-                "├── 4.1.0",
-                "├── 4.1.1",
-                "└── 4.3.1",
-                "Resolving System.Runtime.CompilerServices.Unsafe 6.0.0",
-                "Found 1 matching package:",
-                "└── 6.0.0",
-                "Resolving Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
-                "Found 1 matching package:",
-                "└── 5.2.0",
+                "Resolving System.Collections (= 4.3.0)",
+                "Found 1 matching version: 4.3.0",
+                "Resolving System.Globalization (= 4.0.11), (= 4.3.0)",
+                "Found 2 matching versions: 4.0.11, 4.3.0",
+                "Resolving System.Runtime (>= 4.1.0 && < 4.1.2), (= 4.3.1)",
+                "Found 3 matching versions: 4.1.0, 4.1.1, 4.3.1",
+                "Resolving System.Runtime.CompilerServices.Unsafe (= 6.0.0)",
+                "Found 1 matching version: 6.0.0",
+                "Resolving Microsoft.Data.SqlClient.SNI.runtime (= 5.2.0)",
+                "Found 1 matching version: 5.2.0",
                 "Resolving SpecFlow.Allure (>= 4.0.0 && < 4.0.1)",
-                "Found 0 matching packages.",
-            }
+                "Found 0 matching versions."
+            ]
         );
 
         result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
             "Resolving 8 packages to promote...",
             "Processing System.Collections 4.3.0",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  System.Collections 4.3.0 is not in the destination.",
             "  Resolving dependency Microsoft.NETCore.Platforms (>=",
             "  1.1.0)",
-            "    Resolved as Microsoft.NETCore.Platforms 1.1.0",
-            "    Microsoft.NETCore.Platforms 1.1.0 is queued for",
-            "    processing.",
+            "    Resolved version: 1.1.0",
             "  Resolving dependency Microsoft.NETCore.Targets (>= 1.1.0)",
-            "    Resolved as Microsoft.NETCore.Targets 1.1.0",
-            "    Microsoft.NETCore.Targets 1.1.0 is queued for",
-            "    processing.",
+            "    Resolved version: 1.1.0",
             "  Resolving dependency System.Runtime (>= 4.3.0)",
-            "    Resolved as System.Runtime 4.3.0",
-            "    System.Runtime 4.3.0 is queued for processing.",
+            "    Resolved version: 4.3.0",
             "Processing System.Globalization 4.0.11",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  System.Globalization 4.0.11 is not in the destination.",
             "  Resolving dependency Microsoft.NETCore.Platforms (>=",
             "  1.0.1)",
-            "    Resolved as Microsoft.NETCore.Platforms 1.0.1",
-            "    Microsoft.NETCore.Platforms 1.0.1 is queued for",
-            "    processing.",
+            "    Resolved version: 1.0.1",
             "  Resolving dependency Microsoft.NETCore.Targets (>= 1.0.1)",
-            "    Resolved as Microsoft.NETCore.Targets 1.0.1",
-            "    Microsoft.NETCore.Targets 1.0.1 is queued for",
-            "    processing.",
+            "    Resolved version: 1.0.1",
             "  Resolving dependency System.Runtime (>= 4.1.0)",
-            "    Resolved as System.Runtime 4.1.0",
-            "    System.Runtime 4.1.0 is already processed or queued.",
+            "    Resolved version: 4.1.0",
             "Processing System.Globalization 4.3.0",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  System.Globalization 4.3.0 is not in the destination.",
             "  Resolving dependency Microsoft.NETCore.Platforms (>=",
             "  1.1.0)",
-            "    Resolved as Microsoft.NETCore.Platforms 1.1.0",
-            "    Microsoft.NETCore.Platforms 1.1.0 is already processed",
-            "    or queued.",
+            "    Resolved version: 1.1.0",
             "  Resolving dependency Microsoft.NETCore.Targets (>= 1.1.0)",
-            "    Resolved as Microsoft.NETCore.Targets 1.1.0",
-            "    Microsoft.NETCore.Targets 1.1.0 is already processed or",
-            "    queued.",
+            "    Resolved version: 1.1.0",
             "  Resolving dependency System.Runtime (>= 4.3.0)",
-            "    Resolved as System.Runtime 4.3.0",
-            "    System.Runtime 4.3.0 is already processed or queued.",
+            "    Resolved version: 4.3.0",
             "Processing System.Runtime 4.1.0",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  System.Runtime 4.1.0 is not in the destination.",
             "  Resolving dependency Microsoft.NETCore.Platforms (>=",
             "  1.0.1)",
-            "    Resolved as Microsoft.NETCore.Platforms 1.0.1",
-            "    Microsoft.NETCore.Platforms 1.0.1 is already processed",
-            "    or queued.",
+            "    Resolved version: 1.0.1",
             "  Resolving dependency Microsoft.NETCore.Targets (>= 1.0.1)",
-            "    Resolved as Microsoft.NETCore.Targets 1.0.1",
-            "    Microsoft.NETCore.Targets 1.0.1 is already processed or",
-            "    queued.",
+            "    Resolved version: 1.0.1",
             "Processing System.Runtime 4.1.1",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  System.Runtime 4.1.1 is not in the destination.",
             "  Resolving dependency Microsoft.NETCore.Platforms (>=",
             "  1.0.2)",
-            "    Resolved as Microsoft.NETCore.Platforms 1.0.2",
-            "    Microsoft.NETCore.Platforms 1.0.2 is queued for",
-            "    processing.",
+            "    Resolved version: 1.0.2",
             "  Resolving dependency Microsoft.NETCore.Targets (>= 1.0.6)",
-            "    Resolved as Microsoft.NETCore.Targets 1.0.6",
-            "    Microsoft.NETCore.Targets 1.0.6 is queued for",
-            "    processing.",
+            "    Resolved version: 1.0.6",
             "Processing System.Runtime 4.3.1",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  System.Runtime 4.3.1 is already in the destination.",
-            "  Skipping dependencies of System.Runtime 4.3.1.",
             "Processing System.Runtime.CompilerServices.Unsafe 6.0.0",
-            "  Package license: MIT (https://licenses.nuget.org/MIT)",
-            "  System.Runtime.CompilerServices.Unsafe 6.0.0 is not in the",
-            "  destination.",
-            "  System.Runtime.CompilerServices.Unsafe 6.0.0 has no",
-            "  dependencies.",
             "Processing Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
-            "  Package license:",
-            "  https://www.nuget.org/packages/Microsoft.Data.SqlClient.SN",
-            "  I.runtime/5.2.0/license",
-            "  Microsoft.Data.SqlClient.SNI.runtime 5.2.0 is not in the",
-            "  destination.",
-            "  Microsoft.Data.SqlClient.SNI.runtime 5.2.0 has no",
-            "  dependencies.",
             "Processing Microsoft.NETCore.Platforms 1.1.0",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  Microsoft.NETCore.Platforms 1.1.0 is not in the",
-            "  destination.",
-            "  Microsoft.NETCore.Platforms 1.1.0 has no dependencies.",
             "Processing Microsoft.NETCore.Targets 1.1.0",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  Microsoft.NETCore.Targets 1.1.0 is not in the destination.",
-            "  Microsoft.NETCore.Targets 1.1.0 has no dependencies.",
             "Processing System.Runtime 4.3.0",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  System.Runtime 4.3.0 is not in the destination.",
             "  Resolving dependency Microsoft.NETCore.Platforms (>=",
             "  1.1.0)",
-            "    Resolved as Microsoft.NETCore.Platforms 1.1.0",
-            "    Microsoft.NETCore.Platforms 1.1.0 is already processed",
-            "    or queued.",
+            "    Resolved version: 1.1.0",
             "  Resolving dependency Microsoft.NETCore.Targets (>= 1.1.0)",
-            "    Resolved as Microsoft.NETCore.Targets 1.1.0",
-            "    Microsoft.NETCore.Targets 1.1.0 is already processed or",
-            "    queued.",
+            "    Resolved version: 1.1.0",
             "Processing Microsoft.NETCore.Platforms 1.0.1",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  Microsoft.NETCore.Platforms 1.0.1 is not in the",
-            "  destination.",
-            "  Microsoft.NETCore.Platforms 1.0.1 has no dependencies.",
             "Processing Microsoft.NETCore.Targets 1.0.1",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  Microsoft.NETCore.Targets 1.0.1 is not in the destination.",
-            "  Microsoft.NETCore.Targets 1.0.1 has no dependencies.",
             "Processing Microsoft.NETCore.Platforms 1.0.2",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  Microsoft.NETCore.Platforms 1.0.2 is not in the",
-            "  destination.",
-            "  Microsoft.NETCore.Platforms 1.0.2 has no dependencies.",
-            "Processing Microsoft.NETCore.Targets 1.0.6",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  Microsoft.NETCore.Targets 1.0.6 is not in the destination.",
-            "  Microsoft.NETCore.Targets 1.0.6 has no dependencies."
+            "Processing Microsoft.NETCore.Targets 1.0.6"
         );
 
         result.StdOutput.Should().ContainInConsecutiveOrder(
@@ -263,47 +166,47 @@ public class PromoteFromConfigurationCommandIntegrationTests
         result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
             "Found 14 packages to promote:",
             "├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
-            "│   └── License:",
-            "│       https://www.nuget.org/packages/Microsoft.Data.SqlCli",
-            "│       ent.SNI.runtime/5.2.0/license",
+            "│   License:",
+            "│   https://www.nuget.org/packages/Microsoft.Data.SqlClient.",
+            "│   SNI.runtime/5.2.0/license",
             "├── Microsoft.NETCore.Platforms 1.0.1",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Platforms 1.0.2",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Platforms 1.1.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Targets 1.0.1",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Targets 1.0.6",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Targets 1.1.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── System.Collections 4.3.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── System.Globalization 4.0.11",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── System.Globalization 4.3.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── System.Runtime 4.1.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── System.Runtime 4.1.1",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── System.Runtime 4.3.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "└── System.Runtime.CompilerServices.Unsafe 6.0.0",
-            "    └── License: MIT (https://licenses.nuget.org/MIT)"
+            "    License: MIT (https://licenses.nuget.org/MIT)"
         );
 
         result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
@@ -472,61 +375,26 @@ public class PromoteFromConfigurationCommandIntegrationTests
         actualOutput.Should().StartWith(
             $"""
             Resolving package requests...
-            Resolving System.Runtime 4.3.1
-            Found 1 matching package:
-            └── 4.3.1
-            Resolving Microsoft.Data.SqlClient.SNI.runtime 5.2.0
-            Found 1 matching package:
-            └── 5.2.0
-            Resolving System.Runtime.CompilerServices.Unsafe 6.0.0
-            Found 1 matching package:
-            └── 6.0.0
-            Resolving Newtonsoft.Json 3.5.8
-            Found 1 matching package:
-            └── 3.5.8
+            Resolving System.Runtime (= 4.3.1)
+            Found 1 matching version: 4.3.1
+            Resolving Microsoft.Data.SqlClient.SNI.runtime (= 5.2.0)
+            Found 1 matching version: 5.2.0
+            Resolving System.Runtime.CompilerServices.Unsafe (= 6.0.0)
+            Found 1 matching version: 6.0.0
+            Resolving Newtonsoft.Json (= 3.5.8)
+            Found 1 matching version: 3.5.8
             Resolving 4 packages to promote...
             Processing System.Runtime 4.3.1
-              Package license: MICROSOFT .NET LIBRARY
-              (http://go.microsoft.com/fwlink/?LinkId=329770)
-              System.Runtime 4.3.1 is not in the destination.
               Resolving dependency Microsoft.NETCore.Platforms (>=
               1.1.1)
-                Resolved as Microsoft.NETCore.Platforms 1.1.1
-                Microsoft.NETCore.Platforms 1.1.1 is queued for
-                processing.
+                Resolved version: 1.1.1
               Resolving dependency Microsoft.NETCore.Targets (>= 1.1.3)
-                Resolved as Microsoft.NETCore.Targets 1.1.3
-                Microsoft.NETCore.Targets 1.1.3 is queued for
-                processing.
+                Resolved version: 1.1.3
             Processing Microsoft.Data.SqlClient.SNI.runtime 5.2.0
-              Package license:
-              https://www.nuget.org/packages/Microsoft.Data.SqlClient.SN
-              I.runtime/5.2.0/license
-              Microsoft.Data.SqlClient.SNI.runtime 5.2.0 is not in the
-              destination.
-              Microsoft.Data.SqlClient.SNI.runtime 5.2.0 has no
-              dependencies.
             Processing System.Runtime.CompilerServices.Unsafe 6.0.0
-              Package license: MIT (https://licenses.nuget.org/MIT)
-              System.Runtime.CompilerServices.Unsafe 6.0.0 is not in the
-              destination.
-              System.Runtime.CompilerServices.Unsafe 6.0.0 has no
-              dependencies.
             Processing Newtonsoft.Json 3.5.8
-              Package license: <not set>
-              Newtonsoft.Json 3.5.8 is not in the destination.
-              Newtonsoft.Json 3.5.8 has no dependencies.
             Processing Microsoft.NETCore.Platforms 1.1.1
-              Package license: MICROSOFT .NET LIBRARY
-              (http://go.microsoft.com/fwlink/?LinkId=329770)
-              Microsoft.NETCore.Platforms 1.1.1 is not in the
-              destination.
-              Microsoft.NETCore.Platforms 1.1.1 has no dependencies.
             Processing Microsoft.NETCore.Targets 1.1.3
-              Package license: MICROSOFT .NET LIBRARY
-              (http://go.microsoft.com/fwlink/?LinkId=329770)
-              Microsoft.NETCore.Targets 1.1.3 is not in the destination.
-              Microsoft.NETCore.Targets 1.1.3 has no dependencies.
             Resolved package tree:
             ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
             ├── Newtonsoft.Json 3.5.8
@@ -536,22 +404,22 @@ public class PromoteFromConfigurationCommandIntegrationTests
             └── System.Runtime.CompilerServices.Unsafe 6.0.0
             Found 6 packages to promote:
             ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
-            │   └── License:
-            │       https://www.nuget.org/packages/Microsoft.Data.SqlCli
-            │       ent.SNI.runtime/5.2.0/license
+            │   License:
+            │   https://www.nuget.org/packages/Microsoft.Data.SqlClient.
+            │   SNI.runtime/5.2.0/license
             ├── Microsoft.NETCore.Platforms 1.1.1
-            │   └── License: MICROSOFT .NET LIBRARY
-            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
             ├── Microsoft.NETCore.Targets 1.1.3
-            │   └── License: MICROSOFT .NET LIBRARY
-            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
             ├── Newtonsoft.Json 3.5.8
-            │   └── License: <not set>
+            │   License: <not set>
             ├── System.Runtime 4.3.1
-            │   └── License: MICROSOFT .NET LIBRARY
-            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
             └── System.Runtime.CompilerServices.Unsafe 6.0.0
-                └── License: MIT (https://licenses.nuget.org/MIT)
+                License: MIT (https://licenses.nuget.org/MIT)
             License summary:
             ├── 3x: MICROSOFT .NET LIBRARY
             │   (http://go.microsoft.com/fwlink/?LinkId=329770)
@@ -562,26 +430,26 @@ public class PromoteFromConfigurationCommandIntegrationTests
             └── 1x: MIT (https://licenses.nuget.org/MIT)
             Checking license compliance...
             Checking Microsoft.Data.SqlClient.SNI.runtime 5.2.0
-                License (file): LICENSE.txt
-                [v] Matching accepted license file found: {Path.GetFileName(msLibLicense.Path)}.
+              License (file): LICENSE.txt
+              [v] Matching accepted license file found: {Path.GetFileName(msLibLicense.Path)}.
             Checking Microsoft.NETCore.Platforms 1.1.1
-                License (url):
-                http://go.microsoft.com/fwlink/?LinkId=329770
-                [v] The license url is in whitelist.
+              License (url):
+              http://go.microsoft.com/fwlink/?LinkId=329770
+              [v] The license url is in whitelist.
             Checking Microsoft.NETCore.Targets 1.1.3
-                License (url):
-                http://go.microsoft.com/fwlink/?LinkId=329770
-                [v] The license url is in whitelist.
+              License (url):
+              http://go.microsoft.com/fwlink/?LinkId=329770
+              [v] The license url is in whitelist.
             Checking Newtonsoft.Json 3.5.8
-                License (none): <not set>
-                [v] The package is allowed to have no license.
+              License (none): <not set>
+              [v] The package is allowed to have no license.
             Checking System.Runtime 4.3.1
-                License (url):
-                http://go.microsoft.com/fwlink/?LinkId=329770
-                [v] The license url is in whitelist.
+              License (url):
+              http://go.microsoft.com/fwlink/?LinkId=329770
+              [v] The license url is in whitelist.
             Checking System.Runtime.CompilerServices.Unsafe 6.0.0
-                License (expression): MIT
-                [v] The license expression is in whitelist.
+              License (expression): MIT
+              [v] The license expression is in whitelist.
             No license violations found.
             Promoting 6 packages...
             """
@@ -632,71 +500,29 @@ public class PromoteFromConfigurationCommandIntegrationTests
         actualOutput.Should().Be(
             """
             Resolving package requests...
-            Resolving System.Runtime 4.3.1
-            Found 1 matching package:
-            └── 4.3.1
-            Resolving Microsoft.Data.SqlClient.SNI.runtime 5.2.0
-            Found 1 matching package:
-            └── 5.2.0
-            Resolving System.Runtime.CompilerServices.Unsafe 6.0.0
-            Found 1 matching package:
-            └── 6.0.0
-            Resolving LibGit2Sharp.NativeBinaries 2.0.322
-            Found 1 matching package:
-            └── 2.0.322
-            Resolving Newtonsoft.Json 3.5.8
-            Found 1 matching package:
-            └── 3.5.8
+            Resolving System.Runtime (= 4.3.1)
+            Found 1 matching version: 4.3.1
+            Resolving Microsoft.Data.SqlClient.SNI.runtime (= 5.2.0)
+            Found 1 matching version: 5.2.0
+            Resolving System.Runtime.CompilerServices.Unsafe (= 6.0.0)
+            Found 1 matching version: 6.0.0
+            Resolving LibGit2Sharp.NativeBinaries (= 2.0.322)
+            Found 1 matching version: 2.0.322
+            Resolving Newtonsoft.Json (= 3.5.8)
+            Found 1 matching version: 3.5.8
             Resolving 5 packages to promote...
             Processing System.Runtime 4.3.1
-              Package license: MICROSOFT .NET LIBRARY
-              (http://go.microsoft.com/fwlink/?LinkId=329770)
-              System.Runtime 4.3.1 is not in the destination.
               Resolving dependency Microsoft.NETCore.Platforms (>=
               1.1.1)
-                Resolved as Microsoft.NETCore.Platforms 1.1.1
-                Microsoft.NETCore.Platforms 1.1.1 is queued for
-                processing.
+                Resolved version: 1.1.1
               Resolving dependency Microsoft.NETCore.Targets (>= 1.1.3)
-                Resolved as Microsoft.NETCore.Targets 1.1.3
-                Microsoft.NETCore.Targets 1.1.3 is queued for
-                processing.
+                Resolved version: 1.1.3
             Processing Microsoft.Data.SqlClient.SNI.runtime 5.2.0
-              Package license:
-              https://www.nuget.org/packages/Microsoft.Data.SqlClient.SN
-              I.runtime/5.2.0/license
-              Microsoft.Data.SqlClient.SNI.runtime 5.2.0 is not in the
-              destination.
-              Microsoft.Data.SqlClient.SNI.runtime 5.2.0 has no
-              dependencies.
             Processing System.Runtime.CompilerServices.Unsafe 6.0.0
-              Package license: MIT (https://licenses.nuget.org/MIT)
-              System.Runtime.CompilerServices.Unsafe 6.0.0 is not in the
-              destination.
-              System.Runtime.CompilerServices.Unsafe 6.0.0 has no
-              dependencies.
             Processing LibGit2Sharp.NativeBinaries 2.0.322
-              Package license:
-              https://www.nuget.org/packages/LibGit2Sharp.NativeBinaries
-              /2.0.322/license
-              LibGit2Sharp.NativeBinaries 2.0.322 is not in the
-              destination.
-              LibGit2Sharp.NativeBinaries 2.0.322 has no dependencies.
             Processing Newtonsoft.Json 3.5.8
-              Package license: <not set>
-              Newtonsoft.Json 3.5.8 is not in the destination.
-              Newtonsoft.Json 3.5.8 has no dependencies.
             Processing Microsoft.NETCore.Platforms 1.1.1
-              Package license: MICROSOFT .NET LIBRARY
-              (http://go.microsoft.com/fwlink/?LinkId=329770)
-              Microsoft.NETCore.Platforms 1.1.1 is not in the
-              destination.
-              Microsoft.NETCore.Platforms 1.1.1 has no dependencies.
             Processing Microsoft.NETCore.Targets 1.1.3
-              Package license: MICROSOFT .NET LIBRARY
-              (http://go.microsoft.com/fwlink/?LinkId=329770)
-              Microsoft.NETCore.Targets 1.1.3 is not in the destination.
-              Microsoft.NETCore.Targets 1.1.3 has no dependencies.
             Resolved package tree:
             ├── LibGit2Sharp.NativeBinaries 2.0.322
             ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
@@ -707,26 +533,26 @@ public class PromoteFromConfigurationCommandIntegrationTests
             └── System.Runtime.CompilerServices.Unsafe 6.0.0
             Found 7 packages to promote:
             ├── LibGit2Sharp.NativeBinaries 2.0.322
-            │   └── License:
-            │       https://www.nuget.org/packages/LibGit2Sharp.NativeBi
-            │       naries/2.0.322/license
+            │   License:
+            │   https://www.nuget.org/packages/LibGit2Sharp.NativeBinari
+            │   es/2.0.322/license
             ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
-            │   └── License:
-            │       https://www.nuget.org/packages/Microsoft.Data.SqlCli
-            │       ent.SNI.runtime/5.2.0/license
+            │   License:
+            │   https://www.nuget.org/packages/Microsoft.Data.SqlClient.
+            │   SNI.runtime/5.2.0/license
             ├── Microsoft.NETCore.Platforms 1.1.1
-            │   └── License: MICROSOFT .NET LIBRARY
-            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
             ├── Microsoft.NETCore.Targets 1.1.3
-            │   └── License: MICROSOFT .NET LIBRARY
-            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
             ├── Newtonsoft.Json 3.5.8
-            │   └── License: <not set>
+            │   License: <not set>
             ├── System.Runtime 4.3.1
-            │   └── License: MICROSOFT .NET LIBRARY
-            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
             └── System.Runtime.CompilerServices.Unsafe 6.0.0
-                └── License: MIT (https://licenses.nuget.org/MIT)
+                License: MIT (https://licenses.nuget.org/MIT)
             License summary:
             ├── 3x: MICROSOFT .NET LIBRARY
             │   (http://go.microsoft.com/fwlink/?LinkId=329770)
@@ -740,56 +566,56 @@ public class PromoteFromConfigurationCommandIntegrationTests
             └── 1x: MIT (https://licenses.nuget.org/MIT)
             Checking license compliance...
             Checking LibGit2Sharp.NativeBinaries 2.0.322
-                License (file): libgit2\libgit2.license.txt
-                [x] No matching license files found in the whitelist.
+              License (file): libgit2\libgit2.license.txt
+              [x] No matching license files found in the whitelist.
             Checking Microsoft.Data.SqlClient.SNI.runtime 5.2.0
-                License (file): LICENSE.txt
-                [x] No matching license files found in the whitelist.
+              License (file): LICENSE.txt
+              [x] No matching license files found in the whitelist.
             Checking Microsoft.NETCore.Platforms 1.1.1
-                License (url):
-                http://go.microsoft.com/fwlink/?LinkId=329770
-                [x] The license url is not whitelisted.
+              License (url):
+              http://go.microsoft.com/fwlink/?LinkId=329770
+              [x] The license url is not whitelisted.
             Checking Microsoft.NETCore.Targets 1.1.3
-                License (url):
-                http://go.microsoft.com/fwlink/?LinkId=329770
-                [x] The license url is not whitelisted.
+              License (url):
+              http://go.microsoft.com/fwlink/?LinkId=329770
+              [x] The license url is not whitelisted.
             Checking Newtonsoft.Json 3.5.8
-                License (none): <not set>
-                [x] License is not configured for the package.
+              License (none): <not set>
+              [x] License is not configured for the package.
             Checking System.Runtime 4.3.1
-                License (url):
-                http://go.microsoft.com/fwlink/?LinkId=329770
-                [x] The license url is not whitelisted.
+              License (url):
+              http://go.microsoft.com/fwlink/?LinkId=329770
+              [x] The license url is not whitelisted.
             Checking System.Runtime.CompilerServices.Unsafe 6.0.0
-                License (expression): MIT
-                [x] The license expression is not whitelisted.
+              License (expression): MIT
+              [x] The license expression is not whitelisted.
             7 license violations found:
             ├── LibGit2Sharp.NativeBinaries.2.0.322
-            │   ├── License (file): libgit2\libgit2.license.txt
-            │   └── Reason: No matching license files found in the
-            │       whitelist.
+            │   License (file): libgit2\libgit2.license.txt
+            │   Reason: No matching license files found in the
+            │   whitelist.
             ├── Microsoft.Data.SqlClient.SNI.runtime.5.2.0
-            │   ├── License (file): LICENSE.txt
-            │   └── Reason: No matching license files found in the
-            │       whitelist.
+            │   License (file): LICENSE.txt
+            │   Reason: No matching license files found in the
+            │   whitelist.
             ├── Microsoft.NETCore.Platforms.1.1.1
-            │   ├── License (url):
-            │   │   http://go.microsoft.com/fwlink/?LinkId=329770
-            │   └── Reason: The license url is not whitelisted.
+            │   License (url):
+            │   http://go.microsoft.com/fwlink/?LinkId=329770
+            │   Reason: The license url is not whitelisted.
             ├── Microsoft.NETCore.Targets.1.1.3
-            │   ├── License (url):
-            │   │   http://go.microsoft.com/fwlink/?LinkId=329770
-            │   └── Reason: The license url is not whitelisted.
+            │   License (url):
+            │   http://go.microsoft.com/fwlink/?LinkId=329770
+            │   Reason: The license url is not whitelisted.
             ├── Newtonsoft.Json.3.5.8
-            │   ├── License (none): <not set>
-            │   └── Reason: License is not configured for the package.
+            │   License (none): <not set>
+            │   Reason: License is not configured for the package.
             ├── System.Runtime.4.3.1
-            │   ├── License (url):
-            │   │   http://go.microsoft.com/fwlink/?LinkId=329770
-            │   └── Reason: The license url is not whitelisted.
+            │   License (url):
+            │   http://go.microsoft.com/fwlink/?LinkId=329770
+            │   Reason: The license url is not whitelisted.
             └── System.Runtime.CompilerServices.Unsafe.6.0.0
-                ├── License (expression): MIT
-                └── Reason: The license expression is not whitelisted.
+                License (expression): MIT
+                Reason: The license expression is not whitelisted.
             License violations found.
             """
         );

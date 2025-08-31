@@ -2,5 +2,5 @@
 
 public interface IPackageVersionPolicy
 {
-    public Task<T> Accept<T>(IPackageVersionPolicyVisitor<T> visitor, CancellationToken cancellationToken);
+    Task<T> Accept<T>(IPackageVersionPolicyVisitor<T> visitor, CancellationToken cancellationToken);
 }

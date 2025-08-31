@@ -27,13 +27,11 @@ public class PromoteSinglePackageCommandIntegrationTests
 
         // Assert
         result.StdOutput.Should().StartWith(
-            new[]
-            {
+            [
                 "Resolving package requests...",
-                "Resolving System.Runtime 4.3.0",
-                "Found 1 matching package:",
-                "└── 4.3.0",
-            }
+                "Resolving System.Runtime (= 4.3.0)",
+                "Found 1 matching version: 4.3.0"
+            ]
         );
 
         result.StdOutput.Should().ContainInConsecutiveOrder(
@@ -46,14 +44,14 @@ public class PromoteSinglePackageCommandIntegrationTests
         result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
             "Found 3 packages to promote:",
             "├── Microsoft.NETCore.Platforms 1.1.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Targets 1.1.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "└── System.Runtime 4.3.0",
-            "    └── License: MICROSOFT .NET LIBRARY",
-            "        (http://go.microsoft.com/fwlink/?LinkId=329770)"
+            "    License: MICROSOFT .NET LIBRARY",
+            "    (http://go.microsoft.com/fwlink/?LinkId=329770)"
         );
 
         result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(

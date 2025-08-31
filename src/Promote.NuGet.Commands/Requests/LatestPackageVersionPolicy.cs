@@ -1,6 +1,6 @@
 ﻿namespace Promote.NuGet.Commands.Requests;
 
-public class LatestPackageVersionPolicy : IPackageVersionPolicy
+public sealed class LatestPackageVersionPolicy : IPackageVersionPolicy
 {
     public Task<T> Accept<T>(IPackageVersionPolicyVisitor<T> visitor, CancellationToken cancellationToken)
     {

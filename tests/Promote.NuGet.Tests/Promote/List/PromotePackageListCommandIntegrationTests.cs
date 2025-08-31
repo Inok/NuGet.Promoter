@@ -35,20 +35,15 @@ public class PromotePackageListCommandIntegrationTests
 
         // Assert
         result.StdOutput.Should().StartWith(
-            new[]
-            {
+            [
                 "Resolving package requests...",
                 "Resolving System.Runtime (>= 4.1.0 && < 4.1.2)",
-                "Found 2 matching packages:",
-                "├── 4.1.0",
-                "└── 4.1.1",
-                "Resolving System.Runtime 4.3.1",
-                "Found 1 matching package:",
-                "└── 4.3.1",
-                "Resolving System.Globalization 4.3.0",
-                "Found 1 matching package:",
-                "└── 4.3.0",
-            }
+                "Found 2 matching versions: 4.1.0, 4.1.1",
+                "Resolving System.Runtime (= 4.3.1)",
+                "Found 1 matching version: 4.3.1",
+                "Resolving System.Globalization (= 4.3.0)",
+                "Found 1 matching version: 4.3.0"
+            ]
         );
 
         result.StdOutput.Should().ContainInConsecutiveOrder(
@@ -73,44 +68,44 @@ public class PromotePackageListCommandIntegrationTests
         result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
             "Found 13 packages to promote:",
             "├── Microsoft.NETCore.Platforms 1.0.1",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Platforms 1.0.2",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Platforms 1.1.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Platforms 1.1.1",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Targets 1.0.1",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Targets 1.0.6",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Targets 1.1.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Targets 1.1.3",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── System.Globalization 4.3.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── System.Runtime 4.1.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── System.Runtime 4.1.1",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── System.Runtime 4.3.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "└── System.Runtime 4.3.1",
-            "    └── License: MICROSOFT .NET LIBRARY",
-            "        (http://go.microsoft.com/fwlink/?LinkId=329770)"
+            "    License: MICROSOFT .NET LIBRARY",
+            "    (http://go.microsoft.com/fwlink/?LinkId=329770)"
         );
 
         result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
