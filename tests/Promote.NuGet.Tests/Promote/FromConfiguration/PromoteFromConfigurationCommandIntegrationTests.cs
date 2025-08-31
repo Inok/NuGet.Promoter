@@ -61,181 +61,167 @@ public class PromoteFromConfigurationCommandIntegrationTests
                      );
 
         // Assert
-        result.StdOutput.Should().StartWith(
-            [
-                "Resolving package requests...",
-                "Resolving System.Collections (= 4.3.0)",
-                "Found 1 matching version: 4.3.0",
-                "Resolving System.Globalization (= 4.0.11), (= 4.3.0)",
-                "Found 2 matching versions: 4.0.11, 4.3.0",
-                "Resolving System.Runtime (>= 4.1.0 && < 4.1.2), (= 4.3.1)",
-                "Found 3 matching versions: 4.1.0, 4.1.1, 4.3.1",
-                "Resolving System.Runtime.CompilerServices.Unsafe (= 6.0.0)",
-                "Found 1 matching version: 6.0.0",
-                "Resolving Microsoft.Data.SqlClient.SNI.runtime (= 5.2.0)",
-                "Found 1 matching version: 5.2.0",
-                "Resolving SpecFlow.Allure (>= 4.0.0 && < 4.0.1)",
-                "Found 0 matching versions."
-            ]
-        );
-
-        result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
-            "Resolving 8 packages to promote...",
-            "Processing System.Collections 4.3.0",
-            "  Resolving dependency Microsoft.NETCore.Platforms (>=",
-            "  1.1.0)",
-            "    Resolved version: 1.1.0",
-            "  Resolving dependency Microsoft.NETCore.Targets (>= 1.1.0)",
-            "    Resolved version: 1.1.0",
-            "  Resolving dependency System.Runtime (>= 4.3.0)",
-            "    Resolved version: 4.3.0",
-            "Processing System.Globalization 4.0.11",
-            "  Resolving dependency Microsoft.NETCore.Platforms (>=",
-            "  1.0.1)",
-            "    Resolved version: 1.0.1",
-            "  Resolving dependency Microsoft.NETCore.Targets (>= 1.0.1)",
-            "    Resolved version: 1.0.1",
-            "  Resolving dependency System.Runtime (>= 4.1.0)",
-            "    Resolved version: 4.1.0",
-            "Processing System.Globalization 4.3.0",
-            "  Resolving dependency Microsoft.NETCore.Platforms (>=",
-            "  1.1.0)",
-            "    Resolved version: 1.1.0",
-            "  Resolving dependency Microsoft.NETCore.Targets (>= 1.1.0)",
-            "    Resolved version: 1.1.0",
-            "  Resolving dependency System.Runtime (>= 4.3.0)",
-            "    Resolved version: 4.3.0",
-            "Processing System.Runtime 4.1.0",
-            "  Resolving dependency Microsoft.NETCore.Platforms (>=",
-            "  1.0.1)",
-            "    Resolved version: 1.0.1",
-            "  Resolving dependency Microsoft.NETCore.Targets (>= 1.0.1)",
-            "    Resolved version: 1.0.1",
-            "Processing System.Runtime 4.1.1",
-            "  Resolving dependency Microsoft.NETCore.Platforms (>=",
-            "  1.0.2)",
-            "    Resolved version: 1.0.2",
-            "  Resolving dependency Microsoft.NETCore.Targets (>= 1.0.6)",
-            "    Resolved version: 1.0.6",
-            "Processing System.Runtime 4.3.1",
-            "Processing System.Runtime.CompilerServices.Unsafe 6.0.0",
-            "Processing Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
-            "Processing Microsoft.NETCore.Platforms 1.1.0",
-            "Processing Microsoft.NETCore.Targets 1.1.0",
-            "Processing System.Runtime 4.3.0",
-            "  Resolving dependency Microsoft.NETCore.Platforms (>=",
-            "  1.1.0)",
-            "    Resolved version: 1.1.0",
-            "  Resolving dependency Microsoft.NETCore.Targets (>= 1.1.0)",
-            "    Resolved version: 1.1.0",
-            "Processing Microsoft.NETCore.Platforms 1.0.1",
-            "Processing Microsoft.NETCore.Targets 1.0.1",
-            "Processing Microsoft.NETCore.Platforms 1.0.2",
-            "Processing Microsoft.NETCore.Targets 1.0.6"
-        );
-
-        result.StdOutput.Should().ContainInConsecutiveOrder(
-            "Resolved package tree:",
-            "├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
-            "├── System.Collections 4.3.0",
-            "│   ├── Microsoft.NETCore.Platforms 1.1.0",
-            "│   ├── Microsoft.NETCore.Targets 1.1.0",
-            "│   └── System.Runtime 4.3.0",
-            "│       ├── Microsoft.NETCore.Platforms 1.1.0",
-            "│       └── Microsoft.NETCore.Targets 1.1.0",
-            "├── System.Globalization 4.0.11",
-            "│   ├── Microsoft.NETCore.Platforms 1.0.1",
-            "│   ├── Microsoft.NETCore.Targets 1.0.1",
-            "│   └── System.Runtime 4.1.0 [root]",
-            "│       └── + 2 direct dependencies (expanded below)",
-            "├── System.Globalization 4.3.0",
-            "│   ├── Microsoft.NETCore.Platforms 1.1.0",
-            "│   ├── Microsoft.NETCore.Targets 1.1.0",
-            "│   └── System.Runtime 4.3.0",
-            "│       └── + 2 direct dependencies (expanded above)",
-            "├── System.Runtime 4.1.0",
-            "│   ├── Microsoft.NETCore.Platforms 1.0.1",
-            "│   └── Microsoft.NETCore.Targets 1.0.1",
-            "├── System.Runtime 4.1.1",
-            "│   ├── Microsoft.NETCore.Platforms 1.0.2",
-            "│   └── Microsoft.NETCore.Targets 1.0.6",
-            "├── System.Runtime 4.3.1 [exists]",
-            "└── System.Runtime.CompilerServices.Unsafe 6.0.0"
-        );
-
-        result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
-            "Found 14 packages to promote:",
-            "├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
-            "│   License:",
-            "│   https://www.nuget.org/packages/Microsoft.Data.SqlClient.",
-            "│   SNI.runtime/5.2.0/license",
-            "├── Microsoft.NETCore.Platforms 1.0.1",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── Microsoft.NETCore.Platforms 1.0.2",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── Microsoft.NETCore.Platforms 1.1.0",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── Microsoft.NETCore.Targets 1.0.1",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── Microsoft.NETCore.Targets 1.0.6",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── Microsoft.NETCore.Targets 1.1.0",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── System.Collections 4.3.0",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── System.Globalization 4.0.11",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── System.Globalization 4.3.0",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── System.Runtime 4.1.0",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── System.Runtime 4.1.1",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── System.Runtime 4.3.0",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "└── System.Runtime.CompilerServices.Unsafe 6.0.0",
-            "    License: MIT (https://licenses.nuget.org/MIT)"
-        );
-
-        result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
-            "License summary:",
-            "├── 12x: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── 1x:",
-            "│   https://www.nuget.org/packages/Microsoft.Data.SqlClient.",
-            "│   SNI.runtime/5.2.0/license",
-            "└── 1x: MIT (https://licenses.nuget.org/MIT)"
-        );
-
-        result.StdOutput.Should().ContainInOrder(
-            "Promoting 14 packages...",
-            "(1/14) Promote Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
-            "(2/14) Promote Microsoft.NETCore.Platforms 1.0.1",
-            "(3/14) Promote Microsoft.NETCore.Platforms 1.0.2",
-            "(4/14) Promote Microsoft.NETCore.Platforms 1.1.0",
-            "(5/14) Promote Microsoft.NETCore.Targets 1.0.1",
-            "(6/14) Promote Microsoft.NETCore.Targets 1.0.6",
-            "(7/14) Promote Microsoft.NETCore.Targets 1.1.0",
-            "(8/14) Promote System.Collections 4.3.0",
-            "(9/14) Promote System.Globalization 4.0.11",
-            "(10/14) Promote System.Globalization 4.3.0",
-            "(11/14) Promote System.Runtime 4.1.0",
-            "(12/14) Promote System.Runtime 4.1.1",
-            "(13/14) Promote System.Runtime 4.3.0",
-            "(14/14) Promote System.Runtime.CompilerServices.Unsafe 6.0.0",
-            "14 packages promoted."
+        result.GetStdOutputAsNormalizedString().Should().Be(
+            """
+            Resolving package requests...
+            Resolving System.Collections (= 4.3.0)
+            Found 1 matching version: 4.3.0
+            Resolving System.Globalization (= 4.0.11), (= 4.3.0)
+            Found 2 matching versions: 4.0.11, 4.3.0
+            Resolving System.Runtime (>= 4.1.0 && < 4.1.2), (= 4.3.1)
+            Found 3 matching versions: 4.1.0, 4.1.1, 4.3.1
+            Resolving System.Runtime.CompilerServices.Unsafe (= 6.0.0)
+            Found 1 matching version: 6.0.0
+            Resolving Microsoft.Data.SqlClient.SNI.runtime (= 5.2.0)
+            Found 1 matching version: 5.2.0
+            Resolving SpecFlow.Allure (>= 4.0.0 && < 4.0.1)
+            Found 0 matching versions.
+            Resolving 8 packages to promote...
+            Processing System.Collections 4.3.0
+              Resolving dependency Microsoft.NETCore.Platforms (>=
+              1.1.0)
+                Resolved version: 1.1.0
+              Resolving dependency Microsoft.NETCore.Targets (>= 1.1.0)
+                Resolved version: 1.1.0
+              Resolving dependency System.Runtime (>= 4.3.0)
+                Resolved version: 4.3.0
+            Processing System.Globalization 4.0.11
+              Resolving dependency Microsoft.NETCore.Platforms (>=
+              1.0.1)
+                Resolved version: 1.0.1
+              Resolving dependency Microsoft.NETCore.Targets (>= 1.0.1)
+                Resolved version: 1.0.1
+              Resolving dependency System.Runtime (>= 4.1.0)
+                Resolved version: 4.1.0
+            Processing System.Globalization 4.3.0
+              Resolving dependency Microsoft.NETCore.Platforms (>=
+              1.1.0)
+                Resolved version: 1.1.0
+              Resolving dependency Microsoft.NETCore.Targets (>= 1.1.0)
+                Resolved version: 1.1.0
+              Resolving dependency System.Runtime (>= 4.3.0)
+                Resolved version: 4.3.0
+            Processing System.Runtime 4.1.0
+              Resolving dependency Microsoft.NETCore.Platforms (>=
+              1.0.1)
+                Resolved version: 1.0.1
+              Resolving dependency Microsoft.NETCore.Targets (>= 1.0.1)
+                Resolved version: 1.0.1
+            Processing System.Runtime 4.1.1
+              Resolving dependency Microsoft.NETCore.Platforms (>=
+              1.0.2)
+                Resolved version: 1.0.2
+              Resolving dependency Microsoft.NETCore.Targets (>= 1.0.6)
+                Resolved version: 1.0.6
+            Processing System.Runtime 4.3.1
+            Processing System.Runtime.CompilerServices.Unsafe 6.0.0
+            Processing Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+            Processing Microsoft.NETCore.Platforms 1.1.0
+            Processing Microsoft.NETCore.Targets 1.1.0
+            Processing System.Runtime 4.3.0
+              Resolving dependency Microsoft.NETCore.Platforms (>=
+              1.1.0)
+                Resolved version: 1.1.0
+              Resolving dependency Microsoft.NETCore.Targets (>= 1.1.0)
+                Resolved version: 1.1.0
+            Processing Microsoft.NETCore.Platforms 1.0.1
+            Processing Microsoft.NETCore.Targets 1.0.1
+            Processing Microsoft.NETCore.Platforms 1.0.2
+            Processing Microsoft.NETCore.Targets 1.0.6
+            Resolved package tree:
+            ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+            ├── System.Collections 4.3.0
+            │   ├── Microsoft.NETCore.Platforms 1.1.0
+            │   ├── Microsoft.NETCore.Targets 1.1.0
+            │   └── System.Runtime 4.3.0
+            │       ├── Microsoft.NETCore.Platforms 1.1.0
+            │       └── Microsoft.NETCore.Targets 1.1.0
+            ├── System.Globalization 4.0.11
+            │   ├── Microsoft.NETCore.Platforms 1.0.1
+            │   ├── Microsoft.NETCore.Targets 1.0.1
+            │   └── System.Runtime 4.1.0 [root]
+            │       └── + 2 direct dependencies (expanded below)
+            ├── System.Globalization 4.3.0
+            │   ├── Microsoft.NETCore.Platforms 1.1.0
+            │   ├── Microsoft.NETCore.Targets 1.1.0
+            │   └── System.Runtime 4.3.0
+            │       └── + 2 direct dependencies (expanded above)
+            ├── System.Runtime 4.1.0
+            │   ├── Microsoft.NETCore.Platforms 1.0.1
+            │   └── Microsoft.NETCore.Targets 1.0.1
+            ├── System.Runtime 4.1.1
+            │   ├── Microsoft.NETCore.Platforms 1.0.2
+            │   └── Microsoft.NETCore.Targets 1.0.6
+            ├── System.Runtime 4.3.1 [exists]
+            └── System.Runtime.CompilerServices.Unsafe 6.0.0
+            Found 14 packages to promote:
+            ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+            │   License:
+            │   https://www.nuget.org/packages/Microsoft.Data.SqlClient.
+            │   SNI.runtime/5.2.0/license
+            ├── Microsoft.NETCore.Platforms 1.0.1
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Microsoft.NETCore.Platforms 1.0.2
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Microsoft.NETCore.Platforms 1.1.0
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Microsoft.NETCore.Targets 1.0.1
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Microsoft.NETCore.Targets 1.0.6
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Microsoft.NETCore.Targets 1.1.0
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── System.Collections 4.3.0
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── System.Globalization 4.0.11
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── System.Globalization 4.3.0
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── System.Runtime 4.1.0
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── System.Runtime 4.1.1
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── System.Runtime 4.3.0
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            └── System.Runtime.CompilerServices.Unsafe 6.0.0
+                License: MIT (https://licenses.nuget.org/MIT)
+            License summary:
+            ├── 12x: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── 1x:
+            │   https://www.nuget.org/packages/Microsoft.Data.SqlClient.
+            │   SNI.runtime/5.2.0/license
+            └── 1x: MIT (https://licenses.nuget.org/MIT)
+            License compliance checks are disabled.
+            Promoting 14 packages...
+            (1/14) Promote Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+            (2/14) Promote Microsoft.NETCore.Platforms 1.0.1
+            (3/14) Promote Microsoft.NETCore.Platforms 1.0.2
+            (4/14) Promote Microsoft.NETCore.Platforms 1.1.0
+            (5/14) Promote Microsoft.NETCore.Targets 1.0.1
+            (6/14) Promote Microsoft.NETCore.Targets 1.0.6
+            (7/14) Promote Microsoft.NETCore.Targets 1.1.0
+            (8/14) Promote System.Collections 4.3.0
+            (9/14) Promote System.Globalization 4.0.11
+            (10/14) Promote System.Globalization 4.3.0
+            (11/14) Promote System.Runtime 4.1.0
+            (12/14) Promote System.Runtime 4.1.1
+            (13/14) Promote System.Runtime 4.3.0
+            (14/14) Promote System.Runtime.CompilerServices.Unsafe 6.0.0
+            14 packages promoted.
+            """
         );
 
         result.StdError.Should().BeEmpty();
@@ -371,8 +357,7 @@ public class PromoteFromConfigurationCommandIntegrationTests
                      );
 
         // Assert
-        var actualOutput = string.Join(Environment.NewLine, result.StdOutput.Select(x => x.TrimEnd()));
-        actualOutput.Should().StartWith(
+        result.GetStdOutputAsNormalizedString().Should().Be(
             $"""
             Resolving package requests...
             Resolving System.Runtime (= 4.3.1)
@@ -452,6 +437,13 @@ public class PromoteFromConfigurationCommandIntegrationTests
               [v] The license expression is in whitelist.
             No license violations found.
             Promoting 6 packages...
+            (1/6) Promote Microsoft.Data.SqlClient.SNI.runtime 5.2.0
+            (2/6) Promote Microsoft.NETCore.Platforms 1.1.1
+            (3/6) Promote Microsoft.NETCore.Targets 1.1.3
+            (4/6) Promote Newtonsoft.Json 3.5.8
+            (5/6) Promote System.Runtime 4.3.1
+            (6/6) Promote System.Runtime.CompilerServices.Unsafe 6.0.0
+            6 packages promoted.
             """
         );
 
@@ -496,8 +488,7 @@ public class PromoteFromConfigurationCommandIntegrationTests
                      );
 
         // Assert
-        var actualOutput = string.Join(Environment.NewLine, result.StdOutput.Select(x => x.TrimEnd()));
-        actualOutput.Should().Be(
+        result.GetStdOutputAsNormalizedString().Should().Be(
             """
             Resolving package requests...
             Resolving System.Runtime (= 4.3.1)
