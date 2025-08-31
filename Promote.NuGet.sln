@@ -24,9 +24,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".files", ".files", "{508173
 		.editorconfig = .editorconfig
 		Directory.Packages.props = Directory.Packages.props
 		global.json = global.json
-		docker-compose.yml = docker-compose.yml
-		.env = .env
-		Set-LocalConfiguration.ps1 = Set-LocalConfiguration.ps1
 		nuget.config = nuget.config
 	EndProjectSection
 EndProject
