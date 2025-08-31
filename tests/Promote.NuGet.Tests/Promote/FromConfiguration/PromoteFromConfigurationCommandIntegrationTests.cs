@@ -82,144 +82,56 @@ public class PromoteFromConfigurationCommandIntegrationTests
         result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
             "Resolving 8 packages to promote...",
             "Processing System.Collections 4.3.0",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  System.Collections 4.3.0 is not in the destination.",
             "  Resolving dependency Microsoft.NETCore.Platforms (>=",
             "  1.1.0)",
-            "    Resolved as Microsoft.NETCore.Platforms 1.1.0",
-            "    Microsoft.NETCore.Platforms 1.1.0 is queued for",
-            "    processing.",
+            "    Resolved version: 1.1.0",
             "  Resolving dependency Microsoft.NETCore.Targets (>= 1.1.0)",
-            "    Resolved as Microsoft.NETCore.Targets 1.1.0",
-            "    Microsoft.NETCore.Targets 1.1.0 is queued for",
-            "    processing.",
+            "    Resolved version: 1.1.0",
             "  Resolving dependency System.Runtime (>= 4.3.0)",
-            "    Resolved as System.Runtime 4.3.0",
-            "    System.Runtime 4.3.0 is queued for processing.",
+            "    Resolved version: 4.3.0",
             "Processing System.Globalization 4.0.11",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  System.Globalization 4.0.11 is not in the destination.",
             "  Resolving dependency Microsoft.NETCore.Platforms (>=",
             "  1.0.1)",
-            "    Resolved as Microsoft.NETCore.Platforms 1.0.1",
-            "    Microsoft.NETCore.Platforms 1.0.1 is queued for",
-            "    processing.",
+            "    Resolved version: 1.0.1",
             "  Resolving dependency Microsoft.NETCore.Targets (>= 1.0.1)",
-            "    Resolved as Microsoft.NETCore.Targets 1.0.1",
-            "    Microsoft.NETCore.Targets 1.0.1 is queued for",
-            "    processing.",
+            "    Resolved version: 1.0.1",
             "  Resolving dependency System.Runtime (>= 4.1.0)",
-            "    Resolved as System.Runtime 4.1.0",
-            "    System.Runtime 4.1.0 is already processed or queued.",
+            "    Resolved version: 4.1.0",
             "Processing System.Globalization 4.3.0",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  System.Globalization 4.3.0 is not in the destination.",
             "  Resolving dependency Microsoft.NETCore.Platforms (>=",
             "  1.1.0)",
-            "    Resolved as Microsoft.NETCore.Platforms 1.1.0",
-            "    Microsoft.NETCore.Platforms 1.1.0 is already processed",
-            "    or queued.",
+            "    Resolved version: 1.1.0",
             "  Resolving dependency Microsoft.NETCore.Targets (>= 1.1.0)",
-            "    Resolved as Microsoft.NETCore.Targets 1.1.0",
-            "    Microsoft.NETCore.Targets 1.1.0 is already processed or",
-            "    queued.",
+            "    Resolved version: 1.1.0",
             "  Resolving dependency System.Runtime (>= 4.3.0)",
-            "    Resolved as System.Runtime 4.3.0",
-            "    System.Runtime 4.3.0 is already processed or queued.",
+            "    Resolved version: 4.3.0",
             "Processing System.Runtime 4.1.0",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  System.Runtime 4.1.0 is not in the destination.",
             "  Resolving dependency Microsoft.NETCore.Platforms (>=",
             "  1.0.1)",
-            "    Resolved as Microsoft.NETCore.Platforms 1.0.1",
-            "    Microsoft.NETCore.Platforms 1.0.1 is already processed",
-            "    or queued.",
+            "    Resolved version: 1.0.1",
             "  Resolving dependency Microsoft.NETCore.Targets (>= 1.0.1)",
-            "    Resolved as Microsoft.NETCore.Targets 1.0.1",
-            "    Microsoft.NETCore.Targets 1.0.1 is already processed or",
-            "    queued.",
+            "    Resolved version: 1.0.1",
             "Processing System.Runtime 4.1.1",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  System.Runtime 4.1.1 is not in the destination.",
             "  Resolving dependency Microsoft.NETCore.Platforms (>=",
             "  1.0.2)",
-            "    Resolved as Microsoft.NETCore.Platforms 1.0.2",
-            "    Microsoft.NETCore.Platforms 1.0.2 is queued for",
-            "    processing.",
+            "    Resolved version: 1.0.2",
             "  Resolving dependency Microsoft.NETCore.Targets (>= 1.0.6)",
-            "    Resolved as Microsoft.NETCore.Targets 1.0.6",
-            "    Microsoft.NETCore.Targets 1.0.6 is queued for",
-            "    processing.",
+            "    Resolved version: 1.0.6",
             "Processing System.Runtime 4.3.1",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  System.Runtime 4.3.1 is already in the destination.",
-            "  Skipping dependencies of System.Runtime 4.3.1.",
             "Processing System.Runtime.CompilerServices.Unsafe 6.0.0",
-            "  Package license: MIT (https://licenses.nuget.org/MIT)",
-            "  System.Runtime.CompilerServices.Unsafe 6.0.0 is not in the",
-            "  destination.",
-            "  System.Runtime.CompilerServices.Unsafe 6.0.0 has no",
-            "  dependencies.",
             "Processing Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
-            "  Package license:",
-            "  https://www.nuget.org/packages/Microsoft.Data.SqlClient.SN",
-            "  I.runtime/5.2.0/license",
-            "  Microsoft.Data.SqlClient.SNI.runtime 5.2.0 is not in the",
-            "  destination.",
-            "  Microsoft.Data.SqlClient.SNI.runtime 5.2.0 has no",
-            "  dependencies.",
             "Processing Microsoft.NETCore.Platforms 1.1.0",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  Microsoft.NETCore.Platforms 1.1.0 is not in the",
-            "  destination.",
-            "  Microsoft.NETCore.Platforms 1.1.0 has no dependencies.",
             "Processing Microsoft.NETCore.Targets 1.1.0",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  Microsoft.NETCore.Targets 1.1.0 is not in the destination.",
-            "  Microsoft.NETCore.Targets 1.1.0 has no dependencies.",
             "Processing System.Runtime 4.3.0",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  System.Runtime 4.3.0 is not in the destination.",
             "  Resolving dependency Microsoft.NETCore.Platforms (>=",
             "  1.1.0)",
-            "    Resolved as Microsoft.NETCore.Platforms 1.1.0",
-            "    Microsoft.NETCore.Platforms 1.1.0 is already processed",
-            "    or queued.",
+            "    Resolved version: 1.1.0",
             "  Resolving dependency Microsoft.NETCore.Targets (>= 1.1.0)",
-            "    Resolved as Microsoft.NETCore.Targets 1.1.0",
-            "    Microsoft.NETCore.Targets 1.1.0 is already processed or",
-            "    queued.",
+            "    Resolved version: 1.1.0",
             "Processing Microsoft.NETCore.Platforms 1.0.1",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  Microsoft.NETCore.Platforms 1.0.1 is not in the",
-            "  destination.",
-            "  Microsoft.NETCore.Platforms 1.0.1 has no dependencies.",
             "Processing Microsoft.NETCore.Targets 1.0.1",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  Microsoft.NETCore.Targets 1.0.1 is not in the destination.",
-            "  Microsoft.NETCore.Targets 1.0.1 has no dependencies.",
             "Processing Microsoft.NETCore.Platforms 1.0.2",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  Microsoft.NETCore.Platforms 1.0.2 is not in the",
-            "  destination.",
-            "  Microsoft.NETCore.Platforms 1.0.2 has no dependencies.",
-            "Processing Microsoft.NETCore.Targets 1.0.6",
-            "  Package license: MICROSOFT .NET LIBRARY",
-            "  (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "  Microsoft.NETCore.Targets 1.0.6 is not in the destination.",
-            "  Microsoft.NETCore.Targets 1.0.6 has no dependencies."
+            "Processing Microsoft.NETCore.Targets 1.0.6"
         );
 
         result.StdOutput.Should().ContainInConsecutiveOrder(
@@ -473,47 +385,16 @@ public class PromoteFromConfigurationCommandIntegrationTests
             Found 1 matching version: 3.5.8
             Resolving 4 packages to promote...
             Processing System.Runtime 4.3.1
-              Package license: MICROSOFT .NET LIBRARY
-              (http://go.microsoft.com/fwlink/?LinkId=329770)
-              System.Runtime 4.3.1 is not in the destination.
               Resolving dependency Microsoft.NETCore.Platforms (>=
               1.1.1)
-                Resolved as Microsoft.NETCore.Platforms 1.1.1
-                Microsoft.NETCore.Platforms 1.1.1 is queued for
-                processing.
+                Resolved version: 1.1.1
               Resolving dependency Microsoft.NETCore.Targets (>= 1.1.3)
-                Resolved as Microsoft.NETCore.Targets 1.1.3
-                Microsoft.NETCore.Targets 1.1.3 is queued for
-                processing.
+                Resolved version: 1.1.3
             Processing Microsoft.Data.SqlClient.SNI.runtime 5.2.0
-              Package license:
-              https://www.nuget.org/packages/Microsoft.Data.SqlClient.SN
-              I.runtime/5.2.0/license
-              Microsoft.Data.SqlClient.SNI.runtime 5.2.0 is not in the
-              destination.
-              Microsoft.Data.SqlClient.SNI.runtime 5.2.0 has no
-              dependencies.
             Processing System.Runtime.CompilerServices.Unsafe 6.0.0
-              Package license: MIT (https://licenses.nuget.org/MIT)
-              System.Runtime.CompilerServices.Unsafe 6.0.0 is not in the
-              destination.
-              System.Runtime.CompilerServices.Unsafe 6.0.0 has no
-              dependencies.
             Processing Newtonsoft.Json 3.5.8
-              Package license: <not set>
-              Newtonsoft.Json 3.5.8 is not in the destination.
-              Newtonsoft.Json 3.5.8 has no dependencies.
             Processing Microsoft.NETCore.Platforms 1.1.1
-              Package license: MICROSOFT .NET LIBRARY
-              (http://go.microsoft.com/fwlink/?LinkId=329770)
-              Microsoft.NETCore.Platforms 1.1.1 is not in the
-              destination.
-              Microsoft.NETCore.Platforms 1.1.1 has no dependencies.
             Processing Microsoft.NETCore.Targets 1.1.3
-              Package license: MICROSOFT .NET LIBRARY
-              (http://go.microsoft.com/fwlink/?LinkId=329770)
-              Microsoft.NETCore.Targets 1.1.3 is not in the destination.
-              Microsoft.NETCore.Targets 1.1.3 has no dependencies.
             Resolved package tree:
             ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
             ├── Newtonsoft.Json 3.5.8
@@ -631,54 +512,17 @@ public class PromoteFromConfigurationCommandIntegrationTests
             Found 1 matching version: 3.5.8
             Resolving 5 packages to promote...
             Processing System.Runtime 4.3.1
-              Package license: MICROSOFT .NET LIBRARY
-              (http://go.microsoft.com/fwlink/?LinkId=329770)
-              System.Runtime 4.3.1 is not in the destination.
               Resolving dependency Microsoft.NETCore.Platforms (>=
               1.1.1)
-                Resolved as Microsoft.NETCore.Platforms 1.1.1
-                Microsoft.NETCore.Platforms 1.1.1 is queued for
-                processing.
+                Resolved version: 1.1.1
               Resolving dependency Microsoft.NETCore.Targets (>= 1.1.3)
-                Resolved as Microsoft.NETCore.Targets 1.1.3
-                Microsoft.NETCore.Targets 1.1.3 is queued for
-                processing.
+                Resolved version: 1.1.3
             Processing Microsoft.Data.SqlClient.SNI.runtime 5.2.0
-              Package license:
-              https://www.nuget.org/packages/Microsoft.Data.SqlClient.SN
-              I.runtime/5.2.0/license
-              Microsoft.Data.SqlClient.SNI.runtime 5.2.0 is not in the
-              destination.
-              Microsoft.Data.SqlClient.SNI.runtime 5.2.0 has no
-              dependencies.
             Processing System.Runtime.CompilerServices.Unsafe 6.0.0
-              Package license: MIT (https://licenses.nuget.org/MIT)
-              System.Runtime.CompilerServices.Unsafe 6.0.0 is not in the
-              destination.
-              System.Runtime.CompilerServices.Unsafe 6.0.0 has no
-              dependencies.
             Processing LibGit2Sharp.NativeBinaries 2.0.322
-              Package license:
-              https://www.nuget.org/packages/LibGit2Sharp.NativeBinaries
-              /2.0.322/license
-              LibGit2Sharp.NativeBinaries 2.0.322 is not in the
-              destination.
-              LibGit2Sharp.NativeBinaries 2.0.322 has no dependencies.
             Processing Newtonsoft.Json 3.5.8
-              Package license: <not set>
-              Newtonsoft.Json 3.5.8 is not in the destination.
-              Newtonsoft.Json 3.5.8 has no dependencies.
             Processing Microsoft.NETCore.Platforms 1.1.1
-              Package license: MICROSOFT .NET LIBRARY
-              (http://go.microsoft.com/fwlink/?LinkId=329770)
-              Microsoft.NETCore.Platforms 1.1.1 is not in the
-              destination.
-              Microsoft.NETCore.Platforms 1.1.1 has no dependencies.
             Processing Microsoft.NETCore.Targets 1.1.3
-              Package license: MICROSOFT .NET LIBRARY
-              (http://go.microsoft.com/fwlink/?LinkId=329770)
-              Microsoft.NETCore.Targets 1.1.3 is not in the destination.
-              Microsoft.NETCore.Targets 1.1.3 has no dependencies.
             Resolved package tree:
             ├── LibGit2Sharp.NativeBinaries 2.0.322
             ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0

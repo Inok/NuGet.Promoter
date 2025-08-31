@@ -170,16 +170,9 @@ public class PackagesToPromoteResolver
         var bestMatchVersion = dependencyVersionRange.FindBestMatch(allVersionsOfDepResult.Value);
         var resolvedPackage = new PackageIdentity(dependencyId, bestMatchVersion);
 
-        _logger.LogResolvedDependency(resolvedPackage);
+        var enqueued = context.PackagesToResolveQueue.Enqueue(resolvedPackage);
 
-        if (context.PackagesToResolveQueue.Enqueue(resolvedPackage))
-        {
-            _logger.LogNewPackageQueuedForProcessing(resolvedPackage);
-        }
-        else
-        {
-            _logger.LogPackageIsAlreadyProcessedOrQueued(resolvedPackage);
-        }
+        _logger.LogResolvedDependency(resolvedPackage, enqueued);
 
         context.ResolvedDependencies.Add((source, resolvedPackage));
 

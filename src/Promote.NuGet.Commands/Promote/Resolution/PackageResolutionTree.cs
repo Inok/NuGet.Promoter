@@ -1,4 +1,5 @@
-﻿using NuGet.Packaging.Core;
+﻿using System.Collections.Frozen;
+using NuGet.Packaging.Core;
 using Promote.NuGet.Commands.Core;
 
 namespace Promote.NuGet.Commands.Promote.Resolution;
@@ -25,7 +26,7 @@ public sealed class PackageResolutionTree
     {
         if (!_allPackages.ContainsKey(identity)) throw new ArgumentException("The package is not in the tree");
 
-        return _dependencies.TryGetValue(identity, out var deps) ? deps : new HashSet<PackageIdentity>();
+        return _dependencies.TryGetValue(identity, out var deps) ? deps : FrozenSet<PackageIdentity>.Empty;
     }
 
     public bool IsInTargetFeed(PackageIdentity identity)
