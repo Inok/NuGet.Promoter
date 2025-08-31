@@ -26,46 +26,44 @@ public class PromoteSinglePackageCommandIntegrationTests
         var destinationFeedDescriptor = new NuGetRepositoryDescriptor(destinationFeed.FeedUrl, destinationFeed.ApiKey);
 
         // Assert
-        result.StdOutput.Should().StartWith(
-            [
-                "Resolving package requests...",
-                "Resolving System.Runtime (= 4.3.0)",
-                "Found 1 matching version: 4.3.0"
-            ]
-        );
-
-        result.StdOutput.Should().ContainInConsecutiveOrder(
-            "Resolved package tree:",
-            "└── System.Runtime 4.3.0",
-            "    ├── Microsoft.NETCore.Platforms 1.1.0",
-            "    └── Microsoft.NETCore.Targets 1.1.0"
-        );
-
-        result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
-            "Found 3 packages to promote:",
-            "├── Microsoft.NETCore.Platforms 1.1.0",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── Microsoft.NETCore.Targets 1.1.0",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "└── System.Runtime 4.3.0",
-            "    License: MICROSOFT .NET LIBRARY",
-            "    (http://go.microsoft.com/fwlink/?LinkId=329770)"
-        );
-
-        result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
-            "License summary:",
-            "└── 3x: MICROSOFT .NET LIBRARY",
-            "    (http://go.microsoft.com/fwlink/?LinkId=329770)"
-        );
-
-        result.StdOutput.Should().ContainInOrder(
-            "Promoting 3 packages...",
-            "(1/3) Promote Microsoft.NETCore.Platforms 1.1.0",
-            "(2/3) Promote Microsoft.NETCore.Targets 1.1.0",
-            "(3/3) Promote System.Runtime 4.3.0",
-            "3 packages promoted."
+        result.GetStdOutputAsNormalizedString().Should().Be(
+            """
+            Resolving package requests...
+            Resolving System.Runtime (= 4.3.0)
+            Found 1 matching version: 4.3.0
+            Resolving 1 package to promote...
+            Processing System.Runtime 4.3.0
+              Resolving dependency Microsoft.NETCore.Platforms (>=
+              1.1.0)
+                Resolved version: 1.1.0
+              Resolving dependency Microsoft.NETCore.Targets (>= 1.1.0)
+                Resolved version: 1.1.0
+            Processing Microsoft.NETCore.Platforms 1.1.0
+            Processing Microsoft.NETCore.Targets 1.1.0
+            Resolved package tree:
+            └── System.Runtime 4.3.0
+                ├── Microsoft.NETCore.Platforms 1.1.0
+                └── Microsoft.NETCore.Targets 1.1.0
+            Found 3 packages to promote:
+            ├── Microsoft.NETCore.Platforms 1.1.0
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Microsoft.NETCore.Targets 1.1.0
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            └── System.Runtime 4.3.0
+                License: MICROSOFT .NET LIBRARY
+                (http://go.microsoft.com/fwlink/?LinkId=329770)
+            License summary:
+            └── 3x: MICROSOFT .NET LIBRARY
+                (http://go.microsoft.com/fwlink/?LinkId=329770)
+            License compliance checks are disabled.
+            Promoting 3 packages...
+            (1/3) Promote Microsoft.NETCore.Platforms 1.1.0
+            (2/3) Promote Microsoft.NETCore.Targets 1.1.0
+            (3/3) Promote System.Runtime 4.3.0
+            3 packages promoted.
+            """
         );
 
         result.StdError.Should().BeEmpty();

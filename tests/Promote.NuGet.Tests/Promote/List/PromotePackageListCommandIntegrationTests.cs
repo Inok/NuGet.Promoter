@@ -34,102 +34,132 @@ public class PromotePackageListCommandIntegrationTests
         using var destinationRepo = new NuGetRepository(destinationFeedDescriptor, NullSourceCacheContext.Instance, TestNuGetLogger.Instance);
 
         // Assert
-        result.StdOutput.Should().StartWith(
-            [
-                "Resolving package requests...",
-                "Resolving System.Runtime (>= 4.1.0 && < 4.1.2)",
-                "Found 2 matching versions: 4.1.0, 4.1.1",
-                "Resolving System.Runtime (= 4.3.1)",
-                "Found 1 matching version: 4.3.1",
-                "Resolving System.Globalization (= 4.3.0)",
-                "Found 1 matching version: 4.3.0"
-            ]
-        );
-
-        result.StdOutput.Should().ContainInConsecutiveOrder(
-            "Resolved package tree:",
-            "├── System.Globalization 4.3.0",
-            "│   ├── Microsoft.NETCore.Platforms 1.1.0",
-            "│   ├── Microsoft.NETCore.Targets 1.1.0",
-            "│   └── System.Runtime 4.3.0",
-            "│       ├── Microsoft.NETCore.Platforms 1.1.0",
-            "│       └── Microsoft.NETCore.Targets 1.1.0",
-            "├── System.Runtime 4.1.0",
-            "│   ├── Microsoft.NETCore.Platforms 1.0.1",
-            "│   └── Microsoft.NETCore.Targets 1.0.1",
-            "├── System.Runtime 4.1.1",
-            "│   ├── Microsoft.NETCore.Platforms 1.0.2",
-            "│   └── Microsoft.NETCore.Targets 1.0.6",
-            "└── System.Runtime 4.3.1",
-            "    ├── Microsoft.NETCore.Platforms 1.1.1",
-            "    └── Microsoft.NETCore.Targets 1.1.3"
-        );
-
-        result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
-            "Found 13 packages to promote:",
-            "├── Microsoft.NETCore.Platforms 1.0.1",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── Microsoft.NETCore.Platforms 1.0.2",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── Microsoft.NETCore.Platforms 1.1.0",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── Microsoft.NETCore.Platforms 1.1.1",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── Microsoft.NETCore.Targets 1.0.1",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── Microsoft.NETCore.Targets 1.0.6",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── Microsoft.NETCore.Targets 1.1.0",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── Microsoft.NETCore.Targets 1.1.3",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── System.Globalization 4.3.0",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── System.Runtime 4.1.0",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── System.Runtime 4.1.1",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "├── System.Runtime 4.3.0",
-            "│   License: MICROSOFT .NET LIBRARY",
-            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
-            "└── System.Runtime 4.3.1",
-            "    License: MICROSOFT .NET LIBRARY",
-            "    (http://go.microsoft.com/fwlink/?LinkId=329770)"
-        );
-
-        result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
-            "License summary:",
-            "└── 13x: MICROSOFT .NET LIBRARY",
-            "    (http://go.microsoft.com/fwlink/?LinkId=329770)"
-        );
-
-        result.StdOutput.Should().ContainInOrder(
-            "Promoting 13 packages...",
-            "(1/13) Promote Microsoft.NETCore.Platforms 1.0.1",
-            "(2/13) Promote Microsoft.NETCore.Platforms 1.0.2",
-            "(3/13) Promote Microsoft.NETCore.Platforms 1.1.0",
-            "(4/13) Promote Microsoft.NETCore.Platforms 1.1.1",
-            "(5/13) Promote Microsoft.NETCore.Targets 1.0.1",
-            "(6/13) Promote Microsoft.NETCore.Targets 1.0.6",
-            "(7/13) Promote Microsoft.NETCore.Targets 1.1.0",
-            "(8/13) Promote Microsoft.NETCore.Targets 1.1.3",
-            "(9/13) Promote System.Globalization 4.3.0",
-            "(10/13) Promote System.Runtime 4.1.0",
-            "(11/13) Promote System.Runtime 4.1.1",
-            "(12/13) Promote System.Runtime 4.3.0",
-            "(13/13) Promote System.Runtime 4.3.1",
-            "13 packages promoted."
+        result.GetStdOutputAsNormalizedString().Should().Be(
+            """
+            Resolving package requests...
+            Resolving System.Runtime (>= 4.1.0 && < 4.1.2)
+            Found 2 matching versions: 4.1.0, 4.1.1
+            Resolving System.Runtime (= 4.3.1)
+            Found 1 matching version: 4.3.1
+            Resolving System.Globalization (= 4.3.0)
+            Found 1 matching version: 4.3.0
+            Resolving 4 packages to promote...
+            Processing System.Runtime 4.1.0
+              Resolving dependency Microsoft.NETCore.Platforms (>=
+              1.0.1)
+                Resolved version: 1.0.1
+              Resolving dependency Microsoft.NETCore.Targets (>= 1.0.1)
+                Resolved version: 1.0.1
+            Processing System.Runtime 4.1.1
+              Resolving dependency Microsoft.NETCore.Platforms (>=
+              1.0.2)
+                Resolved version: 1.0.2
+              Resolving dependency Microsoft.NETCore.Targets (>= 1.0.6)
+                Resolved version: 1.0.6
+            Processing System.Runtime 4.3.1
+              Resolving dependency Microsoft.NETCore.Platforms (>=
+              1.1.1)
+                Resolved version: 1.1.1
+              Resolving dependency Microsoft.NETCore.Targets (>= 1.1.3)
+                Resolved version: 1.1.3
+            Processing System.Globalization 4.3.0
+              Resolving dependency Microsoft.NETCore.Platforms (>=
+              1.1.0)
+                Resolved version: 1.1.0
+              Resolving dependency Microsoft.NETCore.Targets (>= 1.1.0)
+                Resolved version: 1.1.0
+              Resolving dependency System.Runtime (>= 4.3.0)
+                Resolved version: 4.3.0
+            Processing Microsoft.NETCore.Platforms 1.0.1
+            Processing Microsoft.NETCore.Targets 1.0.1
+            Processing Microsoft.NETCore.Platforms 1.0.2
+            Processing Microsoft.NETCore.Targets 1.0.6
+            Processing Microsoft.NETCore.Platforms 1.1.1
+            Processing Microsoft.NETCore.Targets 1.1.3
+            Processing Microsoft.NETCore.Platforms 1.1.0
+            Processing Microsoft.NETCore.Targets 1.1.0
+            Processing System.Runtime 4.3.0
+              Resolving dependency Microsoft.NETCore.Platforms (>=
+              1.1.0)
+                Resolved version: 1.1.0
+              Resolving dependency Microsoft.NETCore.Targets (>= 1.1.0)
+                Resolved version: 1.1.0
+            Resolved package tree:
+            ├── System.Globalization 4.3.0
+            │   ├── Microsoft.NETCore.Platforms 1.1.0
+            │   ├── Microsoft.NETCore.Targets 1.1.0
+            │   └── System.Runtime 4.3.0
+            │       ├── Microsoft.NETCore.Platforms 1.1.0
+            │       └── Microsoft.NETCore.Targets 1.1.0
+            ├── System.Runtime 4.1.0
+            │   ├── Microsoft.NETCore.Platforms 1.0.1
+            │   └── Microsoft.NETCore.Targets 1.0.1
+            ├── System.Runtime 4.1.1
+            │   ├── Microsoft.NETCore.Platforms 1.0.2
+            │   └── Microsoft.NETCore.Targets 1.0.6
+            └── System.Runtime 4.3.1
+                ├── Microsoft.NETCore.Platforms 1.1.1
+                └── Microsoft.NETCore.Targets 1.1.3
+            Found 13 packages to promote:
+            ├── Microsoft.NETCore.Platforms 1.0.1
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Microsoft.NETCore.Platforms 1.0.2
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Microsoft.NETCore.Platforms 1.1.0
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Microsoft.NETCore.Platforms 1.1.1
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Microsoft.NETCore.Targets 1.0.1
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Microsoft.NETCore.Targets 1.0.6
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Microsoft.NETCore.Targets 1.1.0
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── Microsoft.NETCore.Targets 1.1.3
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── System.Globalization 4.3.0
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── System.Runtime 4.1.0
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── System.Runtime 4.1.1
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            ├── System.Runtime 4.3.0
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
+            └── System.Runtime 4.3.1
+                License: MICROSOFT .NET LIBRARY
+                (http://go.microsoft.com/fwlink/?LinkId=329770)
+            License summary:
+            └── 13x: MICROSOFT .NET LIBRARY
+                (http://go.microsoft.com/fwlink/?LinkId=329770)
+            License compliance checks are disabled.
+            Promoting 13 packages...
+            (1/13) Promote Microsoft.NETCore.Platforms 1.0.1
+            (2/13) Promote Microsoft.NETCore.Platforms 1.0.2
+            (3/13) Promote Microsoft.NETCore.Platforms 1.1.0
+            (4/13) Promote Microsoft.NETCore.Platforms 1.1.1
+            (5/13) Promote Microsoft.NETCore.Targets 1.0.1
+            (6/13) Promote Microsoft.NETCore.Targets 1.0.6
+            (7/13) Promote Microsoft.NETCore.Targets 1.1.0
+            (8/13) Promote Microsoft.NETCore.Targets 1.1.3
+            (9/13) Promote System.Globalization 4.3.0
+            (10/13) Promote System.Runtime 4.1.0
+            (11/13) Promote System.Runtime 4.1.1
+            (12/13) Promote System.Runtime 4.3.0
+            (13/13) Promote System.Runtime 4.3.1
+            13 packages promoted.
+            """
         );
 
         result.StdError.Should().BeEmpty();
