@@ -25,6 +25,9 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Setup HTTPS development certificate
+        run: dotnet dev-certs https --trust
+
       - name: Build project
         run: ./build.sh -Target All
 
