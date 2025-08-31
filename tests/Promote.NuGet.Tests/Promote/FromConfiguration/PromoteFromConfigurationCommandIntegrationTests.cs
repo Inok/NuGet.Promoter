@@ -166,47 +166,47 @@ public class PromoteFromConfigurationCommandIntegrationTests
         result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
             "Found 14 packages to promote:",
             "├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0",
-            "│   └── License:",
-            "│       https://www.nuget.org/packages/Microsoft.Data.SqlCli",
-            "│       ent.SNI.runtime/5.2.0/license",
+            "│   License:",
+            "│   https://www.nuget.org/packages/Microsoft.Data.SqlClient.",
+            "│   SNI.runtime/5.2.0/license",
             "├── Microsoft.NETCore.Platforms 1.0.1",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Platforms 1.0.2",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Platforms 1.1.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Targets 1.0.1",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Targets 1.0.6",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── Microsoft.NETCore.Targets 1.1.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── System.Collections 4.3.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── System.Globalization 4.0.11",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── System.Globalization 4.3.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── System.Runtime 4.1.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── System.Runtime 4.1.1",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "├── System.Runtime 4.3.0",
-            "│   └── License: MICROSOFT .NET LIBRARY",
-            "│       (http://go.microsoft.com/fwlink/?LinkId=329770)",
+            "│   License: MICROSOFT .NET LIBRARY",
+            "│   (http://go.microsoft.com/fwlink/?LinkId=329770)",
             "└── System.Runtime.CompilerServices.Unsafe 6.0.0",
-            "    └── License: MIT (https://licenses.nuget.org/MIT)"
+            "    License: MIT (https://licenses.nuget.org/MIT)"
         );
 
         result.StdOutput.Select(x => x.TrimEnd()).Should().ContainInConsecutiveOrder(
@@ -404,22 +404,22 @@ public class PromoteFromConfigurationCommandIntegrationTests
             └── System.Runtime.CompilerServices.Unsafe 6.0.0
             Found 6 packages to promote:
             ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
-            │   └── License:
-            │       https://www.nuget.org/packages/Microsoft.Data.SqlCli
-            │       ent.SNI.runtime/5.2.0/license
+            │   License:
+            │   https://www.nuget.org/packages/Microsoft.Data.SqlClient.
+            │   SNI.runtime/5.2.0/license
             ├── Microsoft.NETCore.Platforms 1.1.1
-            │   └── License: MICROSOFT .NET LIBRARY
-            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
             ├── Microsoft.NETCore.Targets 1.1.3
-            │   └── License: MICROSOFT .NET LIBRARY
-            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
             ├── Newtonsoft.Json 3.5.8
-            │   └── License: <not set>
+            │   License: <not set>
             ├── System.Runtime 4.3.1
-            │   └── License: MICROSOFT .NET LIBRARY
-            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
             └── System.Runtime.CompilerServices.Unsafe 6.0.0
-                └── License: MIT (https://licenses.nuget.org/MIT)
+                License: MIT (https://licenses.nuget.org/MIT)
             License summary:
             ├── 3x: MICROSOFT .NET LIBRARY
             │   (http://go.microsoft.com/fwlink/?LinkId=329770)
@@ -430,26 +430,26 @@ public class PromoteFromConfigurationCommandIntegrationTests
             └── 1x: MIT (https://licenses.nuget.org/MIT)
             Checking license compliance...
             Checking Microsoft.Data.SqlClient.SNI.runtime 5.2.0
-                License (file): LICENSE.txt
-                [v] Matching accepted license file found: {Path.GetFileName(msLibLicense.Path)}.
+              License (file): LICENSE.txt
+              [v] Matching accepted license file found: {Path.GetFileName(msLibLicense.Path)}.
             Checking Microsoft.NETCore.Platforms 1.1.1
-                License (url):
-                http://go.microsoft.com/fwlink/?LinkId=329770
-                [v] The license url is in whitelist.
+              License (url):
+              http://go.microsoft.com/fwlink/?LinkId=329770
+              [v] The license url is in whitelist.
             Checking Microsoft.NETCore.Targets 1.1.3
-                License (url):
-                http://go.microsoft.com/fwlink/?LinkId=329770
-                [v] The license url is in whitelist.
+              License (url):
+              http://go.microsoft.com/fwlink/?LinkId=329770
+              [v] The license url is in whitelist.
             Checking Newtonsoft.Json 3.5.8
-                License (none): <not set>
-                [v] The package is allowed to have no license.
+              License (none): <not set>
+              [v] The package is allowed to have no license.
             Checking System.Runtime 4.3.1
-                License (url):
-                http://go.microsoft.com/fwlink/?LinkId=329770
-                [v] The license url is in whitelist.
+              License (url):
+              http://go.microsoft.com/fwlink/?LinkId=329770
+              [v] The license url is in whitelist.
             Checking System.Runtime.CompilerServices.Unsafe 6.0.0
-                License (expression): MIT
-                [v] The license expression is in whitelist.
+              License (expression): MIT
+              [v] The license expression is in whitelist.
             No license violations found.
             Promoting 6 packages...
             """
@@ -533,26 +533,26 @@ public class PromoteFromConfigurationCommandIntegrationTests
             └── System.Runtime.CompilerServices.Unsafe 6.0.0
             Found 7 packages to promote:
             ├── LibGit2Sharp.NativeBinaries 2.0.322
-            │   └── License:
-            │       https://www.nuget.org/packages/LibGit2Sharp.NativeBi
-            │       naries/2.0.322/license
+            │   License:
+            │   https://www.nuget.org/packages/LibGit2Sharp.NativeBinari
+            │   es/2.0.322/license
             ├── Microsoft.Data.SqlClient.SNI.runtime 5.2.0
-            │   └── License:
-            │       https://www.nuget.org/packages/Microsoft.Data.SqlCli
-            │       ent.SNI.runtime/5.2.0/license
+            │   License:
+            │   https://www.nuget.org/packages/Microsoft.Data.SqlClient.
+            │   SNI.runtime/5.2.0/license
             ├── Microsoft.NETCore.Platforms 1.1.1
-            │   └── License: MICROSOFT .NET LIBRARY
-            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
             ├── Microsoft.NETCore.Targets 1.1.3
-            │   └── License: MICROSOFT .NET LIBRARY
-            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
             ├── Newtonsoft.Json 3.5.8
-            │   └── License: <not set>
+            │   License: <not set>
             ├── System.Runtime 4.3.1
-            │   └── License: MICROSOFT .NET LIBRARY
-            │       (http://go.microsoft.com/fwlink/?LinkId=329770)
+            │   License: MICROSOFT .NET LIBRARY
+            │   (http://go.microsoft.com/fwlink/?LinkId=329770)
             └── System.Runtime.CompilerServices.Unsafe 6.0.0
-                └── License: MIT (https://licenses.nuget.org/MIT)
+                License: MIT (https://licenses.nuget.org/MIT)
             License summary:
             ├── 3x: MICROSOFT .NET LIBRARY
             │   (http://go.microsoft.com/fwlink/?LinkId=329770)
@@ -566,56 +566,56 @@ public class PromoteFromConfigurationCommandIntegrationTests
             └── 1x: MIT (https://licenses.nuget.org/MIT)
             Checking license compliance...
             Checking LibGit2Sharp.NativeBinaries 2.0.322
-                License (file): libgit2\libgit2.license.txt
-                [x] No matching license files found in the whitelist.
+              License (file): libgit2\libgit2.license.txt
+              [x] No matching license files found in the whitelist.
             Checking Microsoft.Data.SqlClient.SNI.runtime 5.2.0
-                License (file): LICENSE.txt
-                [x] No matching license files found in the whitelist.
+              License (file): LICENSE.txt
+              [x] No matching license files found in the whitelist.
             Checking Microsoft.NETCore.Platforms 1.1.1
-                License (url):
-                http://go.microsoft.com/fwlink/?LinkId=329770
-                [x] The license url is not whitelisted.
+              License (url):
+              http://go.microsoft.com/fwlink/?LinkId=329770
+              [x] The license url is not whitelisted.
             Checking Microsoft.NETCore.Targets 1.1.3
-                License (url):
-                http://go.microsoft.com/fwlink/?LinkId=329770
-                [x] The license url is not whitelisted.
+              License (url):
+              http://go.microsoft.com/fwlink/?LinkId=329770
+              [x] The license url is not whitelisted.
             Checking Newtonsoft.Json 3.5.8
-                License (none): <not set>
-                [x] License is not configured for the package.
+              License (none): <not set>
+              [x] License is not configured for the package.
             Checking System.Runtime 4.3.1
-                License (url):
-                http://go.microsoft.com/fwlink/?LinkId=329770
-                [x] The license url is not whitelisted.
+              License (url):
+              http://go.microsoft.com/fwlink/?LinkId=329770
+              [x] The license url is not whitelisted.
             Checking System.Runtime.CompilerServices.Unsafe 6.0.0
-                License (expression): MIT
-                [x] The license expression is not whitelisted.
+              License (expression): MIT
+              [x] The license expression is not whitelisted.
             7 license violations found:
             ├── LibGit2Sharp.NativeBinaries.2.0.322
-            │   ├── License (file): libgit2\libgit2.license.txt
-            │   └── Reason: No matching license files found in the
-            │       whitelist.
+            │   License (file): libgit2\libgit2.license.txt
+            │   Reason: No matching license files found in the
+            │   whitelist.
             ├── Microsoft.Data.SqlClient.SNI.runtime.5.2.0
-            │   ├── License (file): LICENSE.txt
-            │   └── Reason: No matching license files found in the
-            │       whitelist.
+            │   License (file): LICENSE.txt
+            │   Reason: No matching license files found in the
+            │   whitelist.
             ├── Microsoft.NETCore.Platforms.1.1.1
-            │   ├── License (url):
-            │   │   http://go.microsoft.com/fwlink/?LinkId=329770
-            │   └── Reason: The license url is not whitelisted.
+            │   License (url):
+            │   http://go.microsoft.com/fwlink/?LinkId=329770
+            │   Reason: The license url is not whitelisted.
             ├── Microsoft.NETCore.Targets.1.1.3
-            │   ├── License (url):
-            │   │   http://go.microsoft.com/fwlink/?LinkId=329770
-            │   └── Reason: The license url is not whitelisted.
+            │   License (url):
+            │   http://go.microsoft.com/fwlink/?LinkId=329770
+            │   Reason: The license url is not whitelisted.
             ├── Newtonsoft.Json.3.5.8
-            │   ├── License (none): <not set>
-            │   └── Reason: License is not configured for the package.
+            │   License (none): <not set>
+            │   Reason: License is not configured for the package.
             ├── System.Runtime.4.3.1
-            │   ├── License (url):
-            │   │   http://go.microsoft.com/fwlink/?LinkId=329770
-            │   └── Reason: The license url is not whitelisted.
+            │   License (url):
+            │   http://go.microsoft.com/fwlink/?LinkId=329770
+            │   Reason: The license url is not whitelisted.
             └── System.Runtime.CompilerServices.Unsafe.6.0.0
-                ├── License (expression): MIT
-                └── Reason: The license expression is not whitelisted.
+                License (expression): MIT
+                Reason: The license expression is not whitelisted.
             License violations found.
             """
         );

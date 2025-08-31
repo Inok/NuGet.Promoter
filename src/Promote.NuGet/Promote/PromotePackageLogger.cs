@@ -20,25 +20,31 @@ public sealed class PromotePackageLogger(bool verbose) : IPromotePackageLogger
 
     void IPackageRequestResolverLogger.LogResolvingPackageRequest(PackageRequest request)
     {
-        AnsiConsole.MarkupLineInterpolated($"Resolving {request}");
+        AnsiConsole.MarkupLineInterpolated($"[bold]Resolving {request}[/]");
     }
 
     void IPackageRequestResolverLogger.LogPackageRequestResolution(PackageRequest request, IReadOnlyCollection<PackageIdentity> matchingPackages)
     {
-        if (matchingPackages.Count == 0)
-        {
-            AnsiConsole.MarkupLineInterpolated($"Found 0 matching versions.");
-            return;
-        }
-
         if (!verbose)
         {
+            if (matchingPackages.Count == 0)
+            {
+                AnsiConsole.MarkupLineInterpolated($"[gray]Found 0 matching versions.[/]");
+                return;
+            }
+
             var versions = matchingPackages.Select(x => x.Version).Order();
             var versionsText = string.Join(", ", versions);
-            AnsiConsole.MarkupLineInterpolated($"Found {matchingPackages.Count} matching {Decl(matchingPackages.Count, "version", "versions")}: {versionsText}");
+            AnsiConsole.MarkupLineInterpolated($"[gray]Found {matchingPackages.Count} matching {Decl(matchingPackages.Count, "version", "versions")}: {versionsText}[/]");
         }
         else
         {
+            if (matchingPackages.Count == 0)
+            {
+                AnsiConsole.MarkupLineInterpolated($"Found 0 matching versions.");
+                return;
+            }
+
             var tree = new Tree(Markup.FromInterpolated($"Found {matchingPackages.Count} matching {Decl(matchingPackages.Count, "version", "versions")}:"));
             foreach (var identity in matchingPackages.OrderBy(x => x.Version))
             {
@@ -211,8 +217,13 @@ public sealed class PromotePackageLogger(bool verbose) : IPromotePackageLogger
         var tree = new Tree(Markup.FromInterpolated($"[bold green]Found {packages.Count} {Decl(packages.Count, "package", "packages")} to promote:[/]"));
         foreach (var identity in packages.OrderBy(x => x.Id))
         {
-            var node = tree.AddNode(Markup.FromInterpolated($"{identity.Id.Id} {identity.Id.Version}"));
-            node.AddNode(Markup.FromInterpolated($"License: {identity.License.PrettyPrint()}"));
+            var content = Markup.FromInterpolated(
+                $"""
+                 {identity.Id.Id} {identity.Id.Version}
+                 [gray]License: {identity.License.PrettyPrint()}[/]
+                 """
+            );
+            tree.AddNode(content);
         }
 
         AnsiConsole.Write(tree);
@@ -225,7 +236,7 @@ public sealed class PromotePackageLogger(bool verbose) : IPromotePackageLogger
                                    .OrderByDescending(x => x.Count)
                                    .ThenBy(x => x.License.License);
 
-        var tree = new Tree(Markup.FromInterpolated($"[green]License summary:[/]"));
+        var tree = new Tree(Markup.FromInterpolated($"[bold green]License summary:[/]"));
         foreach (var item in licenseItems)
         {
             tree.AddNode(Markup.FromInterpolated($"{item.Count}x: {item.License.PrettyPrint()}"));
@@ -251,7 +262,7 @@ public sealed class PromotePackageLogger(bool verbose) : IPromotePackageLogger
 
     void IPackageMirroringExecutorLogger.LogMirrorPackage(PackageIdentity identity, int current, int total)
     {
-        AnsiConsole.MarkupLineInterpolated($"[bold green]({current}/{total}) Promote {identity.Id} {identity.Version}[/]");
+        AnsiConsole.MarkupLineInterpolated($"[bold]({current}/{total}) Promote {identity.Id} {identity.Version}[/]");
     }
 
     void IPackageMirroringExecutorLogger.LogMirroredPackagesCount(int count)
@@ -275,9 +286,14 @@ public sealed class PromotePackageLogger(bool verbose) : IPromotePackageLogger
 
         foreach (var violation in violations.OrderBy(x => x.PackageId))
         {
-            var node = tree.AddNode(Markup.FromInterpolated($"[red]{violation.PackageId}[/]"));
-            node.AddNode(Markup.FromInterpolated($"[red]License ({violation.LicenseType.ToString().ToLowerInvariant()}): {violation.License}[/]"));
-            node.AddNode(Markup.FromInterpolated($"[red]Reason: {violation.Explanation}[/]"));
+            var content = Markup.FromInterpolated(
+                $"""
+                 [red]{violation.PackageId}[/]
+                 [red]License ({violation.LicenseType.ToString().ToLowerInvariant()}): {violation.License}[/]
+                 [red]Reason: {violation.Explanation}[/]
+                 """
+            );
+            tree.AddNode(content);
         }
 
         AnsiConsole.Write(tree);
@@ -296,14 +312,14 @@ public sealed class PromotePackageLogger(bool verbose) : IPromotePackageLogger
     void ILicenseComplianceValidatorLogger.LogFailedToDownloadPackage(PackageIdentity identity)
     {
         var text = Markup.FromInterpolated($"[red]Failed to download package {identity.Id} {identity.Version}[/]");
-        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
     }
 
     void ILicenseComplianceValidatorLogger.LogPackageLicense(PackageLicenseType licenseType, string license, IReadOnlyList<string>? warningsAndErrors)
     {
         var text = Markup.FromInterpolated($"[gray]License ({licenseType.ToString().ToLowerInvariant()}): {license}[/]");
-        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
 
         if (warningsAndErrors?.Count > 0)
@@ -314,7 +330,7 @@ public sealed class PromotePackageLogger(bool verbose) : IPromotePackageLogger
                 tree.AddNode(Markup.FromInterpolated($"{item}"));
             }
 
-            var treePadder = new Padder(tree).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+            var treePadder = new Padder(tree).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
             AnsiConsole.Write(treePadder);
         }
     }
@@ -322,21 +338,21 @@ public sealed class PromotePackageLogger(bool verbose) : IPromotePackageLogger
     void ILicenseComplianceValidatorLogger.LogLicenseCompliance(string reason)
     {
         var text = Markup.FromInterpolated($"[gray][[v]] {reason}[/]");
-        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
     }
 
     void ILicenseComplianceValidatorLogger.LogLicenseViolation(LicenseComplianceViolation violation)
     {
         var text = Markup.FromInterpolated($"[red][[x]] {violation.Explanation}[/]");
-        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
     }
 
     void ILicenseComplianceValidatorLogger.LogAcceptedLicenseFileReadFailure(string acceptedFilePath, Exception exception)
     {
         var text = Markup.FromInterpolated($"[red]Failed to read accepted file {acceptedFilePath}: {exception.Message}[/]");
-        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
 
     }
