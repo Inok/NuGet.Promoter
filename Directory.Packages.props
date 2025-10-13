@@ -23,7 +23,7 @@
         <PackageVersion Include="NUnit3TestAdapter" Version="5.1.0"/>
         <PackageVersion Include="NuGet.Protocol" Version="6.14.0"/>
         <PackageVersion Include="Nuke.Common" Version="9.0.4"/>
-        <PackageVersion Include="Spectre.Console" Version="0.50.0"/>
+        <PackageVersion Include="Spectre.Console" Version="0.52.0"/>
         <PackageVersion Include="Spectre.Console.Analyzer" Version="1.0.0"/>
         <PackageVersion Include="Spectre.Console.Cli" Version="0.50.0"/>
         <PackageVersion Include="Testcontainers" Version="4.7.0"/>
