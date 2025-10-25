@@ -65,7 +65,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download test results
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: test-results
           path: test-results/
@@ -105,7 +105,7 @@ jobs:
           global-json-file: global.json
 
       - name: Download packages
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: packages
           path: artifacts/
