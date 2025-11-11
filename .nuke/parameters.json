@@ -1,4 +1,4 @@
 {
   "$schema": "./build.schema.json",
-  "Solution": "Promote.NuGet.sln"
+  "Solution": "Promote.NuGet.slnx"
 }

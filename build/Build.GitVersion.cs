@@ -11,7 +11,7 @@ public partial class Build
 
         var gitVersionSettings = new GitVersionSettings()
                                  .SetProcessWorkingDirectory(RootDirectory)
-                                 .SetFramework("net8.0")
+                                 .SetFramework("net10.0")
                                  .EnableNoFetch()
                                  .EnableNoCache();
 

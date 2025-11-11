@@ -48,7 +48,7 @@ public class PromoteConfigurationParserTests
                                    ]
                                }
                 ]
-            }, x => x.RespectingRuntimeTypes());
+            }, x => x.PreferringRuntimeMemberTypes());
     }
 
     [Test]
@@ -102,7 +102,7 @@ public class PromoteConfigurationParserTests
                         ]
                     }
                 ]
-            }, x => x.RespectingRuntimeTypes());
+            }, x => x.PreferringRuntimeMemberTypes());
     }
 
     [Test]

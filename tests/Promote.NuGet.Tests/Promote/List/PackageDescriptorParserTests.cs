@@ -13,7 +13,7 @@ public class PackageDescriptorParserTests
         var result = PackageDescriptorParser.ParseLine(input);
 
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().BeEquivalentTo(expectedVersionRequest, x => x.RespectingRuntimeTypes());
+        result.Value.Should().BeEquivalentTo(expectedVersionRequest, x => x.PreferringRuntimeMemberTypes());
     }
 
     private static IEnumerable<object[]> PackagesTestCases()
