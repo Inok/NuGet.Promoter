@@ -1,17 +1,16 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.IO;
 
 namespace Promote.NuGet.TestInfrastructure;
 
 public sealed class ProcessWrapper : IAsyncDisposable
 {
-    private readonly ConcurrentQueue<string> _stdOut = new();
-    private readonly ConcurrentQueue<string> _stdError = new();
+    private readonly ConcurrentBag<string> _stdOut = new();
+    private readonly ConcurrentBag<string> _stdError = new();
     private readonly string _processName;
     private readonly int _processId;
-    private readonly Task _stdOutReadTask;
-    private readonly Task _stdErrorReadTask;
+    private readonly TaskCompletionSource _outputComplete = new();
+    private readonly TaskCompletionSource _errorComplete = new();
 
     public Process Process { get; }
 
@@ -25,42 +24,50 @@ public sealed class ProcessWrapper : IAsyncDisposable
     {
         Process = new Process { StartInfo = processStartInfo };
         
+        // Attach event handlers BEFORE starting the process
+        // This ensures handlers are ready to capture output from the moment the process starts
+        AttachEventHandlers();
+        
         if (!Process.Start())
         {
             throw new InvalidOperationException("Failed to start the process");
         }
         
+        // Start asynchronous reading IMMEDIATELY after process starts
+        // to minimize the window where output could be lost
+        Process.BeginOutputReadLine();
+        Process.BeginErrorReadLine();
+        
         _processName = Process.ProcessName;
         _processId = Process.Id;
-        
-        // Start reading streams immediately in background tasks
-        // This approach avoids the race condition with BeginOutputReadLine()
-        TestContext.Out.WriteLine($"DEBUG: Starting stream reading tasks for PID {_processId}");
-        _stdOutReadTask = ReadStreamAsync(Process.StandardOutput, _stdOut, "stdout");
-        _stdErrorReadTask = ReadStreamAsync(Process.StandardError, _stdError, "stderr");
-        TestContext.Out.WriteLine($"DEBUG: Stream reading tasks started");
     }
 
-    private static async Task ReadStreamAsync(StreamReader reader, ConcurrentQueue<string> queue, string streamName)
+    private void AttachEventHandlers()
     {
-        try
-        {
-            TestContext.Out.WriteLine($"DEBUG: Starting to read {streamName}");
-            string? line;
-            int lineCount = 0;
-            while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
-            {
-                lineCount++;
-                TestContext.Out.WriteLine($"DEBUG: Read line {lineCount} from {streamName}: '{line}'");
-                queue.Enqueue(line);
-            }
-            TestContext.Out.WriteLine($"DEBUG: Finished reading {streamName}, total lines: {lineCount}");
-        }
-        catch (Exception ex)
-        {
-            TestContext.Out.WriteLine($"DEBUG: Exception reading {streamName}: {ex.Message}");
-            // Stream might be closed if process exits, ignore
-        }
+        Process.OutputDataReceived += (_, args) =>
+                                      {
+                                          if (args.Data != null)
+                                          {
+                                              _stdOut.Add(args.Data);
+                                          }
+                                          else
+                                          {
+                                              // null indicates end of stream
+                                              _outputComplete.TrySetResult();
+                                          }
+                                      };
+        Process.ErrorDataReceived += (_, args) =>
+                                     {
+                                         if (args.Data != null)
+                                         {
+                                             _stdError.Add(args.Data);
+                                         }
+                                         else
+                                         {
+                                             // null indicates end of stream
+                                             _errorComplete.TrySetResult();
+                                         }
+                                     };
     }
 
     public Task WaitForExitAsync(CancellationToken cancellationToken = default)
@@ -72,9 +79,9 @@ public sealed class ProcessWrapper : IAsyncDisposable
     {
         await WaitForExitAsync(cancellationToken);
 
-        // Wait for both stream reading tasks to complete
-        // This ensures all data has been read from the streams
-        await Task.WhenAll(_stdOutReadTask, _stdErrorReadTask);
+        // Wait for both output and error streams to signal completion
+        // This ensures all data has been received from the async event handlers
+        await Task.WhenAll(_outputComplete.Task, _errorComplete.Task);
 
         var stdOutput = StdOut.ToList();
         var stdError = StdError.ToList();
@@ -115,10 +122,10 @@ public sealed class ProcessWrapper : IAsyncDisposable
             TestContext.Out.WriteLine("The process was still running and has been killed.");
         }
 
-        // Wait for stream reading tasks to complete before disposing
+        // Wait for stream completion signals before disposing
         try
         {
-            await Task.WhenAll(_stdOutReadTask, _stdErrorReadTask).ConfigureAwait(false);
+            await Task.WhenAll(_outputComplete.Task, _errorComplete.Task).ConfigureAwait(false);
         }
         catch
         {
