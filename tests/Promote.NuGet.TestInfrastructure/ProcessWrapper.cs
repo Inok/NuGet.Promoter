@@ -1,13 +1,14 @@
-using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace Promote.NuGet.TestInfrastructure;
 
 public sealed class ProcessWrapper : IAsyncDisposable
 {
-    private readonly ConcurrentBag<string> _stdOut = new();
-    private readonly ConcurrentBag<string> _stdError = new();
-    private readonly string _processName;
+    private readonly List<string> _stdOut = new();
+    private readonly List<string> _stdError = new();
+    private readonly object _stdOutLock = new();
+    private readonly object _stdErrorLock = new();
+    private readonly ProcessStartInfo _processStartInfo;
     private readonly int _processId;
     private readonly TaskCompletionSource _outputComplete = new();
     private readonly TaskCompletionSource _errorComplete = new();
@@ -16,12 +17,31 @@ public sealed class ProcessWrapper : IAsyncDisposable
 
     public int ExitCode => Process.ExitCode;
 
-    public IReadOnlyList<string> StdOut => _stdOut.ToList();
+    public IReadOnlyList<string> StdOut
+    {
+        get
+        {
+            lock (_stdOutLock)
+            {
+                return _stdOut.ToList();
+            }
+        }
+    }
 
-    public IReadOnlyList<string> StdError => _stdError.ToList();
+    public IReadOnlyList<string> StdError
+    {
+        get
+        {
+            lock (_stdErrorLock)
+            {
+                return _stdError.ToList();
+            }
+        }
+    }
 
     public ProcessWrapper(ProcessStartInfo processStartInfo)
     {
+        _processStartInfo = processStartInfo;
         Process = new Process { StartInfo = processStartInfo };
         
         // Attach event handlers BEFORE starting the process
@@ -38,7 +58,6 @@ public sealed class ProcessWrapper : IAsyncDisposable
         Process.BeginOutputReadLine();
         Process.BeginErrorReadLine();
         
-        _processName = Process.ProcessName;
         _processId = Process.Id;
     }
 
@@ -48,7 +67,10 @@ public sealed class ProcessWrapper : IAsyncDisposable
                                       {
                                           if (args.Data != null)
                                           {
-                                              _stdOut.Add(args.Data);
+                                              lock (_stdOutLock)
+                                              {
+                                                  _stdOut.Add(args.Data);
+                                              }
                                           }
                                           else
                                           {
@@ -60,7 +82,10 @@ public sealed class ProcessWrapper : IAsyncDisposable
                                      {
                                          if (args.Data != null)
                                          {
-                                             _stdError.Add(args.Data);
+                                             lock (_stdErrorLock)
+                                             {
+                                                 _stdError.Add(args.Data);
+                                             }
                                          }
                                          else
                                          {
@@ -70,24 +95,24 @@ public sealed class ProcessWrapper : IAsyncDisposable
                                      };
     }
 
-    public Task WaitForExitAsync(CancellationToken cancellationToken = default)
+    public async Task WaitForExitAsync(CancellationToken cancellationToken = default)
     {
-        return Process.WaitForExitAsync(cancellationToken);
+        await Process.WaitForExitAsync(cancellationToken);
+        
+        // Wait for both output and error streams to signal completion
+        // This ensures all data has been received from the async event handlers
+        await Task.WhenAll(_outputComplete.Task, _errorComplete.Task);
     }
 
     public async Task<ProcessRunResult> WaitForExitAndGetResult(CancellationToken cancellationToken = default)
     {
         await WaitForExitAsync(cancellationToken);
 
-        // Wait for both output and error streams to signal completion
-        // This ensures all data has been received from the async event handlers
-        await Task.WhenAll(_outputComplete.Task, _errorComplete.Task);
-
-        var stdOutput = StdOut.ToList();
-        var stdError = StdError.ToList();
+        var stdOutput = StdOut;
+        var stdError = StdError;
 
         /* Dump results to console */
-        TestContext.Out.WriteLine($"Process '{_processName}' (PID {_processId}) exited with code {Process.ExitCode}.");
+        TestContext.Out.WriteLine($"Process '{_processStartInfo.FileName}' (PID {_processId}) exited with code {Process.ExitCode}.");
 
         if (stdOutput.Count > 0)
         {
