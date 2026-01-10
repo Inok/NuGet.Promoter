@@ -47,8 +47,7 @@ public sealed class LocalNugetFeed : IAsyncDisposable
         const ushort bagetterHttpsPort = 8081;
         const string certInContainerPath = "/https-certs/bagetter.pfx";
 
-        var container = new ContainerBuilder()
-                        .WithImage("bagetter/bagetter:1.6.0")
+        var container = new ContainerBuilder("bagetter/bagetter:1.6.0")
                         .WithLogger(TestcontainersLogger.Instance)
                         .WithEnvironment("ApiKey", apiKey)
                         .WithEnvironment("ASPNETCORE_HTTP_PORTS", bagetterHttpPort.ToString())
