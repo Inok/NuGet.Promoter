@@ -70,7 +70,6 @@ public sealed class ProcessWrapper : IAsyncDisposable
     private void Start()
     {
         // Attach event handlers BEFORE starting the process
-        // This ensures handlers are ready to capture output from the moment the process starts
         AttachEventHandlers();
 
         if (!Process.Start())
@@ -80,8 +79,7 @@ public sealed class ProcessWrapper : IAsyncDisposable
 
         _processId = Process.Id;
 
-        // Start asynchronous reading IMMEDIATELY after process starts
-        // to minimize the window where output could be lost
+        // Start asynchronous reading immediately after process starts
         Process.BeginOutputReadLine();
         Process.BeginErrorReadLine();
     }
@@ -89,38 +87,40 @@ public sealed class ProcessWrapper : IAsyncDisposable
     private void AttachEventHandlers()
     {
         Process.OutputDataReceived += (_, args) =>
-                                      {
-                                          if (args.Data != null)
-                                          {
-                                              _stdOut.Enqueue(args.Data);
-                                          }
-                                          else
-                                          {
-                                              // null indicates end of stream
-                                              _outputComplete.TrySetResult();
-                                          }
-                                      };
+        {
+            if (args.Data != null)
+            {
+                _stdOut.Enqueue(args.Data);
+            }
+            else
+            {
+                // null indicates end of stream
+                _outputComplete.TrySetResult();
+            }
+        };
+        
         Process.ErrorDataReceived += (_, args) =>
-                                     {
-                                         if (args.Data != null)
-                                         {
-                                             _stdError.Enqueue(args.Data);
-                                         }
-                                         else
-                                         {
-                                             // null indicates end of stream
-                                             _errorComplete.TrySetResult();
-                                         }
-                                     };
+        {
+            if (args.Data != null)
+            {
+                _stdError.Enqueue(args.Data);
+            }
+            else
+            {
+                // null indicates end of stream
+                _errorComplete.TrySetResult();
+            }
+        };
     }
 
     public async Task WaitForExitAsync(CancellationToken cancellationToken = default)
     {
-        await Process.WaitForExitAsync(cancellationToken);
-        
-        // Wait for both output and error streams to signal completion
-        // This ensures all data has been received from the async event handlers
+        // Wait for both output and error streams to signal completion FIRST
+        // This ensures all data has been received from the stream readers
         await Task.WhenAll(_outputComplete.Task, _errorComplete.Task);
+        
+        // Then wait for the process to exit (should already be exited, but just in case)
+        await Process.WaitForExitAsync(cancellationToken);
     }
 
     public async Task<ProcessRunResult> WaitForExitAndGetResult(CancellationToken cancellationToken = default)
