@@ -34,7 +34,7 @@ public sealed class ProcessWrapper : IAsyncDisposable
         var stdError = StdError.ToList();
 
         /* Dump results to console */
-        TestContext.Out.WriteLine($"Process {Process} exited with code {Process.ExitCode}.");
+        TestContext.Out.WriteLine($"Process '{Process.ProcessName}' (PID {Process.Id}) exited with code {Process.ExitCode}.");
 
         if (stdOutput.Count > 0)
         {
