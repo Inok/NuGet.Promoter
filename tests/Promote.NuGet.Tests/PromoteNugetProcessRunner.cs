@@ -20,26 +20,17 @@ public static class PromoteNugetProcessRunner
 
     public static ProcessWrapper Run(params string[] arguments)
     {
-        var processStartInfo = new ProcessStartInfo
-                               {
-                                   FileName = "dotnet",
-                                   ArgumentList = { "Promote.NuGet.dll" },
-                                   RedirectStandardOutput = true,
-                                   RedirectStandardError = true,
-                                   Environment =
-                                   {
-                                       ["__NO_ANSI_CONTROL_CODES"] = "1",
-                                       ["__CONSOLE_WIDTH"] = ConsoleWidth.ToString(),
-                                   }
-                               };
+        var args = new List<string> { "Promote.NuGet.dll" };
+        args.AddRange(arguments);
 
-        foreach (var argument in arguments)
+        var environmentVariables = new Dictionary<string, string>
         {
-            processStartInfo.ArgumentList.Add(argument);
-        }
+            ["__NO_ANSI_CONTROL_CODES"] = "1",
+            ["__CONSOLE_WIDTH"] = ConsoleWidth.ToString(),
+        };
 
-        TestContext.Out.WriteLine($"Running {processStartInfo.FileName} {string.Join(" ", processStartInfo.ArgumentList)}");
+        TestContext.Out.WriteLine($"Running dotnet {string.Join(" ", args)}");
 
-        return new ProcessWrapper(processStartInfo);
+        return ProcessWrapper.Create("dotnet", args, environmentVariables);
     }
 }

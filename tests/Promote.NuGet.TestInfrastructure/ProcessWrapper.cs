@@ -1,15 +1,14 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace Promote.NuGet.TestInfrastructure;
 
 public sealed class ProcessWrapper : IAsyncDisposable
 {
-    private readonly List<string> _stdOut = new();
-    private readonly List<string> _stdError = new();
-    private readonly object _stdOutLock = new();
-    private readonly object _stdErrorLock = new();
-    private readonly ProcessStartInfo _processStartInfo;
-    private readonly int _processId;
+    private readonly ConcurrentQueue<string> _stdOut = new();
+    private readonly ConcurrentQueue<string> _stdError = new();
+    private readonly string _processName;
+    private int _processId;
     private readonly TaskCompletionSource _outputComplete = new();
     private readonly TaskCompletionSource _errorComplete = new();
 
@@ -17,48 +16,74 @@ public sealed class ProcessWrapper : IAsyncDisposable
 
     public int ExitCode => Process.ExitCode;
 
-    public IReadOnlyList<string> StdOut
+    public IReadOnlyCollection<string> StdOut => _stdOut;
+
+    public IReadOnlyCollection<string> StdError => _stdError;
+
+    private ProcessWrapper(Process process, string processName)
     {
-        get
+        Process = process;
+        _processName = processName;
+        _processId = -1; // Will be set after Start()
+    }
+
+    public static ProcessWrapper Create(
+        string fileName,
+        IEnumerable<string> arguments,
+        IReadOnlyDictionary<string, string>? environmentVariables = null)
+    {
+        var processStartInfo = new ProcessStartInfo
         {
-            lock (_stdOutLock)
+            FileName = fileName,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+
+        foreach (var argument in arguments)
+        {
+            processStartInfo.ArgumentList.Add(argument);
+        }
+
+        if (environmentVariables != null)
+        {
+            foreach (var (key, value) in environmentVariables)
             {
-                return _stdOut.ToList();
+                processStartInfo.Environment[key] = value;
             }
+        }
+
+        var process = new Process { StartInfo = processStartInfo };
+
+        try
+        {
+            var wrapper = new ProcessWrapper(process, fileName);
+            wrapper.Start();
+            return wrapper;
+        }
+        catch
+        {
+            process.Dispose();
+            throw;
         }
     }
 
-    public IReadOnlyList<string> StdError
+    private void Start()
     {
-        get
-        {
-            lock (_stdErrorLock)
-            {
-                return _stdError.ToList();
-            }
-        }
-    }
-
-    public ProcessWrapper(ProcessStartInfo processStartInfo)
-    {
-        _processStartInfo = processStartInfo;
-        Process = new Process { StartInfo = processStartInfo };
-        
         // Attach event handlers BEFORE starting the process
         // This ensures handlers are ready to capture output from the moment the process starts
         AttachEventHandlers();
-        
+
         if (!Process.Start())
         {
             throw new InvalidOperationException("Failed to start the process");
         }
-        
+
+        _processId = Process.Id;
+
         // Start asynchronous reading IMMEDIATELY after process starts
         // to minimize the window where output could be lost
         Process.BeginOutputReadLine();
         Process.BeginErrorReadLine();
-        
-        _processId = Process.Id;
     }
 
     private void AttachEventHandlers()
@@ -67,10 +92,7 @@ public sealed class ProcessWrapper : IAsyncDisposable
                                       {
                                           if (args.Data != null)
                                           {
-                                              lock (_stdOutLock)
-                                              {
-                                                  _stdOut.Add(args.Data);
-                                              }
+                                              _stdOut.Enqueue(args.Data);
                                           }
                                           else
                                           {
@@ -82,10 +104,7 @@ public sealed class ProcessWrapper : IAsyncDisposable
                                      {
                                          if (args.Data != null)
                                          {
-                                             lock (_stdErrorLock)
-                                             {
-                                                 _stdError.Add(args.Data);
-                                             }
+                                             _stdError.Enqueue(args.Data);
                                          }
                                          else
                                          {
@@ -108,11 +127,11 @@ public sealed class ProcessWrapper : IAsyncDisposable
     {
         await WaitForExitAsync(cancellationToken);
 
-        var stdOutput = StdOut;
-        var stdError = StdError;
+        var stdOutput = StdOut.ToList();
+        var stdError = StdError.ToList();
 
         /* Dump results to console */
-        TestContext.Out.WriteLine($"Process '{_processStartInfo.FileName}' (PID {_processId}) exited with code {Process.ExitCode}.");
+        TestContext.Out.WriteLine($"Process '{_processName}' (PID {_processId}) exited with code {Process.ExitCode}.");
 
         if (stdOutput.Count > 0)
         {
