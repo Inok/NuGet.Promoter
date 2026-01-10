@@ -40,23 +40,6 @@ public static class PromoteNugetProcessRunner
 
         TestContext.Out.WriteLine($"Running {processStartInfo.FileName} {string.Join(" ", processStartInfo.ArgumentList)}");
 
-        Process? process = null;
-        try
-        {
-            process = Process.Start(processStartInfo);
-
-            if (process == null)
-            {
-                Assert.Fail("Failed to run the process");
-                Environment.FailFast("UNREACHABLE");
-            }
-
-            return new ProcessWrapper(process);
-        }
-        catch
-        {
-            process?.Dispose();
-            throw;
-        }
+        return new ProcessWrapper(processStartInfo);
     }
 }
