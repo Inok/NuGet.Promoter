@@ -1,50 +1,121 @@
-﻿using System.Diagnostics;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace Promote.NuGet.TestInfrastructure;
 
 public sealed class ProcessWrapper : IAsyncDisposable
 {
-    private readonly List<string> _stdOut = new();
-    private readonly List<string> _stdError = new();
-    private readonly string _processName;
-    private readonly int _processId;
+    private readonly ConcurrentQueue<string> _stdOut = new();
+    private readonly ConcurrentQueue<string> _stdError = new();
+    private int _processId;
+    private Task _outputReadTask = Task.CompletedTask;
+    private Task _errorReadTask = Task.CompletedTask;
 
     public Process Process { get; }
 
     public int ExitCode => Process.ExitCode;
 
-    public IReadOnlyList<string> StdOut => _stdOut;
+    public IReadOnlyCollection<string> StdOut => _stdOut;
 
-    public IReadOnlyList<string> StdError => _stdError;
+    public IReadOnlyCollection<string> StdError => _stdError;
 
-    public ProcessWrapper(Process process)
+    private ProcessWrapper(Process process)
     {
         Process = process;
-        _processName = process.ProcessName;
-        _processId = process.Id;
-        SubscribeToOutputs();
+        _processId = -1; // Will be set after Start()
     }
 
-    public Task WaitForExitAsync(CancellationToken cancellationToken = default)
+    public static ProcessWrapper Create(
+        string fileName,
+        IReadOnlyCollection<string> arguments,
+        IReadOnlyDictionary<string, string>? environmentVariables = null)
     {
-        return Process.WaitForExitAsync(cancellationToken);
+        TestContext.Out.WriteLine($"Running {fileName} {string.Join(" ", arguments)}");
+
+        var processStartInfo = new ProcessStartInfo
+        {
+            FileName = fileName,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+
+        foreach (var argument in arguments)
+        {
+            processStartInfo.ArgumentList.Add(argument);
+        }
+
+        if (environmentVariables != null)
+        {
+            foreach (var (key, value) in environmentVariables)
+            {
+                processStartInfo.Environment[key] = value;
+            }
+        }
+
+        var process = new Process { StartInfo = processStartInfo };
+
+        try
+        {
+            var wrapper = new ProcessWrapper(process);
+            wrapper.Start();
+            return wrapper;
+        }
+        catch
+        {
+            process.Dispose();
+            throw;
+        }
+    }
+
+    private void Start()
+    {
+        if (!Process.Start())
+        {
+            throw new InvalidOperationException("Failed to start the process");
+        }
+
+        _processId = Process.Id;
+
+        // Use Task.Factory.StartNew with LongRunning option to ensure dedicated threads
+        // Synchronous reading eliminates race conditions with fast-exiting processes
+        _outputReadTask = Task.Factory.StartNew(() =>
+        {
+            string? line;
+            while ((line = Process.StandardOutput.ReadLine()) != null)
+            {
+                _stdOut.Enqueue(line);
+            }
+        }, TaskCreationOptions.LongRunning);
+
+        _errorReadTask = Task.Factory.StartNew(() =>
+        {
+            string? line;
+            while ((line = Process.StandardError.ReadLine()) != null)
+            {
+                _stdError.Enqueue(line);
+            }
+        }, TaskCreationOptions.LongRunning);
+    }
+
+    public async Task WaitForExitAsync(CancellationToken cancellationToken = default)
+    {
+        // Wait for both output and error stream reading tasks to complete with cancellation support
+        // This ensures all data has been captured before returning
+        await Task.WhenAll(_outputReadTask, _errorReadTask).WaitAsync(cancellationToken);
+        
+        // Then wait for process to exit (defensive check, should already be done)
+        await Process.WaitForExitAsync(cancellationToken);
     }
 
     public async Task<ProcessRunResult> WaitForExitAndGetResult(CancellationToken cancellationToken = default)
     {
         await WaitForExitAsync(cancellationToken);
 
-        // Ensure asynchronous event handling has been completed.
-        // WaitForExitAsync (like WaitForExit with timeout) may return before all output is processed.
-        // The parameterless WaitForExit ensures OutputDataReceived and ErrorDataReceived events have finished.
-        // See: https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.waitforexit
-        Process.WaitForExit();
-
         var stdOutput = StdOut.ToList();
         var stdError = StdError.ToList();
 
         /* Dump results to console */
-        TestContext.Out.WriteLine($"Process '{_processName}' (PID {_processId}) exited with code {Process.ExitCode}.");
+        TestContext.Out.WriteLine($"Process '{Process.StartInfo.FileName}' (PID {_processId}) exited with code {Process.ExitCode}.");
 
         if (stdOutput.Count > 0)
         {
@@ -67,27 +138,6 @@ public sealed class ProcessWrapper : IAsyncDisposable
         return new ProcessRunResult(ExitCode, stdOutput, stdError);
     }
 
-    private void SubscribeToOutputs()
-    {
-        Process.OutputDataReceived += (_, args) =>
-                                      {
-                                          if (args.Data != null)
-                                          {
-                                              _stdOut.Add(args.Data);
-                                          }
-                                      };
-        Process.ErrorDataReceived += (_, args) =>
-                                     {
-                                         if (args.Data != null)
-                                         {
-                                             _stdError.Add(args.Data);
-                                         }
-                                     };
-
-        Process.BeginOutputReadLine();
-        Process.BeginErrorReadLine();
-    }
-
     public async ValueTask DisposeAsync()
     {
         if (Process.HasExited == false)
@@ -97,13 +147,7 @@ public sealed class ProcessWrapper : IAsyncDisposable
 
             await Process.WaitForExitAsync();
 
-            TestContext.Out.WriteLine("The process is still running. Dumping its output and killing the process.");
-            TestContext.Out.WriteLine("Error output:");
-            TestContext.Out.WriteLine(await Process.StandardError.ReadToEndAsync());
-            TestContext.Out.WriteLine("Standard output:");
-            TestContext.Out.WriteLine(await Process.StandardOutput.ReadToEndAsync());
-
-            TestContext.Out.WriteLine("The process is stopped.");
+            TestContext.Out.WriteLine("The process was still running and has been killed.");
         }
 
         Process.Dispose();
