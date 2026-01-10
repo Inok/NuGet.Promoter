@@ -6,6 +6,8 @@ public sealed class ProcessWrapper : IAsyncDisposable
 {
     private readonly List<string> _stdOut = new();
     private readonly List<string> _stdError = new();
+    private readonly string _processName;
+    private readonly int _processId;
 
     public Process Process { get; }
 
@@ -18,6 +20,8 @@ public sealed class ProcessWrapper : IAsyncDisposable
     public ProcessWrapper(Process process)
     {
         Process = process;
+        _processName = process.ProcessName;
+        _processId = process.Id;
         SubscribeToOutputs();
     }
 
@@ -34,7 +38,7 @@ public sealed class ProcessWrapper : IAsyncDisposable
         var stdError = StdError.ToList();
 
         /* Dump results to console */
-        TestContext.Out.WriteLine($"Process {Process} exited with code {Process.ExitCode}.");
+        TestContext.Out.WriteLine($"Process '{_processName}' (PID {_processId}) exited with code {Process.ExitCode}.");
 
         if (stdOutput.Count > 0)
         {
