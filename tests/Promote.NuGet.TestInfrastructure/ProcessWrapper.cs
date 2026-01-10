@@ -6,6 +6,8 @@ public sealed class ProcessWrapper : IAsyncDisposable
 {
     private readonly List<string> _stdOut = new();
     private readonly List<string> _stdError = new();
+    private readonly TaskCompletionSource _outputComplete = new();
+    private readonly TaskCompletionSource _errorComplete = new();
 
     public Process Process { get; }
 
@@ -29,6 +31,10 @@ public sealed class ProcessWrapper : IAsyncDisposable
     public async Task<ProcessRunResult> WaitForExitAndGetResult(CancellationToken cancellationToken = default)
     {
         await WaitForExitAsync(cancellationToken);
+
+        // Wait for output streams to complete
+        await _outputComplete.Task.WaitAsync(cancellationToken);
+        await _errorComplete.Task.WaitAsync(cancellationToken);
 
         var stdOutput = StdOut.ToList();
         var stdError = StdError.ToList();
@@ -61,11 +67,25 @@ public sealed class ProcessWrapper : IAsyncDisposable
     {
         Process.OutputDataReceived += (_, args) =>
                                       {
-                                          if (args.Data != null) _stdOut.Add(args.Data);
+                                          if (args.Data != null)
+                                          {
+                                              _stdOut.Add(args.Data);
+                                          }
+                                          else
+                                          {
+                                              _outputComplete.TrySetResult();
+                                          }
                                       };
         Process.ErrorDataReceived += (_, args) =>
                                      {
-                                         if (args.Data != null) _stdError.Add(args.Data);
+                                         if (args.Data != null)
+                                         {
+                                             _stdError.Add(args.Data);
+                                         }
+                                         else
+                                         {
+                                             _errorComplete.TrySetResult();
+                                         }
                                      };
 
         Process.BeginOutputReadLine();
