@@ -7,7 +7,6 @@ public sealed class ProcessWrapper : IAsyncDisposable
 {
     private readonly ConcurrentQueue<string> _stdOut = new();
     private readonly ConcurrentQueue<string> _stdError = new();
-    private readonly string _processName;
     private int _processId;
     private readonly TaskCompletionSource _outputComplete = new();
     private readonly TaskCompletionSource _errorComplete = new();
@@ -20,18 +19,19 @@ public sealed class ProcessWrapper : IAsyncDisposable
 
     public IReadOnlyCollection<string> StdError => _stdError;
 
-    private ProcessWrapper(Process process, string processName)
+    private ProcessWrapper(Process process)
     {
         Process = process;
-        _processName = processName;
         _processId = -1; // Will be set after Start()
     }
 
     public static ProcessWrapper Create(
         string fileName,
-        IEnumerable<string> arguments,
+        IReadOnlyCollection<string> arguments,
         IReadOnlyDictionary<string, string>? environmentVariables = null)
     {
+        TestContext.Out.WriteLine($"Running {fileName} {string.Join(" ", arguments)}");
+
         var processStartInfo = new ProcessStartInfo
         {
             FileName = fileName,
@@ -56,7 +56,7 @@ public sealed class ProcessWrapper : IAsyncDisposable
 
         try
         {
-            var wrapper = new ProcessWrapper(process, fileName);
+            var wrapper = new ProcessWrapper(process);
             wrapper.Start();
             return wrapper;
         }
@@ -131,7 +131,7 @@ public sealed class ProcessWrapper : IAsyncDisposable
         var stdError = StdError.ToList();
 
         /* Dump results to console */
-        TestContext.Out.WriteLine($"Process '{_processName}' (PID {_processId}) exited with code {Process.ExitCode}.");
+        TestContext.Out.WriteLine($"Process '{Process.StartInfo.FileName}' (PID {_processId}) exited with code {Process.ExitCode}.");
 
         if (stdOutput.Count > 0)
         {
@@ -164,16 +164,6 @@ public sealed class ProcessWrapper : IAsyncDisposable
             await Process.WaitForExitAsync();
 
             TestContext.Out.WriteLine("The process was still running and has been killed.");
-        }
-
-        // Wait for stream completion signals before disposing
-        try
-        {
-            await Task.WhenAll(_outputComplete.Task, _errorComplete.Task).ConfigureAwait(false);
-        }
-        catch
-        {
-            // Ignore exceptions during cleanup
         }
 
         Process.Dispose();
