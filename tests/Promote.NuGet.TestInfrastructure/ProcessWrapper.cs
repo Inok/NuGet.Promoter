@@ -8,8 +8,8 @@ public sealed class ProcessWrapper : IAsyncDisposable
     private readonly ConcurrentQueue<string> _stdOut = new();
     private readonly ConcurrentQueue<string> _stdError = new();
     private int _processId;
-    private readonly TaskCompletionSource _outputComplete = new();
-    private readonly TaskCompletionSource _errorComplete = new();
+    private Task _outputReadTask = Task.CompletedTask;
+    private Task _errorReadTask = Task.CompletedTask;
 
     public Process Process { get; }
 
@@ -69,9 +69,6 @@ public sealed class ProcessWrapper : IAsyncDisposable
 
     private void Start()
     {
-        // Attach event handlers BEFORE starting the process
-        AttachEventHandlers();
-
         if (!Process.Start())
         {
             throw new InvalidOperationException("Failed to start the process");
@@ -79,47 +76,34 @@ public sealed class ProcessWrapper : IAsyncDisposable
 
         _processId = Process.Id;
 
-        // Start asynchronous reading immediately after process starts
-        Process.BeginOutputReadLine();
-        Process.BeginErrorReadLine();
-    }
+        // Use Task.Factory.StartNew with LongRunning option to ensure dedicated threads
+        // Synchronous reading eliminates race conditions with fast-exiting processes
+        _outputReadTask = Task.Factory.StartNew(() =>
+        {
+            string? line;
+            while ((line = Process.StandardOutput.ReadLine()) != null)
+            {
+                _stdOut.Enqueue(line);
+            }
+        }, TaskCreationOptions.LongRunning);
 
-    private void AttachEventHandlers()
-    {
-        Process.OutputDataReceived += (_, args) =>
+        _errorReadTask = Task.Factory.StartNew(() =>
         {
-            if (args.Data != null)
+            string? line;
+            while ((line = Process.StandardError.ReadLine()) != null)
             {
-                _stdOut.Enqueue(args.Data);
+                _stdError.Enqueue(line);
             }
-            else
-            {
-                // null indicates end of stream
-                _outputComplete.TrySetResult();
-            }
-        };
-        
-        Process.ErrorDataReceived += (_, args) =>
-        {
-            if (args.Data != null)
-            {
-                _stdError.Enqueue(args.Data);
-            }
-            else
-            {
-                // null indicates end of stream
-                _errorComplete.TrySetResult();
-            }
-        };
+        }, TaskCreationOptions.LongRunning);
     }
 
     public async Task WaitForExitAsync(CancellationToken cancellationToken = default)
     {
-        // Wait for both output and error streams to signal completion FIRST
-        // This ensures all data has been received from the stream readers
-        await Task.WhenAll(_outputComplete.Task, _errorComplete.Task);
+        // Wait for both output and error stream reading tasks to complete with cancellation support
+        // This ensures all data has been captured before returning
+        await Task.WhenAll(_outputReadTask, _errorReadTask).WaitAsync(cancellationToken);
         
-        // Then wait for the process to exit (should already be exited, but just in case)
+        // Then wait for process to exit (defensive check, should already be done)
         await Process.WaitForExitAsync(cancellationToken);
     }
 
