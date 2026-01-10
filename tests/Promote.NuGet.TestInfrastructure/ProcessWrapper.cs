@@ -6,8 +6,6 @@ public sealed class ProcessWrapper : IAsyncDisposable
 {
     private readonly List<string> _stdOut = new();
     private readonly List<string> _stdError = new();
-    private readonly TaskCompletionSource _outputComplete = new();
-    private readonly TaskCompletionSource _errorComplete = new();
 
     public Process Process { get; }
 
@@ -32,9 +30,11 @@ public sealed class ProcessWrapper : IAsyncDisposable
     {
         await WaitForExitAsync(cancellationToken);
 
-        // Wait for output streams to complete
-        await _outputComplete.Task.WaitAsync(cancellationToken);
-        await _errorComplete.Task.WaitAsync(cancellationToken);
+        // Ensure asynchronous event handling has been completed.
+        // WaitForExitAsync (like WaitForExit with timeout) may return before all output is processed.
+        // The parameterless WaitForExit ensures OutputDataReceived and ErrorDataReceived events have finished.
+        // See: https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.waitforexit
+        Process.WaitForExit();
 
         var stdOutput = StdOut.ToList();
         var stdError = StdError.ToList();
@@ -71,20 +71,12 @@ public sealed class ProcessWrapper : IAsyncDisposable
                                           {
                                               _stdOut.Add(args.Data);
                                           }
-                                          else
-                                          {
-                                              _outputComplete.TrySetResult();
-                                          }
                                       };
         Process.ErrorDataReceived += (_, args) =>
                                      {
                                          if (args.Data != null)
                                          {
                                              _stdError.Add(args.Data);
-                                         }
-                                         else
-                                         {
-                                             _errorComplete.TrySetResult();
                                          }
                                      };
 
