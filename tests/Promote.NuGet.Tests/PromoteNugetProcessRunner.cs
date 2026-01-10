@@ -20,16 +20,14 @@ public static class PromoteNugetProcessRunner
 
     public static ProcessWrapper Run(params string[] arguments)
     {
-        var environmentVariables = new Dictionary<string, string>
-        {
-            ["__NO_ANSI_CONTROL_CODES"] = "1",
-            ["__CONSOLE_WIDTH"] = ConsoleWidth.ToString(),
-        };
-
         return ProcessWrapper.Create(
             "dotnet",
-            new[] { "Promote.NuGet.dll" }.Concat(arguments).ToArray(),
-            environmentVariables
+            ["Promote.NuGet.dll", ..arguments],
+            new Dictionary<string, string>
+            {
+                ["__NO_ANSI_CONTROL_CODES"] = "1",
+                ["__CONSOLE_WIDTH"] = ConsoleWidth.ToString(),
+            }
         );
     }
 }
