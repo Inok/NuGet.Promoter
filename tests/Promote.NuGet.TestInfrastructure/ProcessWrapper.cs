@@ -30,6 +30,12 @@ public sealed class ProcessWrapper : IAsyncDisposable
     {
         await WaitForExitAsync(cancellationToken);
 
+        // Ensure asynchronous event handling has been completed.
+        // WaitForExitAsync (like WaitForExit with timeout) may return before all output is processed.
+        // The parameterless WaitForExit ensures OutputDataReceived and ErrorDataReceived events have finished.
+        // See: https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.waitforexit
+        Process.WaitForExit();
+
         var stdOutput = StdOut.ToList();
         var stdError = StdError.ToList();
 
@@ -61,11 +67,17 @@ public sealed class ProcessWrapper : IAsyncDisposable
     {
         Process.OutputDataReceived += (_, args) =>
                                       {
-                                          if (args.Data != null) _stdOut.Add(args.Data);
+                                          if (args.Data != null)
+                                          {
+                                              _stdOut.Add(args.Data);
+                                          }
                                       };
         Process.ErrorDataReceived += (_, args) =>
                                      {
-                                         if (args.Data != null) _stdError.Add(args.Data);
+                                         if (args.Data != null)
+                                         {
+                                             _stdError.Add(args.Data);
+                                         }
                                      };
 
         Process.BeginOutputReadLine();
