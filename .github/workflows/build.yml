@@ -70,7 +70,7 @@ jobs:
           path: test-results/
 
       - name: Report tests
-        uses: dorny/test-reporter@v2
+        uses: dorny/test-reporter@v3
         if: ${{ always() }}
         with:
           name: .NET Tests
