@@ -25,7 +25,9 @@ jobs:
           global-json-file: global.json
 
       - name: Setup HTTPS development certificate
-        run: dotnet dev-certs https --trust
+        run: |
+          dotnet dev-certs https --trust
+          echo "SSL_CERT_DIR=$HOME/.aspnet/dev-certs/trust:/usr/lib/ssl/certs" >> $GITHUB_ENV
 
       - name: Build project
         run: ./build.sh -Target All
