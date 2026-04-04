@@ -104,18 +104,20 @@ partial class Build : NukeBuild
                                           var projects = TestsDirectory.GlobFiles(new[] { "**/*.Tests.csproj" });
                                           Assert.NotEmpty(projects);
 
-                                          DotNetRun(s => s
+                                          DotNetTest(s => s
                                                          .SetConfiguration(Configuration)
                                                          .EnableNoBuild()
                                                          .EnableNoRestore()
+                                                         .SetVerbosity(DotNetVerbosity.minimal)
                                                          .CombineWith(
                                                              projects,
                                                              (cs, v) => cs
-                                                                        .SetProjectFile(v)
-                                                                        .AddApplicationArguments("--results-directory", TestResultsDirectory / v.NameWithoutExtension)
-                                                                        .AddApplicationArguments("--report-trx", "--report-trx-filename", $"test-result-{Guid.NewGuid():N}.trx")
-                                                                        .AddApplicationArguments("--coverage", "--coverage-output", "coverage.cobertura.xml", "--coverage-output-format", "cobertura")
-                                                                        .AddApplicationArguments("--no-ansi")),
+                                                                        .AddProcessAdditionalArguments("--project", v)
+                                                                        .AddProcessAdditionalArguments("--results-directory", TestResultsDirectory / v.NameWithoutExtension)
+                                                                        .AddProcessAdditionalArguments("--report-trx", "--report-trx-filename", $"test-result-{Guid.NewGuid():N}.trx")
+                                                                        .AddProcessAdditionalArguments("--coverage", "--coverage-output", "coverage.cobertura.xml", "--coverage-output-format", "cobertura")
+                                                                        .AddProcessAdditionalArguments("--no-ansi")
+                                                                        .AddProcessAdditionalArguments("--no-progress")),
                                                     degreeOfParallelism: Environment.ProcessorCount,
                                                     completeOnFailure: true
                                           );
