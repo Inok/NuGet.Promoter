@@ -4,33 +4,33 @@
         <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
     </PropertyGroup>
     <ItemGroup>
-        <PackageVersion Include="CSharpFunctionalExtensions" Version="3.6.0"/>
-        <PackageVersion Include="AwesomeAssertions" Version="9.3.0"/>
+        <PackageVersion Include="CSharpFunctionalExtensions" Version="3.7.0"/>
+        <PackageVersion Include="AwesomeAssertions" Version="9.4.0"/>
         <PackageVersion Include="FluentValidation" Version="12.1.1"/>
-        <PackageVersion Include="Humanizer.Core" Version="3.0.1"/>
+        <PackageVersion Include="Humanizer.Core" Version="3.0.10"/>
         <PackageVersion Include="JetBrains.Annotations" Version="2025.2.4"/>
-        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1"/>
-        <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.3.2"/>
-        <PackageVersion Include="Microsoft.Testing.Extensions.Telemetry" Version="2.0.2"/>
-        <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.0.2"/>
-        <PackageVersion Include="Microsoft.Testing.Extensions.VSTestBridge" Version="2.0.2"/>
-        <PackageVersion Include="Microsoft.Testing.Platform" Version="2.0.2"/>
-        <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.0.2"/>
+        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0"/>
+        <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.5.2"/>
+        <PackageVersion Include="Microsoft.Testing.Extensions.Telemetry" Version="2.1.0"/>
+        <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.1.0"/>
+        <PackageVersion Include="Microsoft.Testing.Extensions.VSTestBridge" Version="2.1.0"/>
+        <PackageVersion Include="Microsoft.Testing.Platform" Version="2.1.0"/>
+        <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.1.0"/>
         <PackageVersion Include="NSubstitute" Version="5.3.0"/>
         <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17"/>
-        <PackageVersion Include="NUnit" Version="4.4.0"/>
-        <PackageVersion Include="NUnit.Analyzers" Version="4.11.2"/>
-        <PackageVersion Include="NUnit3TestAdapter" Version="6.0.0"/>
-        <PackageVersion Include="NuGet.Protocol" Version="7.0.1"/>
+        <PackageVersion Include="NUnit" Version="4.5.1"/>
+        <PackageVersion Include="NUnit.Analyzers" Version="4.12.0"/>
+        <PackageVersion Include="NUnit3TestAdapter" Version="6.2.0"/>
+        <PackageVersion Include="NuGet.Protocol" Version="7.3.0"/>
         <PackageVersion Include="Nuke.Common" Version="10.1.0"/>
-        <PackageVersion Include="Spectre.Console" Version="0.50.0"/>
+        <PackageVersion Include="Spectre.Console" Version="0.55.0"/>
         <PackageVersion Include="Spectre.Console.Analyzer" Version="1.0.0"/>
-        <PackageVersion Include="Spectre.Console.Cli" Version="0.50.0"/>
-        <PackageVersion Include="System.Formats.Asn1" Version="10.0.0"/>
-        <PackageVersion Include="Testcontainers" Version="4.10.0"/>
+        <PackageVersion Include="Spectre.Console.Cli" Version="0.55.0"/>
+        <PackageVersion Include="System.Formats.Asn1" Version="10.0.5"/>
+        <PackageVersion Include="Testcontainers" Version="4.11.0"/>
         <PackageVersion Include="YamlDotNet" Version="16.3.0"/>
     </ItemGroup>
     <ItemGroup>
-        <GlobalPackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.102"/>
+        <GlobalPackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.201"/>
     </ItemGroup>
 </Project>

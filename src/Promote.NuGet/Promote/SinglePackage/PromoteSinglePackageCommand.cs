@@ -15,7 +15,7 @@ namespace Promote.NuGet.Promote.SinglePackage;
 [PublicAPI]
 internal sealed class PromoteSinglePackageCommand : CancellableAsyncCommand<PromoteSinglePackageSettings>
 {
-    public override async Task<int> ExecuteAsync(CommandContext context, PromoteSinglePackageSettings promoteSettings, CancellationToken cancellationToken)
+    protected override async Task<int> ExecuteAsync(CommandContext context, PromoteSinglePackageSettings promoteSettings, CancellationToken cancellationToken)
     {
         using var cacheContext = new SourceCacheContext
                                  {

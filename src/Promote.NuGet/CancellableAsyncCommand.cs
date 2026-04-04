@@ -5,9 +5,7 @@ namespace Promote.NuGet;
 public abstract class CancellableAsyncCommand<TSettings> : AsyncCommand<TSettings>
     where TSettings : CommandSettings
 {
-    public abstract Task<int> ExecuteAsync(CommandContext context, TSettings settings, CancellationToken cancellationToken);
-
-    public sealed override async Task<int> ExecuteAsync(CommandContext context, TSettings settings)
+    protected override async Task<int> ExecuteAsync(CommandContext context, TSettings settings, CancellationToken cancellationToken)
     {
         using var cts = new ConsoleAppCancellationTokenSource();
         return await ExecuteAsync(context, settings, cts.Token);
