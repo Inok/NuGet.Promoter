@@ -13,7 +13,7 @@ using Spectre.Console.Cli;
 namespace Promote.NuGet.Promote.SinglePackage;
 
 [PublicAPI]
-internal sealed class PromoteSinglePackageCommand : CancellableAsyncCommand<PromoteSinglePackageSettings>
+internal sealed class PromoteSinglePackageCommand : AsyncCommand<PromoteSinglePackageSettings>
 {
     protected override async Task<int> ExecuteAsync(CommandContext context, PromoteSinglePackageSettings promoteSettings, CancellationToken cancellationToken)
     {

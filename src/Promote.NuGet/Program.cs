@@ -12,6 +12,8 @@ public static class Program
     {
         SetupConsole();
 
+        using var cts = new ConsoleAppCancellationTokenSource();
+
         var app = new CommandApp();
 
         app.Configure(configurator =>
@@ -52,7 +54,7 @@ public static class Program
                           );
                       });
 
-        return await app.RunAsync(args);
+        return await app.RunAsync(args, cts.Token);
     }
 
     private static void SetupConsole()
