@@ -26,8 +26,9 @@ jobs:
 
       - name: Setup HTTPS development certificate
         run: |
-          dotnet dev-certs https --trust
           echo "SSL_CERT_DIR=$HOME/.aspnet/dev-certs/trust:/usr/lib/ssl/certs" >> $GITHUB_ENV
+          export SSL_CERT_DIR="$HOME/.aspnet/dev-certs/trust:/usr/lib/ssl/certs"
+          dotnet dev-certs https --trust
 
       - name: Build project
         run: ./build.sh -Target All
