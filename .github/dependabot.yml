@@ -3,13 +3,18 @@ updates:
   - package-ecosystem: "nuget"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    cooldown:
+      default-days: 3
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    cooldown:
+      default-days: 3
   - package-ecosystem: "dotnet-sdk"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "wednesday"
+    cooldown:
+      default-days: 3
