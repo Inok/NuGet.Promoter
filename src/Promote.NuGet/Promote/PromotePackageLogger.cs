@@ -1,4 +1,5 @@
 using NuGet.Packaging.Core;
+using NuGet.Versioning;
 using Promote.NuGet.Commands.Licensing;
 using Promote.NuGet.Commands.Mirroring;
 using Promote.NuGet.Commands.Promote;
@@ -52,6 +53,13 @@ public sealed class PromotePackageLogger(bool verbose) : IPromotePackageLogger
             }
             AnsiConsole.Write(tree);
         }
+    }
+
+    void IPackageRequestResolverLogger.LogPackageVersionSkippedDueToAge(string packageId, NuGetVersion version, DateTimeOffset publishedDate)
+    {
+        var text = Markup.FromInterpolated($"[yellow]Skipping {packageId} {version} (published {publishedDate:d}): does not meet minimum release age.[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
     }
 
     void IPackagesToPromoteResolverLogger.LogResolvingPackagesToPromote(IReadOnlyCollection<PackageIdentity> identities)
@@ -208,8 +216,22 @@ public sealed class PromotePackageLogger(bool verbose) : IPromotePackageLogger
 
         foreach (var child in dependencies.OrderBy(x => x))
         {
-            AddNodeAndChildren(node, packageTree, child, expanded, rootLevel: false);
+            AddNodeAndChildren(node, packageTree, child, expanded, false);
         }
+    }
+
+    void IPackagesToPromoteResolverLogger.LogDependencyVersionSkippedDueToAge(PackageIdentity source, string dependencyId, NuGetVersion version, DateTimeOffset publishedDate)
+    {
+        var text = Markup.FromInterpolated($"[yellow]Skipping dependency {dependencyId} {version} (published {publishedDate:d}): does not meet minimum release age.[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
+    }
+
+    void IPackagesToPromoteResolverLogger.LogDependencyResolvedToOlderVersionDueToAge(PackageIdentity source, string dependencyId, NuGetVersion bestVersion, NuGetVersion selectedVersion)
+    {
+        var text = Markup.FromInterpolated($"[yellow]Dependency {dependencyId}: best match {bestVersion} is too new; using {selectedVersion} instead.[/]");
+        var padder = new Padder(text).Padding(left: SingleLeftPaddingSize * 2, top: 0, right: 0, bottom: 0);
+        AnsiConsole.Write(padder);
     }
 
     void IPromotePackageLogger.LogPackagesToPromote(IReadOnlyCollection<PackageInfo> packages)
@@ -354,7 +376,6 @@ public sealed class PromotePackageLogger(bool verbose) : IPromotePackageLogger
         var text = Markup.FromInterpolated($"[red]Failed to read accepted file {acceptedFilePath}: {exception.Message}[/]");
         var padder = new Padder(text).Padding(left: SingleLeftPaddingSize, top: 0, right: 0, bottom: 0);
         AnsiConsole.Write(padder);
-
     }
 
     private static string Decl(int count, string one, string many)

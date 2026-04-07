@@ -33,7 +33,7 @@ internal sealed class PromoteSinglePackageCommand : AsyncCommand<PromoteSinglePa
         var packageRequest = CreatePackageRequest(promoteSettings);
 
         var promotePackageLogger = new PromotePackageLogger(verbose: promoteSettings.Verbose);
-        var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, promotePackageLogger);
+        var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, promotePackageLogger, TimeProvider.System);
 
         var arguments = new PromotePackageCommandArguments([packageRequest], LicenseComplianceSettings.Disabled);
         var options = new PromotePackageCommandOptions(promoteSettings.DryRun, promoteSettings.AlwaysResolveDeps, promoteSettings.ForcePush);

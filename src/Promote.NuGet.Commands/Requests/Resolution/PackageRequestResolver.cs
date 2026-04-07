@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
 using Promote.NuGet.Feeds;
 
@@ -8,11 +8,18 @@ public sealed class PackageRequestResolver
 {
     private readonly INuGetRepository _repository;
     private readonly IPackageRequestResolverLogger _logger;
+    private readonly TimeSpan? _minimumReleaseAge;
+    private readonly TimeProvider _timeProvider;
 
-    public PackageRequestResolver(INuGetRepository repository, IPackageRequestResolverLogger logger)
+    public PackageRequestResolver(INuGetRepository repository,
+                                  IPackageRequestResolverLogger logger,
+                                  TimeSpan? minimumReleaseAge,
+                                  TimeProvider timeProvider)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _logger = logger;
+        _minimumReleaseAge = minimumReleaseAge;
+        _timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
     }
 
     public async Task<Result<IReadOnlySet<PackageIdentity>>> ResolvePackageRequests(
@@ -30,7 +37,7 @@ public sealed class PackageRequestResolver
 
             _logger.LogResolvingPackageRequest(request);
 
-            var visitor = new ResolvePackageVersionPolicyVisitor(request.Id, _repository);
+            var visitor = new ResolvePackageVersionPolicyVisitor(request.Id, _repository, _logger, _minimumReleaseAge, _timeProvider);
 
             foreach (var versionRequest in request.VersionPolicies)
             {

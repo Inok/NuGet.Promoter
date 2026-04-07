@@ -149,6 +149,26 @@ promote-nuget promote from-config packages.yml --destination '<TARGET-NUGET-FEED
 ```
 
 
+#### Delayed mirroring
+
+You can configure a minimum release age (in days) to avoid mirroring packages that were published too recently.
+This only affects non-exact versions (`latest` and version ranges). Exact versions always bypass this check.
+
+```yaml
+minimum-release-age: 7
+
+packages:
+  - id: System.Text.Json
+    versions: latest
+  - id: Newtonsoft.Json
+    versions: 13.0.3  # exact version, not affected by minimum-release-age
+```
+
+When set, packages published fewer than 7 days ago will be skipped. For dependencies, the resolver will select
+the best matching version that meets the age requirement. If no suitable version exists, mirroring will fail.
+
+If the feed does not provide a publish date for a package, mirroring will fail with an error.
+
 ## Help
 You can use `--help` argument to find all available commands and options. Example:
 

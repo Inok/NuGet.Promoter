@@ -1,5 +1,6 @@
 using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
+using NuGet.Protocol.Core.Types;
 using Promote.NuGet.Feeds;
 
 namespace Promote.NuGet.Commands.Requests.Resolution;
@@ -8,11 +9,21 @@ internal sealed class ResolvePackageVersionPolicyVisitor : IPackageVersionPolicy
 {
     private readonly string _packageId;
     private readonly INuGetRepository _repository;
+    private readonly IPackageRequestResolverLogger _logger;
+    private readonly TimeSpan? _minimumReleaseAge;
+    private readonly TimeProvider _timeProvider;
 
-    public ResolvePackageVersionPolicyVisitor(string packageId, INuGetRepository repository)
+    public ResolvePackageVersionPolicyVisitor(string packageId,
+                                              INuGetRepository repository,
+                                              IPackageRequestResolverLogger logger,
+                                              TimeSpan? minimumReleaseAge,
+                                              TimeProvider timeProvider)
     {
         _packageId = packageId ?? throw new ArgumentNullException(nameof(packageId));
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _minimumReleaseAge = minimumReleaseAge;
+        _timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
     }
 
     public async Task<Result<IReadOnlySet<PackageIdentity>>> Visit(ExactPackageVersionPolicy versionPolicy, CancellationToken cancellationToken = default)
@@ -67,6 +78,17 @@ internal sealed class ResolvePackageVersionPolicyVisitor : IPackageVersionPolicy
                 continue;
             }
 
+            var ageCheckResult = CheckReleaseAge(packageMetadata.Value);
+            if (ageCheckResult.IsFailure)
+            {
+                return Result.Failure<IReadOnlySet<PackageIdentity>>(ageCheckResult.Error);
+            }
+
+            if (!ageCheckResult.Value)
+            {
+                continue;
+            }
+
             matchingPackages.Add(packageIdentity);
         }
 
@@ -98,9 +120,49 @@ internal sealed class ResolvePackageVersionPolicyVisitor : IPackageVersionPolicy
                 continue;
             }
 
+            var ageCheckResult = CheckReleaseAge(packageMetadata.Value);
+            if (ageCheckResult.IsFailure)
+            {
+                return Result.Failure<IReadOnlySet<PackageIdentity>>(ageCheckResult.Error);
+            }
+
+            if (!ageCheckResult.Value)
+            {
+                continue;
+            }
+
             return new HashSet<PackageIdentity>(capacity: 1) { identity };
         }
 
         return Result.Failure<IReadOnlySet<PackageIdentity>>($"Package {_packageId} has no released versions");
+    }
+
+    /// <summary>
+    /// Checks whether the package meets the minimum release age requirement.
+    /// Returns <c>Result.Success(true)</c> if old enough or no filter is set,
+    /// <c>Result.Success(false)</c> if too new (and logs the skip),
+    /// or <c>Result.Failure</c> if the published date is missing.
+    /// </summary>
+    private Result<bool> CheckReleaseAge(IPackageSearchMetadata metadata)
+    {
+        if (_minimumReleaseAge is not { } minimumAge)
+        {
+            return true;
+        }
+
+        var published = metadata.Published;
+        if (published is null)
+        {
+            return Result.Failure<bool>($"Package {_packageId} {metadata.Identity.Version} has no publish date. Cannot apply minimum release age filter.");
+        }
+
+        var age = _timeProvider.GetUtcNow() - published.Value;
+        if (age < minimumAge)
+        {
+            _logger.LogPackageVersionSkippedDueToAge(_packageId, metadata.Identity.Version, published.Value);
+            return false;
+        }
+
+        return true;
     }
 }

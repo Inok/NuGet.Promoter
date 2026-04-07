@@ -39,7 +39,7 @@ internal sealed class PromoteFromConfigurationCommand : AsyncCommand<PromoteFrom
         }
 
         var promotePackageLogger = new PromotePackageLogger(verbose: promoteSettings.Verbose);
-        var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, promotePackageLogger);
+        var promoter = new PromotePackageCommand(sourceRepository, destinationRepository, promotePackageLogger, TimeProvider.System);
 
         var options = new PromotePackageCommandOptions(promoteSettings.DryRun, promoteSettings.AlwaysResolveDeps, promoteSettings.ForcePush);
 
@@ -68,9 +68,15 @@ internal sealed class PromoteFromConfigurationCommand : AsyncCommand<PromoteFrom
         var configurationDirectory = Path.GetDirectoryName(file);
         Normalize(parseResult.Value, configurationDirectory);
 
-        var requests = parseResult.Value.Packages.Select(x => new PackageRequest(x.Id, x.Versions)).ToList();
+        var configuration = parseResult.Value;
 
-        var complianceOptions = parseResult.Value.LicenseComplianceCheck;
+        var requests = configuration.Packages.Select(x => new PackageRequest(x.Id, x.Versions)).ToList();
+
+        var minimumReleaseAge = configuration.MinimumReleaseAge.HasValue
+                                    ? TimeSpan.FromDays(configuration.MinimumReleaseAge.Value)
+                                    : (TimeSpan?)null;
+
+        var complianceOptions = configuration.LicenseComplianceCheck;
         var licenseComplianceSettings = complianceOptions != null
                                             ? new LicenseComplianceSettings
                                               {
@@ -82,7 +88,7 @@ internal sealed class PromoteFromConfigurationCommand : AsyncCommand<PromoteFrom
                                               }
                                             : LicenseComplianceSettings.Disabled;
 
-        return new PromotePackageCommandArguments(requests, licenseComplianceSettings);
+        return new PromotePackageCommandArguments(requests, licenseComplianceSettings, minimumReleaseAge);
     }
 
     private static void Normalize(PromoteConfiguration configuration, string? relativePathResolutionRoot)
