@@ -40,7 +40,7 @@ Integration tests need Docker/Podman (Testcontainers).
 
 ### dotnet command rules
 
-- Always pass `--verbosity quiet --nologo` to `dotnet build` / `dotnet test`.
+- Always pass `--verbosity quiet` to `dotnet build` / `dotnet test`.
 - Never pipe dotnet output through `tail`, `grep`, or other filters. Multiple test projects print summaries at different points; filters drop some of them. `--verbosity quiet` already limits output.
 - Never use `--no-build` with `dotnet test` — risks stale binaries and hidden compile errors.
 - Never use `-q` — it hides everything. Use `--verbosity quiet` instead.
