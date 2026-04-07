@@ -1,7 +1,7 @@
 # Stop the editor from looking for .editorconfig files in the parent directories
 root = true
 
-[*.{cs,csproj,props,targets}]
+[*.cs]
 indent_style = space
 indent_size = 4
 tab_width = 4
@@ -10,13 +10,12 @@ trim_trailing_whitespace = true
 max_line_length = 160
 insert_final_newline = true
 
-[*.{json,xml,xsd,md,yml,yaml}]
+[*.{csproj,props,targets,sln,slnx,json,xml,xsd,md,yml,yaml}]
 indent_style = space
 indent_size = 2
 tab_width = 2
 charset = utf-8
 trim_trailing_whitespace = true
-max_line_length = 100
 insert_final_newline = true
 
 [*]

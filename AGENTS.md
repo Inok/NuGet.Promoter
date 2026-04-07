@@ -29,11 +29,11 @@ For local dev, use `dotnet test` — it builds and tests in one call:
 
 ```bash
 # All tests
-dotnet test --verbosity quiet --nologo
+dotnet test --verbosity quiet
 # One project
-dotnet test --project tests/Promote.NuGet.Commands.Tests --verbosity quiet --nologo
+dotnet test --project tests/Promote.NuGet.Commands.Tests --verbosity quiet
 # One test (MTP filter syntax)
-dotnet test --project tests/Promote.NuGet.Commands.Tests --verbosity quiet --nologo -- --filter "FullyQualifiedName~DistinctQueue"
+dotnet test --project tests/Promote.NuGet.Commands.Tests --verbosity quiet -- --filter "FullyQualifiedName~DistinctQueue"
 ```
 
 Integration tests need Docker/Podman (Testcontainers).
@@ -96,7 +96,6 @@ Promote.NuGet (CLI)                   ← Spectre.Console.Cli commands, entry po
 - Use `var` when the type is obvious.
 - Always use braces for `if`/`else`/`for`/`foreach`/`while`/`do`, even single lines.
 - Keep nesting shallow — prefer early returns and guard clauses.
-- Package versions go only in `Directory.Packages.props` (central management, transitive pinning). Never add versions in `.csproj`.
 - `.editorconfig` sets formatting (4-space indent, 160-char limit). Microsoft.CodeAnalysis.NetAnalyzers enforced.
 - GitVersion handles versioning (continuous-deployment on `main`).
 
@@ -139,3 +138,15 @@ Promote.NuGet (CLI)                   ← Spectre.Console.Cli commands, entry po
 
 - XML docs: short, focused on intent and usage. Don't repeat the signature.
 - Inline comments only when code can't convey the intent: complex logic, hidden constraints, non-obvious invariants. Delete comments that just describe the next line.
+
+## Package Management
+
+Central Package Management (CPM): versions in `Directory.Packages.props`, `.csproj` files have `<PackageReference>` without `Version`.
+Package versions go only in `Directory.Packages.props` (central management, transitive pinning). Never add versions in `.csproj`.
+
+- **Check latest version** before adding: `dotnet package search <PackageId> --exact-match`
+- **Add a package**: `dotnet package add <PackageId> --project <path>` — handles CPM automatically
+- **Update**: `dotnet package update <PackageId>` or `dotnet package list --outdated` to check
+- Never manually edit versions in `Directory.Packages.props` — use `dotnet package add` / `dotnet package update`
+- Never guess versions from memory — always verify with `dotnet package search --exact-match`
+- `dotnet package update` reformats `Directory.Packages.props` (changes indentation). After running it, revert formatting with `git checkout -- Directory.Packages.props` and apply only the version change manually.
