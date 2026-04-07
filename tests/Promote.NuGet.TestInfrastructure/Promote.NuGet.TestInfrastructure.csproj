@@ -1,5 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <IsTestProject>false</IsTestProject>
+        <EnableNUnitRunner>false</EnableNUnitRunner>
+    </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="NuGet.Protocol"/>
+        <PackageReference Include="NuGet.Protocol" />
     </ItemGroup>
 </Project>
