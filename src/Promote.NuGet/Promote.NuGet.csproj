@@ -1,48 +1,45 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <PackAsTool>true</PackAsTool>
-        <ToolCommandName>promote-nuget</ToolCommandName>
-    </PropertyGroup>
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>promote-nuget</ToolCommandName>
+  </PropertyGroup>
 
-    <!-- Package Metadata -->
-    <PropertyGroup>
-        <Description>A tool to promote NuGet packages and their dependencies from one feed to another.</Description>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageProjectUrl>https://github.com/Inok/NuGet.Promoter</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/Inok/NuGet.Promoter</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
-        <Authors>Pavel Borisov</Authors>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-    </PropertyGroup>
+  <!-- Package Metadata -->
+  <PropertyGroup>
+    <Description>A tool to promote NuGet packages and their dependencies from one feed to another.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Inok/NuGet.Promoter</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Inok/NuGet.Promoter</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Authors>Pavel Borisov</Authors>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="FluentValidation" />
-        <PackageReference Include="Humanizer.Core"/>
-        <PackageReference Include="JetBrains.Annotations"/>
-        <PackageReference Include="NuGet.Protocol"/>
-        <PackageReference Include="Spectre.Console"/>
-        <PackageReference Include="Spectre.Console.Analyzer">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Spectre.Console.Cli"/>
-        <PackageReference Include="YamlDotNet" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="Humanizer.Core" />
+    <PackageReference Include="JetBrains.Annotations" />
+    <PackageReference Include="NuGet.Protocol" />
+    <PackageReference Include="Spectre.Console" />
+    <PackageReference Include="Spectre.Console.Analyzer">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Spectre.Console.Cli" />
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Promote.NuGet.Commands\Promote.NuGet.Commands.csproj"/>
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Promote.NuGet.Commands\Promote.NuGet.Commands.csproj" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-            <_Parameter1>$(MSBuildProjectName).Tests</_Parameter1>
-        </AssemblyAttribute>
-    </ItemGroup>
-    
-    <ItemGroup>
-        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
-    </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(MSBuildProjectName).Tests" />
+  </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 </Project>

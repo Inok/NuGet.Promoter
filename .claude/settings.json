@@ -5,6 +5,7 @@
       "Bash(dotnet test:*)",
       "Bash(dotnet restore:*)",
       "Bash(dotnet package search:*)",
+      "Bash(dotnet package list:*)",
 
       "Bash(git add:*)",
 
