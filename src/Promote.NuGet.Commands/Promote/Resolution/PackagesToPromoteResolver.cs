@@ -1,6 +1,7 @@
-﻿using CSharpFunctionalExtensions;
+using CSharpFunctionalExtensions;
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
+using NuGet.Versioning;
 using Promote.NuGet.Commands.Core;
 using Promote.NuGet.Commands.Licensing;
 using Promote.NuGet.Feeds;
@@ -12,14 +13,20 @@ public class PackagesToPromoteResolver
     private readonly INuGetRepository _sourceRepository;
     private readonly INuGetRepository _destinationRepository;
     private readonly IPackagesToPromoteResolverLogger _logger;
+    private readonly TimeSpan? _minimumReleaseAge;
+    private readonly TimeProvider _timeProvider;
 
     public PackagesToPromoteResolver(INuGetRepository sourceRepository,
                                      INuGetRepository destinationRepository,
-                                     IPackagesToPromoteResolverLogger logger)
+                                     IPackagesToPromoteResolverLogger logger,
+                                     TimeSpan? minimumReleaseAge,
+                                     TimeProvider timeProvider)
     {
         _sourceRepository = sourceRepository ?? throw new ArgumentNullException(nameof(sourceRepository));
         _destinationRepository = destinationRepository ?? throw new ArgumentNullException(nameof(destinationRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _minimumReleaseAge = minimumReleaseAge;
+        _timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
     }
 
     public async Task<Result<PackageResolutionTree>> ResolvePackageTree(IReadOnlySet<PackageIdentity> identities,
@@ -167,7 +174,87 @@ public class PackagesToPromoteResolver
             return Result.Failure<PackageIdentity>(allVersionsOfDepResult.Error);
         }
 
-        var bestMatchVersion = dependencyVersionRange.FindBestMatch(allVersionsOfDepResult.Value);
+        var allVersions = allVersionsOfDepResult.Value;
+        var bestMatchVersion = dependencyVersionRange.FindBestMatch(allVersions);
+
+        if (_minimumReleaseAge is not { } minimumAge)
+        {
+            return await EnqueueResolvedDependency(context, source, dependencyId, bestMatchVersion);
+        }
+
+        var filteredVersionsResult = await FilterVersionsByAge(context, source, dependencyId, dependencyVersionRange, allVersions, minimumAge, cancellationToken);
+        if (filteredVersionsResult.IsFailure)
+        {
+            return Result.Failure<PackageIdentity>(filteredVersionsResult.Error);
+        }
+
+        var filteredVersions = filteredVersionsResult.Value;
+        var filteredBestMatch = dependencyVersionRange.FindBestMatch(filteredVersions);
+
+        if (filteredBestMatch is null)
+        {
+            return Result.Failure<PackageIdentity>(
+                $"Dependency {dependencyId} of {source.Id} {source.Version} has no version satisfying {dependencyVersionRange.PrettyPrint()} that meets the minimum release age.");
+        }
+
+        if (bestMatchVersion is not null && filteredBestMatch != bestMatchVersion)
+        {
+            _logger.LogDependencyResolvedToOlderVersionDueToAge(source, dependencyId, bestMatchVersion, filteredBestMatch);
+        }
+
+        return await EnqueueResolvedDependency(context, source, dependencyId, filteredBestMatch);
+    }
+
+    private async Task<Result<IReadOnlyCollection<NuGetVersion>>> FilterVersionsByAge(
+        ResolutionContext context,
+        PackageIdentity source,
+        string dependencyId,
+        VersionRange dependencyVersionRange,
+        IReadOnlyCollection<NuGetVersion> allVersions,
+        TimeSpan minimumAge,
+        CancellationToken cancellationToken)
+    {
+        var now = _timeProvider.GetUtcNow();
+        var filtered = new List<NuGetVersion>();
+
+        foreach (var version in allVersions)
+        {
+            if (!dependencyVersionRange.Satisfies(version))
+            {
+                continue;
+            }
+
+            var identity = new PackageIdentity(dependencyId, version);
+            var metadataResult = await _sourceRepository.Packages.GetPackageMetadata(identity, cancellationToken);
+            if (metadataResult.IsFailure)
+            {
+                return Result.Failure<IReadOnlyCollection<NuGetVersion>>(metadataResult.Error);
+            }
+
+            var published = metadataResult.Value.Published;
+            if (published is null)
+            {
+                return Result.Failure<IReadOnlyCollection<NuGetVersion>>(
+                    $"Package {dependencyId} {version} has no publish date. Cannot apply minimum release age filter.");
+            }
+
+            if ((now - published.Value) < minimumAge)
+            {
+                _logger.LogDependencyVersionSkippedDueToAge(source, dependencyId, version, published.Value);
+                continue;
+            }
+
+            filtered.Add(version);
+        }
+
+        return filtered;
+    }
+
+    private async Task<Result<PackageIdentity>> EnqueueResolvedDependency(ResolutionContext context,
+                                                                          PackageIdentity source,
+                                                                          string dependencyId,
+                                                                          NuGetVersion? bestMatchVersion)
+    {
         var resolvedPackage = new PackageIdentity(dependencyId, bestMatchVersion);
 
         var enqueued = context.PackagesToResolveQueue.Enqueue(resolvedPackage);

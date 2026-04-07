@@ -130,6 +130,57 @@ public class PromoteConfigurationParserTests
     }
 
     [Test]
+    public void Parse_minimum_release_age()
+    {
+        const string input =
+            """
+            minimum-release-age: 7
+
+            packages:
+              - id: System.Globalization
+                versions: 4.3.0
+            """;
+
+        var configuration = PromoteConfigurationParser.Parse(input);
+
+        configuration.MinimumReleaseAge.Should().Be(7);
+    }
+
+    [Test]
+    public void Parse_minimum_release_age_absent()
+    {
+        const string input =
+            """
+            packages:
+              - id: System.Globalization
+                versions: 4.3.0
+            """;
+
+        var configuration = PromoteConfigurationParser.Parse(input);
+
+        configuration.MinimumReleaseAge.Should().BeNull();
+    }
+
+    [TestCase(0)]
+    [TestCase(-1)]
+    [TestCase(-100)]
+    public void Throw_validation_error_if_minimum_release_age_is_not_positive(int age)
+    {
+        var input =
+            $"""
+             minimum-release-age: {age}
+
+             packages:
+               - id: System.Globalization
+                 versions: 4.3.0
+             """;
+
+        var action = () => PromoteConfigurationParser.Parse(input);
+
+        action.Should().Throw<ValidationException>();
+    }
+
+    [Test]
     public void Throw_validation_error_if_empty_accepted_licenses()
     {
         const string input =

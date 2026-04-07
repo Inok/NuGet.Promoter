@@ -5,5 +5,6 @@ namespace Promote.NuGet.Commands.Promote;
 
 public record PromotePackageCommandArguments(
     IReadOnlyCollection<PackageRequest> Requests,
-    LicenseComplianceSettings LicenseComplianceSettings
+    LicenseComplianceSettings LicenseComplianceSettings,
+    TimeSpan? MinimumReleaseAge = null
 );

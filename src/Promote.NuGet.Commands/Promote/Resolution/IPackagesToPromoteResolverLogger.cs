@@ -1,4 +1,5 @@
 ﻿using NuGet.Packaging.Core;
+using NuGet.Versioning;
 using Promote.NuGet.Commands.Licensing;
 
 namespace Promote.NuGet.Commands.Promote.Resolution;
@@ -24,4 +25,8 @@ public interface IPackagesToPromoteResolverLogger
     void LogPackageDependenciesSkipped(PackageIdentity identity);
 
     void LogResolvedPackageTree(PackageResolutionTree packageTree);
+
+    void LogDependencyVersionSkippedDueToAge(PackageIdentity source, string dependencyId, NuGetVersion version, DateTimeOffset publishedDate);
+
+    void LogDependencyResolvedToOlderVersionDueToAge(PackageIdentity source, string dependencyId, NuGetVersion bestVersion, NuGetVersion selectedVersion);
 }

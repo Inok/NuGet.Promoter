@@ -74,6 +74,10 @@ Promote.NuGet (CLI)                   ← Spectre.Console.Cli commands, entry po
 - **Shared helpers** (`Promote.NuGet.TestInfrastructure`): `LocalNugetFeed`, `ProcessWrapper`, `TempFile`
 - All tests have `[CancelAfter(60_000)]`
 
+### Packages & tools
+
+- **Time testing**: `Microsoft.Extensions.TimeProvider.Testing` package provides `FakeTimeProvider`. The using is `Microsoft.Extensions.Time.Testing` (note: different from package name).
+
 ### Conventions
 
 - **Class names:** `{ClassName}Tests`.
@@ -150,3 +154,9 @@ Package versions go only in `Directory.Packages.props` (central management, tran
 - Never manually edit versions in `Directory.Packages.props` — use `dotnet package add` / `dotnet package update`
 - Never guess versions from memory — always verify with `dotnet package search --exact-match`
 - `dotnet package update` reformats `Directory.Packages.props` (changes indentation). After running it, revert formatting with `git checkout -- Directory.Packages.props` and apply only the version change manually.
+
+## NuGet SDK Pitfalls
+
+- `VersionRange.FindBestMatch(versions)` picks the **lowest** satisfying version (NuGet's minimum version strategy), not the highest. Don't assume it returns the greatest match.
+- `IPackageSearchMetadata.Published` returns `DateTimeOffset?` — available on metadata already fetched via `GetPackageMetadata()`.
+- **Namespace collision**: In test files under `Promote.NuGet.*` namespaces, `NuGet.Packaging` resolves to `Promote.NuGet.Packaging`. Use `global::NuGet.Packaging`, `global::NuGet.Frameworks`, etc.
